@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <item name="edit_world" type="layout">@layout/edit_world_twopane_port</item>
+  <item name="edit_terrains" type="layout">@layout/edit_terrains_twopane_port</item>
+  <item name="edit_world_fragment"
+        type="layout">@layout/edit_world_fragment_port</item>
+  <item name="edit_region_fragment"
+        type="layout">@layout/edit_world_region_fragment</item>
+  <bool name="has_two_panes">true</bool>
+  <bool name="is_landscape">false</bool>
+</resources>

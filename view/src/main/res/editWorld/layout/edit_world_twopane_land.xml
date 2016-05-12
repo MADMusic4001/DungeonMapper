@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:baselineAligned="false">
+
+    <fragment
+        android:id="@+id/props_fragment"
+        android:layout_width="0dp"
+        android:layout_weight="35"
+        android:layout_height="match_parent"
+        android:name="com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldPropsFragment"
+        tools:layout="@layout/edit_world_fragment"/>
+    <fragment
+        android:id="@+id/region_editor_fragment"
+        android:layout_width="0dp"
+        android:layout_weight="65"
+        android:layout_height="match_parent"
+        android:name="com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldRegionFragment"
+        tools:layout="@layout/edit_region_fragment"/>
+</LinearLayout>

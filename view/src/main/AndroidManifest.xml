@@ -1,0 +1,42 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.madmusic4001.dungeonmapper">
+
+  <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
+
+  <uses-permission
+      android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  <uses-permission
+      android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+  <application android:name=".view.DungeonMapperApp"
+               android:allowBackup="true"
+               android:label="@string/appName"
+               android:icon="@drawable/ic_launcher"
+               android:theme="@style/AppTheme">
+    <activity android:name=".view.activities.selectWorld.SelectWorldActivity"
+              android:label="@string/appName"
+              android:windowSoftInputMode="adjustPan">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+    <activity
+        android:name=".view.activities.editWorld.EditWorldActivity"
+        android:label="@string/label_editWorld"
+        android:parentActivityName=".view.activities.selectWorld.SelectWorldActivity"
+        tools:ignore="UnusedAttribute"
+        android:windowSoftInputMode="adjustPan">
+      <meta-data
+          android:name="android.support.PARENT_ACTIVITY"
+          android:value=".view.activities.selectWorld.SelectWorldActivity" />
+    </activity>
+    <activity
+        android:name=".view.activities.editTerrain.EditTerrainActivity"
+        android:label="@string/title_terrainList"
+        android:windowSoftInputMode="adjustPan">
+    </activity>
+  </application>
+
+</manifest>

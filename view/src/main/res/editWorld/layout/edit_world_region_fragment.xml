@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:madmusic4001="http://schemas.android.com/apk/res-auto"
+  android:id="@+id/mapEditorLayout"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+	<RelativeLayout
+	  android:layout_width="match_parent"
+	  android:layout_height="wrap_content" >
+
+	  <EditText
+	    android:id="@+id/regionNameEdit"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+      android:layout_centerHorizontal="true"
+	    android:ems="10"
+	    android:inputType="text"
+	    android:maxLength="40"
+	    android:selectAllOnFocus="true"
+	    android:hint="@string/label_newRegion">
+	    <requestFocus />
+    </EditText>
+
+		<GridLayout
+        android:id="@+id/selectorsGrid"
+        android:layout_below="@id/regionNameEdit"
+        android:layout_centerHorizontal="true"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content">
+
+			<Spinner
+					android:id="@+id/upExitSpinner"
+					android:layout_centerHorizontal="true"
+					android:gravity="right"
+					android:layout_column="0"/>
+			<Spinner
+					android:id="@+id/northExitSpinner"
+					android:layout_centerHorizontal="true"
+					android:gravity="fill"
+					android:layout_column="1"/>
+
+			<Spinner
+				android:id="@+id/westExitSpinner"
+				android:layout_centerHorizontal="true"
+				android:gravity="right"
+				android:layout_column="0"
+				android:layout_row="1"/>
+			<Spinner
+				android:id="@+id/selectTerrainSpinner"
+				android:layout_centerHorizontal="true"
+				android:gravity="fill"
+				android:layout_column="1"
+				android:layout_row="1"/>
+			<Spinner
+				android:id="@+id/eastExitSpinner"
+				android:layout_centerHorizontal="true"
+				android:gravity="left"
+				android:layout_column="2"
+				android:layout_row="1"/>
+
+			<Spinner
+				android:id="@+id/southExitSpinner"
+				android:layout_centerHorizontal="true"
+				android:gravity="fill"
+				android:layout_column="1"
+				android:layout_row="2"/>
+			<Spinner
+					android:id="@+id/downExitSpinner"
+					android:layout_centerHorizontal="true"
+					android:gravity="left"
+					android:layout_column="2"
+					android:layout_row="2"/>
+    </GridLayout>
+
+    <HorizontalScrollView
+      android:id="@+id/mapScrollView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/selectorsGrid"
+      android:padding="4dp"
+      android:layout_margin="4dp"
+      android:layout_centerInParent="true">
+        <com.madmusic4001.dungeonmapper.view.views.RegionView
+          android:id="@+id/mapView"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          madmusic4001:background_color="@android:color/white"
+          madmusic4001:border_color="@android:color/holo_green_dark"
+          madmusic4001:num_cols="16"
+          madmusic4001:num_rows="16"
+          madmusic4001:show_grid="true"
+          madmusic4001:grid_line_color="@android:color/holo_orange_light"
+          madmusic4001:use_dotted_line_for_grid="true" />
+      </HorizontalScrollView>
+
+      <Spinner
+        android:id="@+id/selectMapSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/mapScrollView"
+        android:visibility="gone"/>
+
+      <LinearLayout
+        android:id="@+id/xyCoordinatesLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/selectMapSpinner"
+        android:visibility="gone">
+
+          <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+          <Spinner
+            android:id="@+id/xCoordinateSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+          <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+          <Spinner
+            android:id="@+id/yCoordinateSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+          <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+        </LinearLayout>
+	</RelativeLayout>
+</ScrollView>

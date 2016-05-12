@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/list_view_background_color_state_list">
+
+    <TextView
+        android:id="@+id/nameView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="5"
+        android:gravity="start"
+        android:padding="10dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:hint="@string/label_worldName"/>
+
+    <TextView
+        android:id="@+id/createdView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="4"
+        android:gravity="end"
+        android:padding="10dp"
+        android:selectAllOnFocus="true"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/modifiedView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="4"
+        android:gravity="end"
+        android:padding="10dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+</LinearLayout>

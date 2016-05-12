@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.madmusic4001.rpgmapmaker.activities.EditWorldActivity" >
+
+    <item
+        android:id="@+id/edit_world_action_settings"
+        android:title="@string/label_settings"
+        android:orderInCategory="9999"
+        android:showAsAction="never"/>
+    <item
+        android:id="@+id/action_manage_terrains"
+        android:title="@string/label_editTerrains"
+        android:showAsAction="never"/>
+</menu>

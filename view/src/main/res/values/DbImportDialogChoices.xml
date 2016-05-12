@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <array name="alert_db_import_choices">
+    <item>@string/alert_db_import_choice_keep</item>
+    <item>@string/alert_db_import_choice_overwrite</item>
+  </array>
+</resources>

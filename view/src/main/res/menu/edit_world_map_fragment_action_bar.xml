@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_show_grid"
+        android:title="@string/label_showGrid"
+        android:icon="@drawable/ic_grid_off_black_24dp"
+        android:orderInCategory="20"
+        android:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_fill_region"
+        android:title="@string/label_fillRegion"
+        android:orderInCategory="30"
+        android:icon="@drawable/ic_create_black_24dp"
+        android:showAsAction="ifRoom"/>
+    <item
+      android:id="@+id/action_show_palette"
+      android:title="@string/label_hide_palette"
+      android:icon="@drawable/ic_hdr_off_black_24dp"
+      android:orderInCategory="40"
+      android:showAsAction="ifRoom"/>
+  <item
+      android:id="@+id/action_dotted_lines"
+      android:title="@string/label_dottedGrid"
+      android:orderInCategory="50"
+      android:showAsAction="ifRoom"/>
+</menu>

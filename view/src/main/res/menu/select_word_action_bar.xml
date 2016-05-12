@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.madmusic4001.rpgmapmaker.activities.SelectWorldActivity">
+
+    <item
+        android:id="@+id/action_new_world"
+        android:icon="@drawable/ic_action_new"
+        android:title="@string/label_actionNewWorld"
+        android:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_manage_terrains"
+        android:title="@string/label_editTerrains"
+        android:showAsAction="never"/>
+    <item
+        android:id="@+id/action_export"
+        android:title="@string/label_actionExport"
+        android:showAsAction="never"/>
+    <item
+        android:id="@+id/action_import"
+        android:title="@string/label_actionImport"
+        android:showAsAction="never"/>
+    <item
+        android:id="@+id/actionSettings"
+        android:title="@string/label_settings"
+        android:showAsAction="never"/>
+
+</menu>

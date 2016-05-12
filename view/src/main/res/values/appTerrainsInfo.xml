@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <array name="app_empty_terrain">
+    <item>@string/empty</item>
+    <item>@drawable/app_empty_terrain</item>
+    <item>false</item>
+    <item>false</item>
+  </array>
+  <array name="app_desert_terrain">
+    <item>@string/desert</item>
+    <item>@drawable/app_desert_terrain</item>
+    <item>false</item>
+    <item>false</item>
+  </array>
+  <array name="app_forest_terrain">
+    <item>@string/forest</item>
+    <item>@drawable/app_forest_terrain</item>
+    <item>false</item>
+    <item>false</item>
+  </array>
+  <array name="app_grass_terrain">
+    <item>@string/grass</item>
+    <item>@drawable/app_grass_terrain</item>
+    <item>false</item>
+    <item>false</item>
+  </array>
+  <array name="app_water_terrain">
+    <item>@string/water</item>
+    <item>@drawable/app_water_terrain</item>
+    <item>false</item>
+    <item>false</item>
+  </array>
+  <array name="AppTerrainsInfo">
+    <item>@array/app_empty_terrain</item>
+    <item>@array/app_desert_terrain</item>
+    <item>@array/app_forest_terrain</item>
+    <item>@array/app_grass_terrain</item>
+    <item>@array/app_water_terrain</item>
+  </array>
+</resources>

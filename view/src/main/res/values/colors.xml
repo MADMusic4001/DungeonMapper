@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="image_border_start">#40990000</color>
+    <color name="image_border_end">#FF660000</color>
+    <color name="image_border_center">#FFFF3333</color>
+    <color name="list_odd_row_background">#30202020</color>
+    <color name="list_even_row_background">#30404040</color>
+</resources>

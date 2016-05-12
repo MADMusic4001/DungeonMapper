@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<declare-styleable name="RegionView">
+    <attr name="background_color" format="color|reference" />
+    <attr name="border_color" format="color|reference" />
+	  <attr name="num_rows" format="integer" />
+	  <attr name="num_cols" format="integer" />
+	  <attr name="show_grid" format="boolean" />
+	  <attr name="grid_line_color" format="color|reference" />
+	  <attr name="use_dotted_line_for_grid" format="boolean" />
+	</declare-styleable>    
+</resources>

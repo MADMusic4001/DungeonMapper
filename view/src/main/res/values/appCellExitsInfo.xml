@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="clear_cell_exit">
+        <item>@drawable/clear_center</item>
+        <item>@drawable/clear_horizontal</item>
+        <item>@drawable/clear_vertical</item>
+        <item>@drawable/clear_vertical</item>
+        <item>@drawable/clear_horizontal</item>
+        <item>@drawable/clear_center</item>
+        <item>@string/open</item>
+        <item>false</item>
+    </array>
+    <array name="door_cell_exit">
+        <item/>
+        <item>@drawable/door_cell_exit_north</item>
+        <item>@drawable/door_cell_exit_west</item>
+        <item>@drawable/door_cell_exit_east</item>
+        <item>@drawable/door_cell_exit_south</item>
+        <item/>
+        <item>@string/door</item>
+        <item>false</item>
+    </array>
+    <array name="secret_cell_exit">
+        <item/>
+        <item>@drawable/secret_door_cell_exit_north</item>
+        <item>@drawable/secret_door_cell_exit_west</item>
+        <item>@drawable/secret_door_cell_exit_east</item>
+        <item>@drawable/secret_door_cell_exit_south</item>
+        <item/>
+        <item>@string/secretDoor</item>
+        <item>false</item>
+    </array>
+    <array name="impassible_cell_exit">
+        <item/>
+        <item>@drawable/impassible_cell_exit_north</item>
+        <item>@drawable/impassible_cell_exit_west</item>
+        <item>@drawable/impassible_cell_exit_east</item>
+        <item>@drawable/impassible_cell_exit_south</item>
+        <item/>
+        <item>@string/impassible</item>
+        <item>true</item>
+    </array>
+    <array name="stairs_up_exit">
+        <item>@drawable/app_stairs_up_overlay</item>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item>@string/stairsUp</item>
+        <item>true</item>
+    </array>
+    <array name="stairs_down_exit">
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item/>
+        <item>@drawable/app_stairs_down_overlay</item>
+        <item>@string/stairsDown</item>
+        <item>true</item>
+    </array>
+    <array name="appCellExitsInfo">
+        <item>@array/clear_cell_exit</item>
+        <item>@array/door_cell_exit</item>
+        <item>@array/secret_cell_exit</item>
+        <item>@array/impassible_cell_exit</item>
+        <item>@array/stairs_up_exit</item>
+        <item>@array/stairs_down_exit</item>
+    </array>
+</resources>
