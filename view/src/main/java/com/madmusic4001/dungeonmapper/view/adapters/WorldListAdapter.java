@@ -41,6 +41,7 @@ import javax.inject.Inject;
  * @author Mark Danley
  * Created 8/4/2014
  */
+@PerActivity
 public class WorldListAdapter extends ArrayAdapter<World> {
 	private static final int LAYOUT_RESOURCE_ID = R.layout.name_timestamps_row;
 
@@ -56,7 +57,7 @@ public class WorldListAdapter extends ArrayAdapter<World> {
 	 *
 	 * @param context the view {@code Context} the adapter will be attached to.
 	 */
-	@Inject @PerActivity
+	@Inject
 	public WorldListAdapter(Context context) {
 		super(context, LAYOUT_RESOURCE_ID);
 		layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
