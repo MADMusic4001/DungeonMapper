@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 MadMusic4001
+ * Copyright (C) 2016 MadInnovations
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.data.dao;
+package com.madmusic4001.dungeonmapper.controller.events;
 
-import android.provider.BaseColumns;
-
-import com.madmusic4001.dungeonmapper.data.entity.Cell;
+import java.util.Objects;
 
 /**
  * ${CLASS_DESCRIPTION}
  *
  * @author Mark
- * Created 7/2/2015.
+ * Created 5/12/2016.
  */
-public interface CellDao extends BaseDao<Cell> {
+public class WorldPersistenceEvent {
+	public enum Action {
+		SAVE,
+		DELETE,
+		READ;
+	}
+	private Action action;
+	private Object information;
+
+	public WorldPersistenceEvent(Action action, Object information) {
+		this.action = action;
+		this.information = information;
+	}
+
+	public Action getAction() {
+		return action;
+	}
+	public Object getInformation() {
+		return information;
+	}
 }

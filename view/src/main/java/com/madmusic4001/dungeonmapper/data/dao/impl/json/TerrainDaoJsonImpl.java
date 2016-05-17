@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package com.madmusic4001.dungeonmapper.data.dao.impl;
+package com.madmusic4001.dungeonmapper.data.dao.impl.json;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
 import com.madmusic4001.dungeonmapper.data.entity.AppSettings;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
+import com.madmusic4001.dungeonmapper.data.util.BitMapUtils;
 import com.madmusic4001.dungeonmapper.data.util.FileUtils;
 
 import java.io.BufferedInputStream;
@@ -37,9 +42,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -51,7 +56,7 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.APP_VERSION
  */
 @SuppressWarnings("unused")
 @Singleton
-public class TerrainDaoFileImpl implements TerrainDao {
+public class TerrainDaoJsonImpl implements TerrainDao {
 	public static final String TERRAIN_DIR = File.separator + "terrains";
 	public static final String TERRAIN_FILE_EXTENSION = ".trn";
 	public static final String TERRAIN_FILES_REGEX = ".*" + File.pathSeparator +
@@ -61,23 +66,21 @@ public class TerrainDaoFileImpl implements TerrainDao {
 	protected FileUtils fileUtils;
 
 	@Override
-	public int count() {
+	public int count(Collection<DaoFilter> filters) {
 		throw new UnsupportedOperationException("Count not implemented for TerrainDaoFileImple.");
 	}
 
 	@Override
-	public Terrain load(String id) {
+	public Terrain load(int id) {
 		throw new UnsupportedOperationException("Load() not implemented for TerrainDaoFileImple.");
 	}
 
 	@Override
-	public Collection<Terrain> loadWithFilter(Terrain filter) {
-		throw new UnsupportedOperationException("LoadWithFilter(Terrain filter) not implemented "
-														+ "for TerrainDaoFileImple.");
-	}
-
-	@Override
-	public Collection<Terrain> loadAll() {
+	public Collection<Terrain> load(Collection<DaoFilter> filters) {
+		if(filters != null && !filters.isEmpty()) {
+			throw new UnsupportedOperationException("LoadWithFilter(Terrain filter) not implemented "
+															+ "for TerrainDaoFileImple.");
+		}
 		ArrayList<Terrain> allTerrains = new ArrayList<>();
 
 		Collection<File> terrains = fileUtils.getFiles(AppSettings.useExternalStorageForWorlds(),
@@ -90,7 +93,7 @@ public class TerrainDaoFileImpl implements TerrainDao {
 	}
 
 	@Override
-	public void save(Terrain aTerrain) {
+	public boolean save(Terrain aTerrain) {
 		File file = null;
 		DataOutputStream stream = null;
 
@@ -104,17 +107,12 @@ public class TerrainDaoFileImpl implements TerrainDao {
 				throw new DaoException(R.string.exception_terrainLoadError);
 			}
 			stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-			stream.writeLong(APP_VERSION_ID);
-			stream.writeUTF(aTerrain.getName());
-			stream.writeBoolean(aTerrain.isUserCreated());
-			stream.writeBoolean(aTerrain.isSolid());
-			stream.writeBoolean(aTerrain.canConnect());
-			Map<String, String> displayNames = aTerrain.getLocaleDisplayNames();
-			stream.writeInt(displayNames.size());
-			for(Map.Entry<String, String> entry : displayNames.entrySet()) {
-				stream.writeUTF(entry.getKey());
-				stream.writeUTF(entry.getValue());
-			}
+			VersionedTerrain versionedTerrain = new VersionedTerrain();
+			versionedTerrain.versionNbr = APP_VERSION_ID;
+			versionedTerrain.terrain = aTerrain;
+			versionedTerrain.imageString = BitMapUtils.getStringFromBitmap(aTerrain.getImage());
+			Gson gson = new Gson();
+			gson.toJson(versionedTerrain);
 			ByteArrayOutputStream bitmapStream = new ByteArrayOutputStream();
 			aTerrain.getImage().compress(Bitmap.CompressFormat.PNG, 100, bitmapStream);
 			byte[] bytes = bitmapStream.toByteArray();
@@ -143,25 +141,50 @@ public class TerrainDaoFileImpl implements TerrainDao {
 				}
 			}
 		}
+		return true;
 	}
 
 	@Override
-	public void delete(Terrain aTerrain) {
-		File file;
-		String relativePath = TERRAIN_DIR;
-		String fileName = aTerrain.getName().concat(TERRAIN_FILE_EXTENSION);
-
-		file = fileUtils.getFile(AppSettings.useExternalStorageForWorlds(), relativePath, fileName);
-
-		if(!file.delete()) {
-			throw new DaoException(R.string.exception_terrainNotRemoved);
+	public boolean delete(Collection<DaoFilter> filters) {
+		boolean result;
+		if(filters == null || filters.isEmpty()) {
+			result = deleteAll();
 		}
+		else {
+			if(filters.size() > 1) {
+				throw new UnsupportedOperationException("TerrainDaoJsonImpl.delete() can only accept 0 or 1 filter");
+			}
+			DaoFilter filter = filters.iterator().next();
+			if(!filter.getFieldName().equals(TerrainsContract.COLUMN_NAME_NAME)) {
+				throw new UnsupportedOperationException("TerrainDaoJsonImpl.delete() filter must be on NAME field");
+			}
+			File file;
+			String relativePath = TERRAIN_DIR;
+			String fileName = filter.getValue().concat(TERRAIN_FILE_EXTENSION);
+
+			file = fileUtils.getFile(AppSettings.useExternalStorageForWorlds(), relativePath, fileName);
+
+			result = file.delete();
+		}
+		return result;
+	}
+
+	private boolean deleteAll() {
+		boolean result = true;
+		File root = new File(TERRAIN_DIR);
+		File[] Files = root.listFiles();
+		if(Files != null) {
+			for(int i = 0; i < Files.length && result; i++) {
+				result = Files[i].delete();
+			}
+		}
+		return result;
 	}
 
 	private Terrain readFromFile(File file) {
 		Bitmap bitmap;
-		DataInputStream stream = null;
-		Terrain terrain = new Terrain("");
+		InputStreamReader stream = null;
+		VersionedTerrain versionedTerrain = null;
 		BitmapFactory.Options options = new BitmapFactory.Options();
 
 		try {
@@ -170,31 +193,20 @@ public class TerrainDaoFileImpl implements TerrainDao {
 				Log.e(this.getClass().getName(), "External storage unavailable");
 				throw new DaoException(R.string.exception_terrainLoadError);
 			}
-			stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
-			long appVersion = stream.readLong();
-			if(appVersion > APP_VERSION_ID) {
+			stream = new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(file))));
+			Gson gson = new Gson();
+			versionedTerrain = gson.fromJson(stream, VersionedTerrain.class);
+			if(versionedTerrain.versionNbr > APP_VERSION_ID) {
 				throw new DaoException(R.string.exception_versionMismatch);
 			}
-			terrain.setName(stream.readUTF());
-			terrain.setUserCreated(stream.readBoolean());
-			terrain.setSolid(stream.readBoolean());
-			terrain.setConnect(stream.readBoolean());
-			int numDisplayNames = stream.readInt();
-			for(int i = 0; i < numDisplayNames; i++) {
-				terrain.addDisplayName(stream.readUTF(), stream.readUTF());
-			}
-            byte[] bitmapData = new byte[stream.readInt()];
-            int bitmapLengthRead = stream.read(bitmapData);
-            options.inScaled = false;
-            bitmap = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapLengthRead, options);
-            terrain.setImage(bitmap);
+			versionedTerrain.terrain.setImage(BitMapUtils.getBitmapFromString(versionedTerrain.imageString));
+		}
+		catch (JsonSyntaxException | JsonIOException ex) {
+			Log.e(this.getClass().getName(), "Error reading " + file.getAbsolutePath(), ex);
+			throw new DaoException(R.string.exception_terrainLoadError, file.getAbsolutePath(), ex);
 		}
 		catch(FileNotFoundException ex) {
 			Log.e(this.getClass().getName(), file.getAbsolutePath() + " not found.", ex);
-			throw new DaoException(R.string.exception_terrainLoadError, file.getAbsolutePath(), ex);
-		}
-		catch(IOException ex) {
-			Log.e(this.getClass().getName(), "Error reading " + file.getAbsolutePath(), ex);
 			throw new DaoException(R.string.exception_terrainLoadError, file.getAbsolutePath(), ex);
 		}
 		finally {
@@ -207,6 +219,12 @@ public class TerrainDaoFileImpl implements TerrainDao {
 				}
 			}
 		}
-		return terrain;
+		return versionedTerrain.terrain;
+	}
+
+	private class VersionedTerrain {
+		public long versionNbr;
+		public Terrain terrain;
+		public String imageString;
 	}
 }

@@ -26,13 +26,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.data.entity.CellExit;
+import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 
 /**
  *
  */
-public class CellExitSpinnerAdapter extends ArrayAdapter<CellExit> {
+public class CellExitSpinnerAdapter extends ArrayAdapter<CellExitType> {
 	private  @DataConstants.Direction  int cellExitDirection;
 	private LayoutInflater       		   inflater;
 	private View.OnClickListener           onStickyToggleListener;

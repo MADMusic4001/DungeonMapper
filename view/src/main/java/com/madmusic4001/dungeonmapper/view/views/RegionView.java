@@ -53,7 +53,7 @@ import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
 import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
 import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
-import com.madmusic4001.dungeonmapper.data.entity.CellExit;
+import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
 import com.madmusic4001.dungeonmapper.data.entity.World;
@@ -111,9 +111,9 @@ public class RegionView extends GLSurfaceView {
 
 	// behavior options
 	private Terrain currentTerrain;
-	private SparseArray<CellExit> currentCellExitsMap = new SparseArray<>();
-	private boolean               stickyTerrain       = true;
-	private SparseBooleanArray    stickyCellExitsMap  = new SparseBooleanArray();
+	private SparseArray<CellExitType> currentCellExitsMap = new SparseArray<>();
+	private boolean                   stickyTerrain       = true;
+	private SparseBooleanArray        stickyCellExitsMap  = new SparseBooleanArray();
 
 	// Pixel sizes (calculated when render options or device config changes)
 	private DisplayMetrics displayMetrics;
@@ -333,9 +333,9 @@ public class RegionView extends GLSurfaceView {
 				}
 
 				for (@Direction int direction = UP; direction <= DOWN; direction++) {
-					CellExit mapCellExit = cell.getExitForDirection(direction);
-					CellExit currentExit = currentCellExitsMap.get(direction);
-					if (!currentExit.equals(mapCellExit) || isNew) {
+					CellExitType mapCellExitType = cell.getExitForDirection(direction);
+					CellExitType currentExit = currentCellExitsMap.get(direction);
+					if (!currentExit.equals(mapCellExitType) || isNew) {
 						cell.setExitForDirection(direction, currentExit);
 						cellChanged = true;
 					}
@@ -378,8 +378,8 @@ public class RegionView extends GLSurfaceView {
 		this.terrainChangedListener = terrainChangedListener;
 	}
 
-	public void setCurrentCellExit(@DataConstants.Direction int direction, CellExit cellExit) {
-		currentCellExitsMap.put(direction, cellExit);
+	public void setCurrentCellExit(@DataConstants.Direction int direction, CellExitType cellExitType) {
+		currentCellExitsMap.put(direction, cellExitType);
 	}
 
 	public void setOnExitChangedListener(@DataConstants.Direction int direction,
@@ -404,9 +404,9 @@ public class RegionView extends GLSurfaceView {
 		/**
 		 * Called when an exit style changes.
 		 *
-		 * @param cellExit the new selected cellExit.
+		 * @param cellExitType the new selected cellExit.
 		 */
-		void onExitChanged(CellExit cellExit);
+		void onExitChanged(CellExitType cellExitType);
 	}
 
 	/**
@@ -469,18 +469,18 @@ public class RegionView extends GLSurfaceView {
 			}
 
 			for (@Direction int direction = UP; direction <= DOWN; direction++) {
-				CellExit mapCellExit = cell.getExitForDirection(direction);
-				CellExit currentExit = currentCellExitsMap.get(direction);
+				CellExitType mapCellExitType = cell.getExitForDirection(direction);
+				CellExitType currentExit = currentCellExitsMap.get(direction);
 				boolean sticky = stickyCellExitsMap.get(direction);
-				if (sticky && !currentExit.equals(mapCellExit) || isNew) {
+				if (sticky && !currentExit.equals(mapCellExitType) || isNew) {
 					cell.setExitForDirection(direction, currentExit);
 					cellChanged = true;
 				}
-				else if (mapCellExit != null && !mapCellExit.equals(currentExit)) {
-					currentCellExitsMap.put(direction, mapCellExit);
+				else if (mapCellExitType != null && !mapCellExitType.equals(currentExit)) {
+					currentCellExitsMap.put(direction, mapCellExitType);
 					OnExitChangedListener listener = exitChangedListenerMap.get(direction);
 					if (listener != null) {
-						listener.onExitChanged(mapCellExit);
+						listener.onExitChanged(mapCellExitType);
 					}
 				}
 			}
@@ -886,15 +886,15 @@ public class RegionView extends GLSurfaceView {
 
 			packer = cellExitManger.getBitmapPacker();
 			cellExitTextureRegions.clear();
-			for (CellExit cellExit : cellExitManger.getCellExits()) {
+			for (CellExitType cellExitType : cellExitManger.getCellExits()) {
 				Rect[] regions = new Rect[6];
-				regions[UP] = packer.getRect(cellExit.getName() + "_up");
-				regions[NORTH] = packer.getRect(cellExit.getName() + "_north");
-				regions[WEST] = packer.getRect(cellExit.getName() + "_west");
-				regions[EAST] = packer.getRect(cellExit.getName() + "_east");
-				regions[SOUTH] = packer.getRect(cellExit.getName() + "_south");
-				regions[DOWN] = packer.getRect(cellExit.getName() + "_down");
-				cellExitTextureRegions.put(cellExit.getId(), regions);
+				regions[UP] = packer.getRect(cellExitType.getName() + "_up");
+				regions[NORTH] = packer.getRect(cellExitType.getName() + "_north");
+				regions[WEST] = packer.getRect(cellExitType.getName() + "_west");
+				regions[EAST] = packer.getRect(cellExitType.getName() + "_east");
+				regions[SOUTH] = packer.getRect(cellExitType.getName() + "_south");
+				regions[DOWN] = packer.getRect(cellExitType.getName() + "_down");
+				cellExitTextureRegions.put(cellExitType.getId(), regions);
 			}
 			bindTexture(packer.getBitmap(), CELL_EXITS_GL_NUM);
 		}
@@ -1015,9 +1015,9 @@ public class RegionView extends GLSurfaceView {
 			atlasWidth = cellExitManger.getBitmapPacker().getWidth();
 			atlasHeight = cellExitManger.getBitmapPacker().getHeight();
 			for (@Direction int i = UP; i <= DOWN; i++) {
-				CellExit cellExit = cell.getExitForDirection(i);
-				if (cellExit != null) {
-					texRect = new RectF(cellExitTextureRegions.get(cellExit.getId())[i]);
+				CellExitType cellExitType = cell.getExitForDirection(i);
+				if (cellExitType != null) {
+					texRect = new RectF(cellExitTextureRegions.get(cellExitType.getId())[i]);
 					switch (i) {
 						case UP:
 							rect = new Rect(left + CELL_EXIT_SIZE_DP,

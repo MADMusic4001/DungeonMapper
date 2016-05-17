@@ -27,7 +27,7 @@ import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
 import com.madmusic4001.dungeonmapper.data.dao.DungeonMapperSqlHelper;
 import com.madmusic4001.dungeonmapper.data.entity.AppSettings;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
-import com.madmusic4001.dungeonmapper.data.entity.CellExit;
+import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
@@ -312,7 +312,7 @@ public class WorldFileDao {
 			for(int i = 0; i < numExits; i++) {
 				@DataConstants.Direction int exitDirection = stream.readInt();
 				int cellExitId = stream.readInt();
-				CellExit exitCell = cellExitManager.getCellExitWithId(cellExitId);
+				CellExitType exitCell = cellExitManager.getCellExitWithId(cellExitId);
 				newCell.setExitForDirection(exitDirection, exitCell);
 			}
 		}
@@ -363,7 +363,7 @@ public class WorldFileDao {
 			// Save CellExit references
 			stream.writeInt(cell.getNumExits());
 			for(@DataConstants.Direction int direction = NORTH; direction <= DOWN; direction++) {
-				CellExit exit = cell.getExitForDirection(direction);
+				CellExitType exit = cell.getExitForDirection(direction);
 				if(exit != null) {
 					stream.writeInt(direction);
 					stream.writeInt(exit.getId());

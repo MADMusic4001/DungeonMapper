@@ -29,7 +29,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridLayout;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -37,11 +36,10 @@ import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.EditWorldRegionController;
-import com.madmusic4001.dungeonmapper.data.entity.CellExit;
+import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
-import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldActivity;
 import com.madmusic4001.dungeonmapper.view.adapters.CellExitSpinnerAdapter;
 import com.madmusic4001.dungeonmapper.view.adapters.TerrainSpinnerAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
@@ -106,8 +104,8 @@ public class EditWorldRegionFragment extends Fragment
 	}
 
 	@Override
-	public void onLoadCellExitsComplete(Collection<CellExit> cellExits) {
-		for (CellExit exit : cellExits) {
+	public void onLoadCellExitsComplete(Collection<CellExitType> cellExitTypes) {
+		for (CellExitType exit : cellExitTypes) {
 			upExitAdapter.add(exit);
 			northExitAdapter.add(exit);
 			westExitAdapter.add(exit);
@@ -116,17 +114,17 @@ public class EditWorldRegionFragment extends Fragment
 			downExitAdapter.add(exit);
 		}
 		upExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(UP, (CellExit) upExitSpinner.getSelectedItem());
+		regionView.setCurrentCellExit(UP, (CellExitType) upExitSpinner.getSelectedItem());
 		northExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(NORTH, (CellExit) northExitSpinner.getSelectedItem());
+		regionView.setCurrentCellExit(NORTH, (CellExitType) northExitSpinner.getSelectedItem());
 		westExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(WEST, (CellExit) westExitSpinner.getSelectedItem());
+		regionView.setCurrentCellExit(WEST, (CellExitType) westExitSpinner.getSelectedItem());
 		eastExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(EAST, (CellExit) eastExitSpinner.getSelectedItem());
+		regionView.setCurrentCellExit(EAST, (CellExitType) eastExitSpinner.getSelectedItem());
 		southExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(SOUTH, (CellExit) southExitSpinner.getSelectedItem());
+		regionView.setCurrentCellExit(SOUTH, (CellExitType) southExitSpinner.getSelectedItem());
 		downExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(DOWN, (CellExit) downExitSpinner.getSelectedItem());
+		regionView.setCurrentCellExit(DOWN, (CellExitType) downExitSpinner.getSelectedItem());
 	}
 
 	@Override
@@ -509,7 +507,7 @@ public class EditWorldRegionFragment extends Fragment
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				regionView.setCurrentCellExit(direction,
-										   (CellExit) parent.getItemAtPosition(position));
+										   (CellExitType) parent.getItemAtPosition(position));
 			}
 			@Override
 			public void onNothingSelected(AdapterView<?> parent) {
@@ -560,26 +558,26 @@ public class EditWorldRegionFragment extends Fragment
 		});
 		regionView.setOnExitChangedListener(NORTH, new RegionView.OnExitChangedListener() {
 			@Override
-			public void onExitChanged(CellExit cellExit) {
-				northExitSpinner.setSelection(northExitAdapter.getPosition(cellExit));
+			public void onExitChanged(CellExitType cellExitType) {
+				northExitSpinner.setSelection(northExitAdapter.getPosition(cellExitType));
 			}
 		});
 		regionView.setOnExitChangedListener(WEST, new RegionView.OnExitChangedListener() {
 			@Override
-			public void onExitChanged(CellExit cellExit) {
-				westExitSpinner.setSelection(westExitAdapter.getPosition(cellExit));
+			public void onExitChanged(CellExitType cellExitType) {
+				westExitSpinner.setSelection(westExitAdapter.getPosition(cellExitType));
 			}
 		});
 		regionView.setOnExitChangedListener(EAST, new RegionView.OnExitChangedListener() {
 			@Override
-			public void onExitChanged(CellExit cellExit) {
-				eastExitSpinner.setSelection(eastExitAdapter.getPosition(cellExit));
+			public void onExitChanged(CellExitType cellExitType) {
+				eastExitSpinner.setSelection(eastExitAdapter.getPosition(cellExitType));
 			}
 		});
 		regionView.setOnExitChangedListener(SOUTH, new RegionView.OnExitChangedListener() {
 			@Override
-			public void onExitChanged(CellExit cellExit) {
-				southExitSpinner.setSelection(southExitAdapter.getPosition(cellExit));
+			public void onExitChanged(CellExitType cellExitType) {
+				southExitSpinner.setSelection(southExitAdapter.getPosition(cellExitType));
 			}
 		});
 		regionView.setCellChangedListener(new RegionView.OnCellChangedListener() {

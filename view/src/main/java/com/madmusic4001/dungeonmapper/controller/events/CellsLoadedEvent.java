@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 MadMusic4001
+ * Copyright (C) 2016 MadInnovations
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.data.dao;
-
-import android.provider.BaseColumns;
+package com.madmusic4001.dungeonmapper.controller.events;
 
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
+import java.util.Collection;
+
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- * Created 7/2/2015.
+ * Event representing the results of a request to load Cell instances from persistent storage.
  */
-public interface CellDao extends BaseDao<Cell> {
+public class CellsLoadedEvent {
+	Collection<Cell> cells;
+
+	/**
+	 * Creates a CellsLoadedEvent instance.
+	 *
+	 * @param cells  the collection of cells that were loaded
+	 */
+	public CellsLoadedEvent(Collection<Cell> cells) {
+		this.cells = cells;
+	}
+
+	// Getters
+	public Collection<Cell> getCells() {
+		return cells;
+	}
 }

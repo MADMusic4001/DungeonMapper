@@ -28,6 +28,9 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+/**
+ * Utility methods for working with files in the Android file system.
+ */
 @Singleton
 public class FileUtils {
     private Context context;

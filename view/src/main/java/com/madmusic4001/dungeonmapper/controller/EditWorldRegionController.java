@@ -22,7 +22,7 @@ import android.util.Log;
 import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
 import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
 import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
-import com.madmusic4001.dungeonmapper.data.entity.CellExit;
+import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
 import com.madmusic4001.dungeonmapper.data.entity.World;
@@ -81,16 +81,16 @@ public class EditWorldRegionController extends BaseController {
 	 */
 	public synchronized void loadCellExits() {
 
-		new AsyncTask<Void, Void, Collection<CellExit>>() {
+		new AsyncTask<Void, Void, Collection<CellExitType>>() {
 			@Override
-			protected Collection<CellExit> doInBackground(Void... params) {
+			protected Collection<CellExitType> doInBackground(Void... params) {
 				return cellExitManager.loadCellExits();
 			}
 
 			@Override
-			protected void onPostExecute(Collection<CellExit> cellExits) {
+			protected void onPostExecute(Collection<CellExitType> cellExitTypes) {
 				((EditWorldRegionUpdateHandler) getUpdateHandler())
-						.onLoadCellExitsComplete(cellExits);
+						.onLoadCellExitsComplete(cellExitTypes);
 			}
 		}.execute();
 	}
@@ -163,9 +163,9 @@ public class EditWorldRegionController extends BaseController {
 		 * Notifies the implementer that all {@code CellExit} instances have been loaded from
 		 * storage.
 		 *
-		 * @param cellExits  the {@link Collection} of {@link CellExit} instances.
+		 * @param cellExitTypes  the {@link Collection} of {@link CellExitType} instances.
 		 */
-		void onLoadCellExitsComplete(Collection<CellExit> cellExits);
+		void onLoadCellExitsComplete(Collection<CellExitType> cellExitTypes);
 
 		/**
 		 * Notifies the implementer that all {@code Terrain} instances have been loaded from storage.

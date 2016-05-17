@@ -19,16 +19,16 @@ import android.content.Context;
 
 import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
-import com.madmusic4001.dungeonmapper.data.dao.CellExitDao;
+import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
 import com.madmusic4001.dungeonmapper.data.dao.DungeonMapperSqlHelper;
 import com.madmusic4001.dungeonmapper.data.dao.RegionDao;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
-import com.madmusic4001.dungeonmapper.data.dao.impl.CellDaoSqlImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.CellExitDaoSqlImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.RegionDaoSqlImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.TerrainDaoSqlImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.WorldDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellExitTypeTypeDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.TerrainDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 
 import javax.inject.Singleton;
 
@@ -44,14 +44,14 @@ import dagger.Provides;
 @Module(includes = ApplicationModule.class)
 public class DaoModule {
 	@Provides @Singleton
-	CellDao provideCellDao(Context context, DungeonMapperSqlHelper helper, TerrainDao terrainDao, CellExitDao cellExitDao,
+	CellDao provideCellDao(Context context, DungeonMapperSqlHelper helper, TerrainDao terrainDao, CellExitTypeDao cellExitTypeDao,
 						   TerrainManager terrainManager) {
-		return new CellDaoSqlImpl(context, helper, terrainDao, cellExitDao, terrainManager);
+		return new CellDaoSqlImpl(context, helper, terrainDao, cellExitTypeDao, terrainManager);
 	}
 
 	@Provides @Singleton
-	CellExitDao provideCellExitDao(Context context, DungeonMapperSqlHelper helper) {
-		return new CellExitDaoSqlImpl(context, helper);
+	CellExitTypeDao provideCellExitDao(Context context, DungeonMapperSqlHelper helper) {
+		return new CellExitTypeTypeDaoSqlImpl(context, helper);
 	}
 
 	@Provides @Singleton

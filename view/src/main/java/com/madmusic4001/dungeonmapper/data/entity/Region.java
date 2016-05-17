@@ -39,14 +39,10 @@ public class Region {
 	 * Create a new instance with the given grid size
 	 *
 	 * @param name the name of this instance.
-	 * @param parent the {@link World} that will contain the new instance.
 	 */
-	public Region(String name, World parent) {
+	public Region(String name, World world) {
 		this.name = name;
-		this.parent = parent;
-		width = parent.getRegionWidth();
-		height = parent.getRegionHeight();
-		cells = new ArrayList<>(width * height);
+		this.parent = world;
 	}
 
 	/**

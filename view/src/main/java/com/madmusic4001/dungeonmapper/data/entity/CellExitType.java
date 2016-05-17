@@ -24,7 +24,7 @@ import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 /**
  * Map cell exit style
  */
-public class CellExit {
+public class CellExitType {
     private int id = -1;
 	private String name;
 	private boolean solid;
@@ -34,7 +34,7 @@ public class CellExit {
     /**
      * Creates a new instance.
      */
-    public CellExit() { }
+    public CellExitType() { }
 
     /**
      * Gets the {@link Bitmap} for the given direction.

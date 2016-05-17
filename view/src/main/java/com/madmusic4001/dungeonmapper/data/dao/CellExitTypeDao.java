@@ -16,10 +16,10 @@
 
 package com.madmusic4001.dungeonmapper.data.dao;
 
-import com.madmusic4001.dungeonmapper.data.entity.Terrain;
+import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 
 /**
  *
  */
-public interface TerrainDao extends BaseDao<Terrain> {
+public interface CellExitTypeDao extends BaseDao<CellExitType>{
 }

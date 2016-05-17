@@ -38,6 +38,7 @@ public final class DataConstants {
 	public static final String ALL_FILES_REGEX      = ".*";
 	public static final String SELECTED_WORLD_NAME  = PACKAGE_NAME + ".selected_world_name";
 	public static final String SAVED_REGION_NAME    = PACKAGE_NAME + ".saved_region_name";
+	public static final int UNINITIALIZED             = -1;
 
 	public static final int ID_WHEN_RESOURCE_NOT_FOUND        = -1;
 	public static final int TERRAIN_NAME_ARRAY_RESOURCE_INDEX = 1;

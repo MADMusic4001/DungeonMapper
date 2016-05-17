@@ -18,8 +18,8 @@ package com.madmusic4001.dungeonmapper.controller.managers;
 
 import android.graphics.Bitmap;
 
-import com.madmusic4001.dungeonmapper.data.dao.CellExitDao;
-import com.madmusic4001.dungeonmapper.data.entity.CellExit;
+import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
+import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.exceptions.DataException;
 import com.madmusic4001.dungeonmapper.data.util.BitmapPacker;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.*;
@@ -31,26 +31,26 @@ import java.util.HashMap;
 import javax.inject.Inject;
 
 /**
- * Keeps track of all available {@link CellExit}  instances
+ * Keeps track of all available {@link CellExitType}  instances
  */
 public class CellExitManager {
     private static final int          BITMAP_SIZE  = 144;
     private static final int          PADDING_SIZE = 6;
     private              PackedBitmap packedBitmap = null;
     private              BitmapPacker packer       = null;
-    private final CellExitDao dao;
-    private java.util.Map<String, CellExit> cellExitNameMap = new HashMap<>();
+    private final CellExitTypeDao dao;
+    private java.util.Map<String, CellExitType> cellExitNameMap = new HashMap<>();
 
-    public Collection<CellExit> getCellExits() {
-        Collection<CellExit> cellExits = cellExitNameMap.values();
-        if(cellExits.isEmpty()) {
-            cellExits = dao.loadAll();
-            for(CellExit aCellExit : cellExits) {
-                cellExitNameMap.put(aCellExit.getName(), aCellExit);
+    public Collection<CellExitType> getCellExits() {
+        Collection<CellExitType> cellExitTypes = cellExitNameMap.values();
+        if(cellExitTypes.isEmpty()) {
+            cellExitTypes = dao.load(null);
+            for(CellExitType aCellExitType : cellExitTypes) {
+                cellExitNameMap.put(aCellExitType.getName(), aCellExitType);
             }
         }
 
-        return cellExits;
+        return cellExitTypes;
     }
 
     /**
@@ -59,7 +59,7 @@ public class CellExitManager {
      * @param dao a {@code CellExitDao} implementation instance.
      */
     @Inject
-    protected CellExitManager(final CellExitDao dao) {
+    protected CellExitManager(final CellExitTypeDao dao) {
         this.dao = dao;
     }
 
@@ -69,31 +69,31 @@ public class CellExitManager {
      * @param cellExitId the id of the desired {@code CellExit}.
      * @return a {@code CellExit} instance or null if not found.
      */
-    public CellExit getCellExitWithId(long cellExitId) throws DataException {
-        CellExit cellExit = null;
-        for (CellExit aCellExit : cellExitNameMap.values()) {
-            if (aCellExit.getId() == cellExitId) {
-                cellExit = aCellExit;
+    public CellExitType getCellExitWithId(long cellExitId) throws DataException {
+        CellExitType cellExitType = null;
+        for (CellExitType aCellExitType : cellExitNameMap.values()) {
+            if (aCellExitType.getId() == cellExitId) {
+                cellExitType = aCellExitType;
                 break;
             }
         }
-        return cellExit;
+        return cellExitType;
     }
 
     /**
-     * Loads all {@link CellExit} instances.
+     * Loads all {@link CellExitType} instances.
      *
-     * @return a {@link Collection} of {@link CellExit} instances.
+     * @return a {@link Collection} of {@link CellExitType} instances.
      */
-    public Collection<CellExit> loadCellExits() {
-        Collection<CellExit> cellExits = cellExitNameMap.values();
-        if (cellExits.isEmpty()) {
-            cellExits = dao.loadAll();
-            for(CellExit anExit : cellExits) {
+    public Collection<CellExitType> loadCellExits() {
+        Collection<CellExitType> cellExitTypes = cellExitNameMap.values();
+        if (cellExitTypes.isEmpty()) {
+            cellExitTypes = dao.load(null);
+            for(CellExitType anExit : cellExitTypes) {
                 cellExitNameMap.put(anExit.getName(),anExit);
             }
         }
-        return cellExits;
+        return cellExitTypes;
     }
 
     private BitmapPacker createPacker() {
@@ -117,7 +117,7 @@ public class CellExitManager {
     private void packBitmaps(BitmapPacker packer) {
     Bitmap bitmap;
 
-        for(CellExit exit : cellExitNameMap.values()) {
+        for(CellExitType exit : cellExitNameMap.values()) {
             bitmap = exit.getBitmapForDirection(UP);
             packer.addImage(exit.getName() + "_up", bitmap);
 

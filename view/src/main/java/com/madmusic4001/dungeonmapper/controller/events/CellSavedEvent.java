@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 MadMusic4001
+ * Copyright (C) 2016 MadInnovations
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.data.dao;
-
-import android.provider.BaseColumns;
+package com.madmusic4001.dungeonmapper.controller.events;
 
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
@@ -23,7 +21,21 @@ import com.madmusic4001.dungeonmapper.data.entity.Cell;
  * ${CLASS_DESCRIPTION}
  *
  * @author Mark
- * Created 7/2/2015.
+ * Created 5/12/2016.
  */
-public interface CellDao extends BaseDao<Cell> {
+public class CellSavedEvent {
+	boolean successful;
+	Cell cell;
+
+	public CellSavedEvent(boolean successful, Cell cell) {
+		this.successful = successful;
+		this.cell = cell;
+	}
+
+	public boolean isSuccessful() {
+		return successful;
+	}
+	public Cell getCell() {
+		return cell;
+	}
 }

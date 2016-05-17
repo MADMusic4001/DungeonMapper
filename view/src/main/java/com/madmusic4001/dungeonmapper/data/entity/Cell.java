@@ -28,10 +28,10 @@ public class Cell {
     private Region                  parent = null;
 	private int						x;
 	private int						y;
-    private boolean              	solid = false;
-	private Terrain              	terrain = null;
-    private SparseArray<Cell>	    directionLinksArray = new SparseArray<>(6);
-    private SparseArray<CellExit>   directionExitsArray = new SparseArray<>(6);
+    private boolean                   solid               = false;
+	private Terrain                   terrain             = null;
+    private SparseArray<Cell>         directionLinksArray = new SparseArray<>(6);
+    private SparseArray<CellExitType> directionExitsArray = new SparseArray<>(6);
 
     /**
      * Gets the {@code Cell} for the given direction.
@@ -66,17 +66,17 @@ public class Cell {
     /**
      * Gets the {@code CellExit} for the given direction.
      *
-     * @param direction  the {@link DataConstants.Direction} of the {@link CellExit}
-     * @return the {@link CellExit} for the given direction or null if not found.
+     * @param direction  the {@link DataConstants.Direction} of the {@link CellExitType}
+     * @return the {@link CellExitType} for the given direction or null if not found.
      */
-    public CellExit getExitForDirection(@DataConstants.Direction int direction) {
+    public CellExitType getExitForDirection(@DataConstants.Direction int direction) {
         return directionExitsArray.get(direction);
     }
 
 	/**
 	 * Gets the number of {@code CellExit} instances that this {@code Cell} uses.
 	 *
-	 * @return the number of {@link CellExit} instances used by this {@link Cell}
+	 * @return the number of {@link CellExitType} instances used by this {@link Cell}
 	 */
 	public int getNumExits() {
 		return directionExitsArray.size();
@@ -86,9 +86,9 @@ public class Cell {
      * Sets the {@code CellExit} for the given direction.
      *
      * @param direction  a {@link DataConstants.Direction} for the exit to be set.
-     * @param exit  the {@link CellExit} to be set.
+     * @param exit  the {@link CellExitType} to be set.
      */
-    public void setExitForDirection(@DataConstants.Direction int direction, CellExit exit) {
+    public void setExitForDirection(@DataConstants.Direction int direction, CellExitType exit) {
         directionExitsArray.put(direction, exit);
     }
 
