@@ -58,9 +58,9 @@ public class SelectWorldActivity extends Activity implements
 		SelectWorldController.SelectWorldUpdateHandler,
 		DbImportDialogFragment.ImportDialogListener,
 		FileSelectorDialogFragment.FileSelectorDialogListener {
-	@Inject
+//	@Inject
 	protected WorldListAdapter      adapter;
-	@Inject
+//	@Inject
 	protected SelectWorldController controller;
 	private ListView 				listView;
 	private String					fileName;
@@ -73,8 +73,8 @@ public class SelectWorldActivity extends Activity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		((DungeonMapperApp) getApplication()).getApplicationComponent()
-				.newActivityComponent(new ActivityModule(this)).injectInto(this);
+//		((DungeonMapperApp) getApplication()).getApplicationComponent()
+//				.newActivityComponent(new ActivityModule(this)).injectInto(this);
 		setContentView(R.layout.select_world_layout);
 		initListView();
 		controller.loadWorlds();

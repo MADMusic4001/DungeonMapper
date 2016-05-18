@@ -26,7 +26,6 @@ import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
 import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
-import com.madmusic4001.dungeonmapper.data.dao.DungeonMapperSqlHelper;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
@@ -130,7 +129,7 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 	 * @param cellExitTypeDao  a CellExitDao instance
 	 */
 	@Inject
-	public CellDaoSqlImpl(DungeonMapperSqlHelper sqlHelper, CellExitTypeDao cellExitTypeDao,
+	public CellDaoSqlImpl(SQLiteOpenHelper sqlHelper, CellExitTypeDao cellExitTypeDao,
 						  TerrainDao terrainDao) {
 		this.sqlHelper = sqlHelper;
 		this.cellExitTypeDao = cellExitTypeDao;

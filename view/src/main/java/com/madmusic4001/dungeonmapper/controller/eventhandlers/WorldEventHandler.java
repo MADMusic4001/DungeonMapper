@@ -16,6 +16,7 @@
 package com.madmusic4001.dungeonmapper.controller.eventhandlers;
 
 import com.madmusic4001.dungeonmapper.controller.events.WorldPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.WorldPersistentEventPosting;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 
@@ -42,6 +43,19 @@ public class WorldEventHandler {
 
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void onWorldPersistenceEvent(WorldPersistenceEvent event) {
+		switch (event.getAction()) {
+			case SAVE:
+				worldDao.save((World)event.getInformation());
+				break;
+			case DELETE:
+				break;
+			case READ:
+				break;
+		}
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onWorldPersistenceEvent(WorldPersistentEventPosting event) {
 		switch (event.getAction()) {
 			case SAVE:
 				worldDao.save((World)event.getInformation());

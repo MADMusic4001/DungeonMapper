@@ -16,25 +16,17 @@
 package com.madmusic4001.dungeonmapper.view;
 
 import android.app.Application;
-import android.util.Log;
 
-import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
 import com.madmusic4001.dungeonmapper.view.di.components.ApplicationComponent;
 import com.madmusic4001.dungeonmapper.view.di.components.DaggerApplicationComponent;
 import com.madmusic4001.dungeonmapper.view.di.modules.ApplicationModule;
-
-import javax.inject.Inject;
+import com.madmusic4001.dungeonmapper.view.di.modules.EventHandlerModule;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- *         Created 7/3/2015.
+ * Main class for maintaining application state.
  */
 public class DungeonMapperApp extends Application {
 	private ApplicationComponent applicationComponent;
-	@Inject
-	WorldManager worldManager;
 
 	@Override
 	public void onCreate() {
@@ -43,9 +35,10 @@ public class DungeonMapperApp extends Application {
 	}
 
 	private void initializeInjector() {
-		this.applicationComponent = DaggerApplicationComponent.builder().applicationModule(
-				new ApplicationModule(this)).build();
-		Log.d("DungeonMapperApp", "ApplicationComponent successfully created.");
+		this.applicationComponent = DaggerApplicationComponent.builder()
+				.eventHandlerModule(new EventHandlerModule())
+				.applicationModule(new ApplicationModule(this))
+				.build();
 	}
 
 	public ApplicationComponent getApplicationComponent() {

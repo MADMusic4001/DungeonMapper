@@ -21,6 +21,8 @@ import android.content.SharedPreferences;
 
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 
+import org.greenrobot.eventbus.EventBus;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -28,16 +30,18 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- *         Created 7/2/2015.
+ * Provides application level class instances for dependency injection.
  */
 @Module
 public class ApplicationModule {
 	static final String PREFS_DEFAULT = "dmapp";
 	private final DungeonMapperApp application;
 
+	/**
+	 * Creates a new ApplicationModule instance.
+	 *
+	 * @param application  a {@link DungeonMapperApp} instance.
+	 */
 	@Inject
 	public ApplicationModule(DungeonMapperApp application) {
 		this.application = application;
@@ -46,7 +50,7 @@ public class ApplicationModule {
 	/**
 	 * The {@link Context} for the application.
 	 *
-	 * @return a {@link Context} instance.
+	 * @return a Context instance.
 	 */
 	@Provides @Singleton
 	Context provideApplicationContext() {
@@ -57,7 +61,7 @@ public class ApplicationModule {
 	 * The {@link Application} instance.
 	 *
 	 * @param app the {@link DungeonMapperApp}.
-	 * @return the {@link Application} instance
+	 * @return an Application instance
 	 */
 	@Provides @Singleton
 	Application provideApplication(DungeonMapperApp app) {
@@ -67,7 +71,7 @@ public class ApplicationModule {
 	/**
 	 * The {@link DungeonMapperApp}.
 	 *
-	 * @return the {@link DungeonMapperApp} instance.
+	 * @return a DungeonMapperApp instance.
 	 */
 	@Provides @Singleton
 	DungeonMapperApp provideDungeonMapperApp() {
@@ -78,10 +82,20 @@ public class ApplicationModule {
 	 * The {@link SharedPreferences} for the application.
 	 *
 	 * @param app the {@link Application} whose {@link SharedPreferences} is being requested.
-	 * @return the {@link SharedPreferences} instance.
+	 * @return a SharedPreferences instance.
 	 */
 	@Provides @Singleton
 	SharedPreferences provideSharedPrefs(Application app) {
 		return app.getSharedPreferences(PREFS_DEFAULT, Context.MODE_PRIVATE);
+	}
+
+	/**
+	 * The {@link EventBus} for the application.
+	 *
+	 * @return an EventBus instance.
+	 */
+	@Provides @Singleton
+	EventBus providesEventBus() {
+		return new EventBus();
 	}
 }

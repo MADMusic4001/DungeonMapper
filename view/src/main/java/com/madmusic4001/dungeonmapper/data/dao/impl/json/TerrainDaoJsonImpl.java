@@ -26,6 +26,7 @@ import com.google.gson.JsonSyntaxException;
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.TerrainDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.AppSettings;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
@@ -46,23 +47,20 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.APP_VERSION_ID;
 
 /**
  *
  */
 @SuppressWarnings("unused")
-@Singleton
+//@Singleton
 public class TerrainDaoJsonImpl implements TerrainDao {
 	public static final String TERRAIN_DIR = File.separator + "terrains";
 	public static final String TERRAIN_FILE_EXTENSION = ".trn";
 	public static final String TERRAIN_FILES_REGEX = ".*" + File.pathSeparator +
 			TERRAIN_FILE_EXTENSION;
 
-	@Inject
+//	@Inject
 	protected FileUtils fileUtils;
 
 	@Override
@@ -145,8 +143,8 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 	}
 
 	@Override
-	public boolean delete(Collection<DaoFilter> filters) {
-		boolean result;
+	public int delete(Collection<DaoFilter> filters) {
+		int result;
 		if(filters == null || filters.isEmpty()) {
 			result = deleteAll();
 		}
@@ -155,7 +153,7 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 				throw new UnsupportedOperationException("TerrainDaoJsonImpl.delete() can only accept 0 or 1 filter");
 			}
 			DaoFilter filter = filters.iterator().next();
-			if(!filter.getFieldName().equals(TerrainsContract.COLUMN_NAME_NAME)) {
+			if(!filter.getFieldName().equals(TerrainDaoSqlImpl.TerrainsContract.COLUMN_NAME_NAME)) {
 				throw new UnsupportedOperationException("TerrainDaoJsonImpl.delete() filter must be on NAME field");
 			}
 			File file;
@@ -164,18 +162,20 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 
 			file = fileUtils.getFile(AppSettings.useExternalStorageForWorlds(), relativePath, fileName);
 
-			result = file.delete();
+			result = (file.delete() ? 1 : 0);
 		}
 		return result;
 	}
 
-	private boolean deleteAll() {
-		boolean result = true;
+	private int deleteAll() {
+		int result = 0;
 		File root = new File(TERRAIN_DIR);
-		File[] Files = root.listFiles();
-		if(Files != null) {
-			for(int i = 0; i < Files.length && result; i++) {
-				result = Files[i].delete();
+		File[] files = root.listFiles();
+		if(files != null) {
+			for(File file : files) {
+				if(file.delete()) {
+					result ++;
+				}
 			}
 		}
 		return result;

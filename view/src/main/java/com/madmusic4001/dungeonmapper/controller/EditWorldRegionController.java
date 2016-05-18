@@ -21,7 +21,7 @@ import android.util.Log;
 
 import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
 import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
-import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
+//import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
@@ -38,141 +38,141 @@ import javax.inject.Inject;
  * @author Mark
  * Created 7/16/2015.
  */
-public class EditWorldRegionController extends BaseController {
-	private WorldManager    worldManager;
-	private CellExitManager cellExitManager;
-	private TerrainManager	terrainManager;
-
-	/**
-	 * Constructor for dependency injection.
-	 */
-	@Inject
-	public EditWorldRegionController(EditWorldRegionFragment fragment, WorldManager worldManager,
-									 CellExitManager cellExitManager,
-									 TerrainManager terrainManager) {
-		super(fragment.getActivity(), fragment);
-		this.worldManager = worldManager;
-		this.cellExitManager = cellExitManager;
-		this.terrainManager = terrainManager;
-	}
-
-	/**
-	 * Saves a {@link Region} instance to persistent storage.
-	 *
-	 * @param region the {@link Region} instance to save.
-	 */
-	public synchronized void saveRegion(final Region region, final String oldName) {
-
-		new AsyncTask<Void, Void, Region>() {
-			@Override
-			protected Region doInBackground(Void... params) {
-				return worldManager.saveRegion(region, oldName);
-			}
-
-			@Override
-			protected void onPostExecute(Region region) {
-				((EditWorldRegionUpdateHandler) getUpdateHandler()).onRegionSaved(region);
-			}
-		}.execute();
-	}
-
-	/**
-	 * Loads all {@code CellExit} instances from storage.
-	 */
-	public synchronized void loadCellExits() {
-
-		new AsyncTask<Void, Void, Collection<CellExitType>>() {
-			@Override
-			protected Collection<CellExitType> doInBackground(Void... params) {
-				return cellExitManager.loadCellExits();
-			}
-
-			@Override
-			protected void onPostExecute(Collection<CellExitType> cellExitTypes) {
-				((EditWorldRegionUpdateHandler) getUpdateHandler())
-						.onLoadCellExitsComplete(cellExitTypes);
-			}
-		}.execute();
-	}
-
-	/**
-	 * Loads all {@code Terrain} instances from storage.
-	 */
-	public synchronized void loadTerrains() {
-
-		new AsyncTask<Void, Void, Collection<Terrain>>() {
-			@Override
-			protected Collection<Terrain> doInBackground(Void... params) {
-				return terrainManager.loadTerrains();
-			}
-
-			@Override
-			protected void onPostExecute(Collection<Terrain> terrains) {
-				((EditWorldRegionUpdateHandler) getUpdateHandler())
-						.onLoadTerrainsComplete(terrains);
-			}
-		}.execute();
-	}
-
-	/**
-	 * Loads the {@link Region} instance to be displayed in the UI.
-	 *
-	 * @param worldName  the name of the {@link World} contaning the {@link Region} to load.
-	 * @param regionName  the name of the {@link Region} instance to load.
-	 */
-	public synchronized void loadRegion(final String worldName, final String regionName) {
-
-		new AsyncTask<Void, Void, Region>() {
-			@Override
-			protected Region doInBackground(Void... params) {
-				Region region = worldManager.getRegionForWorld(worldName, regionName);
-				if(region != null) {
-					Log.d(this.getClass().getName(), "Loading cells for Region " + regionName + " in World " + worldName);
-					worldManager.getCellsForRegion(region);
-				}
-				else {
-					Log.e(this.getClass().getName(), "Failed to load Region + " + regionName + " for World " + worldName);
-				}
-				return region;
-			}
-
-			@Override
-			protected void onPostExecute(Region region) {
-				((EditWorldRegionUpdateHandler) getUpdateHandler()).onRegionLoaded(region);
-			}
-		}.execute();
-	}
-
-	// <editor-fold> dec="Callback interface declaration">
-	public interface EditWorldRegionUpdateHandler extends BaseUpdateHandler {
-		/**
-		 * Sets the {@code Region} to be displayed in the UI.
-		 *
-		 * @param region the {@link Region} to display.
-		 */
-		void onRegionLoaded(@NonNull Region region);
-
-		/**
-		 * Notifies the implementer that the {@code Region} was saved.
-		 *
-		 * @param region  the {@link Region} that was saved.
-		 */
-		void onRegionSaved(Region region);
-
-		/**
-		 * Notifies the implementer that all {@code CellExit} instances have been loaded from
-		 * storage.
-		 *
-		 * @param cellExitTypes  the {@link Collection} of {@link CellExitType} instances.
-		 */
-		void onLoadCellExitsComplete(Collection<CellExitType> cellExitTypes);
-
-		/**
-		 * Notifies the implementer that all {@code Terrain} instances have been loaded from storage.
-		 *
-		 * @param terrains  the {@link Collection} of {@link Terrain} instances.
-		 */
-		void onLoadTerrainsComplete(Collection<Terrain> terrains);
-	}
-	// </editor-fold>
-}
+//public class EditWorldRegionController extends BaseController {
+////	private WorldManager    worldManager;
+////	private CellExitManager cellExitManager;
+////	private TerrainManager	terrainManager;
+////
+////	/**
+////	 * Constructor for dependency injection.
+////	 */
+////	@Inject
+//	public EditWorldRegionController(EditWorldRegionFragment fragment, WorldManager worldManager,
+//									 CellExitManager cellExitManager,
+//									 TerrainManager terrainManager) {
+//		super(fragment.getActivity(), fragment);
+////		this.worldManager = worldManager;
+////		this.cellExitManager = cellExitManager;
+////		this.terrainManager = terrainManager;
+//	}
+////
+////	/**
+////	 * Saves a {@link Region} instance to persistent storage.
+////	 *
+////	 * @param region the {@link Region} instance to save.
+////	 */
+////	public synchronized void saveRegion(final Region region, final String oldName) {
+////
+////		new AsyncTask<Void, Void, Region>() {
+////			@Override
+////			protected Region doInBackground(Void... params) {
+////				return worldManager.saveRegion(region, oldName);
+////			}
+////
+////			@Override
+////			protected void onPostExecute(Region region) {
+////				((EditWorldRegionUpdateHandler) getUpdateHandler()).onRegionSaved(region);
+////			}
+////		}.execute();
+////	}
+////
+////	/**
+////	 * Loads all {@code CellExit} instances from storage.
+////	 */
+////	public synchronized void loadCellExits() {
+////
+////		new AsyncTask<Void, Void, Collection<CellExitType>>() {
+////			@Override
+////			protected Collection<CellExitType> doInBackground(Void... params) {
+////				return cellExitManager.loadCellExits();
+////			}
+////
+////			@Override
+////			protected void onPostExecute(Collection<CellExitType> cellExitTypes) {
+////				((EditWorldRegionUpdateHandler) getUpdateHandler())
+////						.onLoadCellExitsComplete(cellExitTypes);
+////			}
+////		}.execute();
+////	}
+////
+////	/**
+////	 * Loads all {@code Terrain} instances from storage.
+////	 */
+////	public synchronized void loadTerrains() {
+////
+////		new AsyncTask<Void, Void, Collection<Terrain>>() {
+////			@Override
+////			protected Collection<Terrain> doInBackground(Void... params) {
+////				return terrainManager.loadTerrains();
+////			}
+////
+////			@Override
+////			protected void onPostExecute(Collection<Terrain> terrains) {
+////				((EditWorldRegionUpdateHandler) getUpdateHandler())
+////						.onLoadTerrainsComplete(terrains);
+////			}
+////		}.execute();
+////	}
+////
+////	/**
+////	 * Loads the {@link Region} instance to be displayed in the UI.
+////	 *
+////	 * @param worldName  the name of the {@link World} contaning the {@link Region} to load.
+////	 * @param regionName  the name of the {@link Region} instance to load.
+////	 */
+////	public synchronized void loadRegion(final String worldName, final String regionName) {
+////
+////		new AsyncTask<Void, Void, Region>() {
+////			@Override
+////			protected Region doInBackground(Void... params) {
+////				Region region = worldManager.getRegionForWorld(worldName, regionName);
+////				if(region != null) {
+////					Log.d(this.getClass().getName(), "Loading cells for Region " + regionName + " in World " + worldName);
+////					worldManager.getCellsForRegion(region);
+////				}
+////				else {
+////					Log.e(this.getClass().getName(), "Failed to load Region + " + regionName + " for World " + worldName);
+////				}
+////				return region;
+////			}
+////
+////			@Override
+////			protected void onPostExecute(Region region) {
+////				((EditWorldRegionUpdateHandler) getUpdateHandler()).onRegionLoaded(region);
+////			}
+////		}.execute();
+////	}
+////
+////	// <editor-fold> dec="Callback interface declaration">
+//	public interface EditWorldRegionUpdateHandler extends BaseUpdateHandler {
+//		/**
+//		 * Sets the {@code Region} to be displayed in the UI.
+//		 *
+//		 * @param region the {@link Region} to display.
+//		 */
+//		void onRegionLoaded(@NonNull Region region);
+//
+//		/**
+//		 * Notifies the implementer that the {@code Region} was saved.
+//		 *
+//		 * @param region  the {@link Region} that was saved.
+//		 */
+//		void onRegionSaved(Region region);
+//
+//		/**
+//		 * Notifies the implementer that all {@code CellExit} instances have been loaded from
+//		 * storage.
+//		 *
+//		 * @param cellExitTypes  the {@link Collection} of {@link CellExitType} instances.
+//		 */
+//		void onLoadCellExitsComplete(Collection<CellExitType> cellExitTypes);
+//
+//		/**
+//		 * Notifies the implementer that all {@code Terrain} instances have been loaded from storage.
+//		 *
+//		 * @param terrains  the {@link Collection} of {@link Terrain} instances.
+//		 */
+//		void onLoadTerrainsComplete(Collection<Terrain> terrains);
+//	}
+////	// </editor-fold>
+//}

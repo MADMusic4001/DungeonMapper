@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 MadMusic4001
+ * Copyright (C) 2016 MadInnovations
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 package com.madmusic4001.dungeonmapper.view.di.modules;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteOpenHelper;
 
-import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
 import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
-import com.madmusic4001.dungeonmapper.data.dao.DungeonMapperSqlHelper;
 import com.madmusic4001.dungeonmapper.data.dao.RegionDao;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellExitTypeTypeDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.DungeonMapperSqlHelper;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.TerrainDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
@@ -36,17 +36,13 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- *         Created 7/4/2015.
+ * Provides instances of DAO SQL implementation classes for dependency injection.
  */
 @Module(includes = ApplicationModule.class)
-public class DaoModule {
+public class SqlDaoModule {
 	@Provides @Singleton
-	CellDao provideCellDao(Context context, DungeonMapperSqlHelper helper, TerrainDao terrainDao, CellExitTypeDao cellExitTypeDao,
-						   TerrainManager terrainManager) {
-		return new CellDaoSqlImpl(context, helper, terrainDao, cellExitTypeDao, terrainManager);
+	CellDao provideCellDao(DungeonMapperSqlHelper helper, CellExitTypeDao cellExitTypeDao, TerrainDao terrainDao) {
+		return new CellDaoSqlImpl(helper, cellExitTypeDao, terrainDao);
 	}
 
 	@Provides @Singleton
@@ -55,8 +51,8 @@ public class DaoModule {
 	}
 
 	@Provides @Singleton
-	RegionDao provideRegionDao(Context context, DungeonMapperSqlHelper helper) {
-		return new RegionDaoSqlImpl(context, helper);
+	RegionDao provideRegionDao(DungeonMapperSqlHelper helper, WorldDao worldDao) {
+		return new RegionDaoSqlImpl(helper, worldDao);
 	}
 
 	@Provides @Singleton
@@ -65,7 +61,7 @@ public class DaoModule {
 	}
 
 	@Provides @Singleton
-	WorldDao provideWorldDao(Context context, DungeonMapperSqlHelper helper) {
-		return new WorldDaoSqlImpl(context, helper);
+	WorldDao provideWorldDao(DungeonMapperSqlHelper helper) {
+		return new WorldDaoSqlImpl(helper);
 	}
 }

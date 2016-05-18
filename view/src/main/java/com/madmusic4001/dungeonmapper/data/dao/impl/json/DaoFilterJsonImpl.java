@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 MadMusic4001
+ * Copyright (C) 2016 MadInnovations
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.view.di.modules;
+package com.madmusic4001.dungeonmapper.data.dao.impl.json;
 
-import com.madmusic4001.dungeonmapper.view.di.PerActivity;
-import com.madmusic4001.dungeonmapper.view.views.RegionView;
-
-import dagger.Module;
-import dagger.Provides;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 
 /**
- * Provides a RegionView instance for dependency injection.
+ * ${CLASS_DESCRIPTION}
+ *
+ * @author Mark
+ * Created 5/18/2016.
  */
-//@PerActivity
-//@Module
-public class ViewModule {
-	RegionView        regionView;
-
-	public ViewModule(RegionView regionView) {
-		this.regionView = regionView;
+public class DaoFilterJsonImpl extends DaoFilter {
+	/**
+	 * @see DaoFilter#DaoFilter(Operator, String, String)
+	 */
+	public DaoFilterJsonImpl(Operator operator, String fieldName, String value) {
+		super(operator, fieldName, value);
 	}
 
-//	@Provides
-//	@PerActivity
-	RegionView regionView() {
-		return this.regionView;
+	@Override
+	public String getFilterString() {
+		throw new UnsupportedOperationException("No filter string needed for Json implementations");
 	}
 }

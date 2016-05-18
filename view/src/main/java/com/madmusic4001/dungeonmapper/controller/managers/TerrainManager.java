@@ -34,7 +34,7 @@ import javax.inject.Singleton;
 /**
  *
  */
-@Singleton
+//@Singleton
 public class TerrainManager {
     private static final int BITMAP_SIZE  = 144;
     private static final int PADDING_SIZE = 6;
@@ -52,7 +52,7 @@ public class TerrainManager {
      * @param context the application {@link android.content.Context} instance.
      * @param dao a {@link TerrainDao} instance.
      */
-    @Inject
+//    @Inject
     public TerrainManager(final Context context, final TerrainDao dao) {
         this.context = context;
         this.dao = dao;
@@ -93,7 +93,7 @@ public class TerrainManager {
     public Collection<Terrain> getTerrains() {
 		Collection<Terrain> terrains = terrainNameMap.values();
         if(terrains.isEmpty()) {
-			terrains = dao.loadAll();
+			terrains = dao.load(null);
 			for(Terrain aTerrain : terrains) {
 				if(aTerrain.getImage().getWidth() > bitmapSize) {
 					bitmapSize = aTerrain.getImage().getWidth();
@@ -126,7 +126,7 @@ public class TerrainManager {
 	public Collection<Terrain> loadTerrains() {
 		Collection<Terrain> terrains = terrainNameMap.values();
 		if (terrains.isEmpty()) {
-			terrains = dao.loadAll();
+			terrains = dao.load(null);
 			for(Terrain aTerrain : terrains) {
 				if(aTerrain.getImage().getWidth() > bitmapSize) {
 					bitmapSize = aTerrain.getImage().getWidth();

@@ -28,7 +28,7 @@ import dagger.Provides;
  * @author Mark
  * Created 7/19/2015.
  */
-@Module
+//@Module
 public class FragmentModule {
 	EditWorldPropsFragment  editWorldPropsFragment;
 	EditWorldRegionFragment editWorldRegionFragment;
@@ -41,13 +41,12 @@ public class FragmentModule {
 		this.editWorldRegionFragment = editWorldRegionFragment;
 	}
 
-
-	@Provides @PerFragment
+//	@Provides @PerFragment
 	EditWorldPropsFragment editWorldPropsFragment() {
 		return this.editWorldPropsFragment;
 	}
 
-	@Provides @PerFragment
+//	@Provides @PerFragment
 	EditWorldRegionFragment editWorldRegionFragment() {
 		return this.editWorldRegionFragment;
 	}

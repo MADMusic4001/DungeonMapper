@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.madmusic4001.dungeonmapper.data.dao;
+package com.madmusic4001.dungeonmapper.data.dao.impl.sql;
 
 import android.content.ContentValues;
 import android.content.Context;

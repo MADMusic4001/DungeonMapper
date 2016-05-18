@@ -15,16 +15,15 @@
  */
 package com.madmusic4001.dungeonmapper.controller.events;
 
-import android.content.Context;
-import android.os.AsyncTask;
-
-import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
-import com.madmusic4001.dungeonmapper.data.entity.Region;
-import com.madmusic4001.dungeonmapper.data.entity.World;
-
-import java.util.Collection;
-
-import javax.inject.Inject;
+//import android.content.Context;
+//import android.os.AsyncTask;
+//
+//import com.madmusic4001.dungeonmapper.data.entity.Region;
+//import com.madmusic4001.dungeonmapper.data.entity.World;
+//
+//import java.util.Collection;
+//
+//import javax.inject.Inject;
 
 /**
  * ${CLASS_DESCRIPTION}
@@ -32,52 +31,52 @@ import javax.inject.Inject;
  * @author Mark
  * Created 7/3/2015.
  */
-public class LoadRegionsEvent extends EventsProcessor<LoadRegionsEvent> {
-	@Inject
-	WorldManager manager;
-	private World theWorld;
-	private Collection<Region> regions;
-
-	/**
-	 * Constructor for creating an instance of this class to be injected into other classes by
-	 * Dagger 2.
-	 */
-	public LoadRegionsEvent(Context context) {
-		super(context);
-	}
-
-	@Override
-	public void processEvent(EventsVisitor visitor, Object... params) {
-		super.processEvent(visitor, params);
-		if (params.length < 1) {
-			throw new IllegalArgumentException("At least 1 value must be passed in the params "
-													   + "argument.");
-		}
-		try {
-			theWorld = (World) params[0];
-		}
-		catch (ClassCastException ex) {
-			throw new IllegalArgumentException("params[0] must be an instance of the World for "
-													   + "which the Regions need to be loaded", ex);
-		}
-
-		new LoadRegionsTask().execute();
-	}
-
-	private class LoadRegionsTask extends AsyncTask<Void, Void, Collection<Region>> {
-		@Override
-		protected Collection<Region> doInBackground(Void... params) {
-			return manager.getRegionsForWorld(theWorld);
-		}
-
-		@Override
-		protected void onPostExecute(Collection<Region> regions) {
-			LoadRegionsEvent.this.regions = regions;
-			getVisitor().eventProcessed();
-		}
-	}
-
-	public Collection<Region> getRegions() {
-		return regions;
-	}
-}
+//public class LoadRegionsEvent extends EventsProcessor<LoadRegionsEvent> {
+//	@Inject
+//	WorldManager manager;
+//	private World theWorld;
+//	private Collection<Region> regions;
+//
+//	/**
+//	 * Constructor for creating an instance of this class to be injected into other classes by
+//	 * Dagger 2.
+//	 */
+//	public LoadRegionsEvent(Context context) {
+//		super(context);
+//	}
+//
+//	@Override
+//	public void processEvent(EventsVisitor visitor, Object... params) {
+//		super.processEvent(visitor, params);
+//		if (params.length < 1) {
+//			throw new IllegalArgumentException("At least 1 value must be passed in the params "
+//													   + "argument.");
+//		}
+//		try {
+//			theWorld = (World) params[0];
+//		}
+//		catch (ClassCastException ex) {
+//			throw new IllegalArgumentException("params[0] must be an instance of the World for "
+//													   + "which the Regions need to be loaded", ex);
+//		}
+//
+////		new LoadRegionsTask().execute();
+//	}
+//
+////	private class LoadRegionsTask extends AsyncTask<Void, Void, Collection<Region>> {
+////		@Override
+////		protected Collection<Region> doInBackground(Void... params) {
+////			return manager.getRegionsForWorld(theWorld);
+////		}
+////
+////		@Override
+////		protected void onPostExecute(Collection<Region> regions) {
+////			LoadRegionsEvent.this.regions = regions;
+////			getVisitor().eventProcessed();
+////		}
+////	}
+//
+//	public Collection<Region> getRegions() {
+//		return regions;
+//	}
+//}

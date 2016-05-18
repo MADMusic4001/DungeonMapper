@@ -168,12 +168,11 @@ public class RegionView extends GLSurfaceView {
 	/**
 	 * Create a new MapView with a reference to the context and the given attributes.
 	 */
-	@Inject
 	public RegionView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		ViewComponent viewComponent = ((EditWorldActivity) context).getActivityComponent()
-				.newViewComponent(new ViewModule(this));
-		viewComponent.injectInto(this);
+////		ViewComponent viewComponent = ((EditWorldActivity) context).getActivityComponent()
+////				.newViewComponent(new ViewModule(this));
+//		viewComponent.injectInto(this);
 
 		initView();
 	}
@@ -250,7 +249,7 @@ public class RegionView extends GLSurfaceView {
 		queueEvent(new Runnable() {
 			@Override
 			public void run() {
-				worldManager.saveCell(cell);
+//				worldManager.saveCell(cell);
 				mapRenderer.createSpritesForCell(cell, true);
 				requestRender();
 			}
@@ -346,7 +345,7 @@ public class RegionView extends GLSurfaceView {
 					queueEvent(new Runnable() {
 						@Override
 						public void run() {
-							worldManager.saveCell(finalCell);
+//							worldManager.saveCell(finalCell);
 							mapRenderer.createSpritesForCell(finalCell, true);
 						}
 					});

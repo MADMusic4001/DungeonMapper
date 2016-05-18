@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 MadMusic4001
+ * Copyright (C) 2016 MadInnovations
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.view.di.modules;
-
-import com.madmusic4001.dungeonmapper.view.di.PerActivity;
-import com.madmusic4001.dungeonmapper.view.views.RegionView;
-
-import dagger.Module;
-import dagger.Provides;
+package com.madmusic4001.dungeonmapper.controller.events;
 
 /**
- * Provides a RegionView instance for dependency injection.
+ * ${CLASS_DESCRIPTION}
+ *
+ * @author Mark
+ * Created 5/18/2016.
  */
-//@PerActivity
-//@Module
-public class ViewModule {
-	RegionView        regionView;
-
-	public ViewModule(RegionView regionView) {
-		this.regionView = regionView;
-	}
-
-//	@Provides
-//	@PerActivity
-	RegionView regionView() {
-		return this.regionView;
+public class WorldPersistentEventPosting extends WorldPersistenceEvent{
+	public WorldPersistentEventPosting(Action action, Object information) {
+		super(action, information);
 	}
 }

@@ -20,11 +20,15 @@ import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.google.gson.Gson;
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
-import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
-import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
-import com.madmusic4001.dungeonmapper.data.dao.DungeonMapperSqlHelper;
+import com.madmusic4001.dungeonmapper.controller.events.WorldPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.WorldPersistentEventPosting;
+import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.DungeonMapperSqlHelper;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.AppSettings;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
@@ -33,6 +37,8 @@ import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.data.util.FileUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -43,6 +49,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -64,22 +71,25 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WORLD_FILE_
  */
 @SuppressWarnings("unused")
 @Singleton
-public class WorldFileDao {
+public class WorldDaoJsonImpl {
 	@SuppressLint("SimpleDateFormat")
 	private static final SimpleDateFormat dateFormat =
 			new SimpleDateFormat("yyyy-MM-dd HH-mm-ss-SSS");
-	private TerrainManager         terrainManager;
-	private CellExitManager        cellExitManager;
+	private TerrainDao             terrainDao;
+	private CellExitTypeDao		   cellExitTypeDao;
 	private FileUtils              fileUtils;
 	private DungeonMapperSqlHelper sqlHelper;
+	private EventBus			   eventBus;
 
 	@Inject
-	public WorldFileDao(TerrainManager terrainManager,
-						CellExitManager cellExitManager,
-						FileUtils fileUtils,
-						DungeonMapperSqlHelper sqlHelper) {
-		this.terrainManager = terrainManager;
-		this.cellExitManager = cellExitManager;
+	public WorldDaoJsonImpl(TerrainDao terrainDao,
+							CellExitTypeDao cellExitTypeDao,
+							EventBus eventBus,
+							FileUtils fileUtils,
+							DungeonMapperSqlHelper sqlHelper) {
+		this.terrainDao = terrainDao;
+		this.cellExitTypeDao = cellExitTypeDao;
+		this.eventBus = eventBus;
 		this.fileUtils = fileUtils;
 		this.sqlHelper = sqlHelper;
 	}
@@ -94,10 +104,9 @@ public class WorldFileDao {
 	 *                     World} should be kept as is
 	 * @return a {@link World} instance with the given name
 	 */
-	public World loadFromFile(@NonNull final WorldManager manager, @NonNull String name,
-							  boolean overwrite) {
+	public World loadFromFile(@NonNull String name, boolean overwrite) {
 		File file = null;
-		DataInputStream stream = null;
+		InputStreamReader stream = null;
 		World newWorld = null;
 
 		try {
@@ -109,31 +118,15 @@ public class WorldFileDao {
 				Log.e(this.getClass().getName(), "External storage unavailable");
 				throw new DaoException(R.string.exception_worldLoadError);
 			}
-			stream = new DataInputStream(new BufferedInputStream(
-					new FileInputStream(file.getAbsolutePath())));
-			if ((newWorld = manager.getWorldWithName(name)) != null && !overwrite) {
-				Log.d(this.getClass().getName(), "Returning existing world.");
-				return newWorld;
-			}
-			sqlHelper.getWritableDatabase().beginTransaction();
-			if (newWorld == null) {
-				newWorld = manager.createNewWorld(name);
-			}
-			long appVersion = stream.readLong();
-			if (appVersion > APP_VERSION_ID) {
+			stream = new InputStreamReader(new DataInputStream(new BufferedInputStream(
+					new FileInputStream(file.getAbsolutePath()))));
+			Gson gson = new Gson();
+			VersionedWorld versionedWorld = gson.fromJson(stream, VersionedWorld.class);
+
+			if(versionedWorld.appVersion > APP_VERSION_ID) {
 				throw new DaoException(R.string.exception_versionMismatch);
 			}
-			newWorld.setOriginOffset(stream.readInt());
-			@OriginLocation int tempInt = stream.readInt();
-			newWorld.setOriginLocation(tempInt);
-			newWorld.setRegionWidth(stream.readInt());
-			newWorld.setRegionHeight(stream.readInt());
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(dateFormat.parse(stream.readUTF()));
-			newWorld.setCreateTs(cal);
-			cal.setTime(dateFormat.parse(stream.readUTF()));
-			newWorld.setModifiedTs(cal);
-			manager.saveWorld(newWorld);
+			eventBus.post(new WorldPersistentEventPosting(WorldPersistenceEvent.Action.SAVE, versionedWorld.world));
 			// Read in all regions
 			int regionCount = stream.readInt();
 			for (int i = 0; i < regionCount; i++) {
@@ -283,6 +276,9 @@ public class WorldFileDao {
 			y = stream.readInt();
 			newCell.setY(y);
 			newCell.setSolid(stream.readBoolean());
+			DaoFilter = new DaoFilter(DaoFilter.Operator.EQUALS, WorldDaoSqlImpl.WorldsContract.NAME_COLUMN_NAME,
+									  )
+			terrainDao.load()
 			terrainManager.getTerrainWithName(stream.readUTF());
 			parent.putCell(newCell);
 
@@ -375,5 +371,10 @@ public class WorldFileDao {
 								   cell.getParent().getName(),
 								   cell.getParent().getParent().getName());
 		}
+	}
+
+	private class VersionedWorld {
+		public long appVersion;
+		public World world;
 	}
 }

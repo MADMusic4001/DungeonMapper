@@ -28,8 +28,8 @@ import dagger.Subcomponent;
  * @author Mark
  * Created 7/19/2015.
  */
-@PerFragment
-@Subcomponent(modules = FragmentModule.class)
+//@PerFragment
+//@Subcomponent(modules = FragmentModule.class)
 public interface FragmentComponent {
 
 	void injectInto(EditWorldPropsFragment fragment);

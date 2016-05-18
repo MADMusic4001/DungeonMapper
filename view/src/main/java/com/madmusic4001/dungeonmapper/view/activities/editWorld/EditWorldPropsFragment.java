@@ -45,7 +45,6 @@ import com.madmusic4001.dungeonmapper.controller.EditWorldPropsController;
 import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
-import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldActivity;
 import com.madmusic4001.dungeonmapper.view.adapters.RegionListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 
@@ -109,8 +108,8 @@ public class EditWorldPropsFragment extends Fragment implements
 							 Bundle savedInstanceState) {
 		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onCreateView");
 		Log.d(this.getClass().getName(), "Component = " + ((EditWorldActivity)activity).getActivityComponent());
-		((EditWorldActivity)activity).getActivityComponent().
-				newFragmentComponent(new FragmentModule(this)).injectInto(this);
+//		((EditWorldActivity)activity).getActivityComponent().
+//				newFragmentComponent(new FragmentModule(this)).injectInto(this);
 
 		View layout = inflater.inflate(R.layout.edit_world_fragment, container, false);
 
@@ -159,7 +158,7 @@ public class EditWorldPropsFragment extends Fragment implements
 		int id = item.getItemId();
 		if (id == R.id.actionNewRegion) {
 			if(world != null) {
-				controller.createRegion(world, null);
+//				controller.createRegion(world, null);
 			}
 			result = true;
 		}
@@ -201,7 +200,7 @@ public class EditWorldPropsFragment extends Fragment implements
 			case R.id.region_item_delete:
 				region = (Region)regionsListView.getItemAtPosition(info.position);
 				if(region != null) {
-					controller.deleteRegion(region);
+//					controller.deleteRegion(region);
 					return true;
 				}
 				else {
@@ -216,12 +215,12 @@ public class EditWorldPropsFragment extends Fragment implements
 	// <editor-fold desc="Public action methods">
 	public void updateRegionsList() {
 		regionListAdapter.clear();
-		regionListAdapter.addAll(worldManager.getRegionsForWorld(world));
+//		regionListAdapter.addAll(worldManager.getRegionsForWorld(world));
 		regionListAdapter.notifyDataSetChanged();
 	}
 
 	public void loadWorld(String worldName) {
-		controller.loadWorld(worldName);
+//		controller.loadWorld(worldName);
 	}
 	// </editor-fold>
 
@@ -247,7 +246,7 @@ public class EditWorldPropsFragment extends Fragment implements
 		}
 
 		Toast.makeText(getActivity(), getString(R.string.edit_world_props_loading_regions_toast), Toast.LENGTH_LONG).show();
-		controller.loadRegionsForWorld(world);
+//		controller.loadRegionsForWorld(world);
 	}
 
 	@Override
@@ -341,7 +340,7 @@ public class EditWorldPropsFragment extends Fragment implements
 					String newName = worldNameView.getText().toString();
 					if (world != null && !world.getName().equals(newName)) {
 						world.setName(newName);
-						controller.saveWorld(world);
+//						controller.saveWorld(world);
 					}
 				}
 			}
@@ -360,7 +359,7 @@ public class EditWorldPropsFragment extends Fragment implements
 						int newOffset = buttonView.isChecked() ? 0 : 1;
 						if (world != null && world.getOriginOffset() != newOffset) {
 							world.setOriginOffset(newOffset);
-							controller.saveWorld(world);
+//							controller.saveWorld(world);
 							Log.d(((Object) this).getClass().getName(), "Executed "
 									+ "EditWorldPropsController#saveWorld(World world)");
 						}
@@ -386,7 +385,7 @@ public class EditWorldPropsFragment extends Fragment implements
 				@OriginLocation int newPosition = (int) parent.getSelectedItemId();
 				if (world != null && world.getOriginLocation() != newPosition) {
 					world.setOriginLocation(newPosition);
-					controller.saveWorld(world);
+//					controller.saveWorld(world);
 					Log.d(((Object) this).getClass().getName(), "Executed "
 							+ "EditWorldPropsController#saveWorld(World world)");
 				}
@@ -436,7 +435,7 @@ public class EditWorldPropsFragment extends Fragment implements
 				int newWidth = Integer.valueOf(v.getText().toString());
 				if (world != null && world.getRegionWidth() != newWidth) {
 					world.setRegionWidth(newWidth);
-					controller.saveWorld(world);
+//					controller.saveWorld(world);
 					Log.d(((Object) this).getClass().getName(), "Executed "
 							+ "EditWorldPropsController#saveWorld(World world)");
 					//TODO: Update region fragment with new width
@@ -451,7 +450,7 @@ public class EditWorldPropsFragment extends Fragment implements
 					int newWidth = Integer.valueOf(regionWidthView.getText().toString());
 					if (world != null && world.getRegionWidth() != newWidth) {
 						world.setRegionWidth(newWidth);
-						controller.saveWorld(world);
+//						controller.saveWorld(world);
 						Log.d(((Object) this).getClass().getName(), "Executed "
 								+ "EditWorldPropsController#saveWorld(World world)");
 						//TODO: Update region fragment with new width
@@ -496,7 +495,7 @@ public class EditWorldPropsFragment extends Fragment implements
 				int newHeight = Integer.valueOf(v.getText().toString());
 				if (world != null && world.getRegionHeight() != newHeight) {
 					world.setRegionHeight(newHeight);
-					controller.saveWorld(world);
+//					controller.saveWorld(world);
 					Log.d(((Object) this).getClass().getName(), "Executed "
 							+ "EditWorldPropsController#saveWorld(World world)");
 					//TODO: Update region fragment with new height
@@ -511,7 +510,7 @@ public class EditWorldPropsFragment extends Fragment implements
 					int newHeight = Integer.valueOf(regionHeightView.getText().toString());
 					if (world != null && world.getRegionHeight() != newHeight) {
 						world.setRegionHeight(newHeight);
-						controller.saveWorld(world);
+//						controller.saveWorld(world);
 						Log.d(((Object) this).getClass().getName(), "Executed "
 								+ "EditWorldPropsController#saveWorld(World world)");
 						//TODO: Update region fragment with new height
@@ -533,20 +532,20 @@ public class EditWorldPropsFragment extends Fragment implements
 		headerView.findViewById(R.id.nameHeader).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				controller.sortRegionsByName();
+//				controller.sortRegionsByName();
 			}
 		});
 		headerView.findViewById(R.id.createdHeader).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				controller.sortRegionsByCreatedTs();
+//				controller.sortRegionsByCreatedTs();
 			}
 		});
 		headerView.findViewById(R.id.modifiedHeader).setOnClickListener(new View.OnClickListener
 				() {
 			@Override
 			public void onClick(View v) {
-				controller.sortRegionsByModifiedTs();
+//				controller.sortRegionsByModifiedTs();
 			}
 		});
 

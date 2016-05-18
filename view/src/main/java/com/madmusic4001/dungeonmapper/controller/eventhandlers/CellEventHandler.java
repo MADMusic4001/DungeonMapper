@@ -16,10 +16,9 @@
 package com.madmusic4001.dungeonmapper.controller.eventhandlers;
 
 import com.madmusic4001.dungeonmapper.controller.events.CellDeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.CellSavedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.CellPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.CellSavedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.CellsLoadedEvent;
-import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
@@ -38,13 +37,11 @@ import javax.inject.Singleton;
 @Singleton
 public class CellEventHandler {
 	private EventBus eventBus;
-	private WorldManager worldManager;
 	private CellDao cellDao;
 
 	@Inject
-	public CellEventHandler(EventBus eventBus, WorldManager worldManager, CellDao cellDao) {
+	public CellEventHandler(EventBus eventBus, CellDao cellDao) {
 		this.eventBus = eventBus;
-		this.worldManager = worldManager;
 		this.cellDao = cellDao;
 	}
 

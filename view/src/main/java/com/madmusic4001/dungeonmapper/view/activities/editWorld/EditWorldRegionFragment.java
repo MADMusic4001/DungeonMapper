@@ -153,8 +153,8 @@ public class EditWorldRegionFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState) {
 		View layout = inflater.inflate(R.layout.edit_region_fragment, container, false);
-		((EditWorldActivity) getActivity()).getActivityComponent().
-				newFragmentComponent(new FragmentModule(this)).injectInto(this);
+//		((EditWorldActivity) getActivity()).getActivityComponent().
+//				newFragmentComponent(new FragmentModule(this)).injectInto(this);
 
 		initRegionNameView(layout);
 
@@ -184,8 +184,8 @@ public class EditWorldRegionFragment extends Fragment
 		regionView = (RegionView) layout.findViewById(R.id.mapView);
 		initMapView(regionView);
 
-		controller.loadCellExits();
-		controller.loadTerrains();
+//		controller.loadCellExits();
+//		controller.loadTerrains();
 
 		setHasOptionsMenu(true);
 		return layout;
@@ -195,7 +195,7 @@ public class EditWorldRegionFragment extends Fragment
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		controller.loadRegion(callbackListener.getWorldName(), callbackListener.getRegionName());
+//		controller.loadRegion(callbackListener.getWorldName(), callbackListener.getRegionName());
 	}
 
 	/**
@@ -424,7 +424,7 @@ public class EditWorldRegionFragment extends Fragment
 
 	// <editor-fold desc="Public action methods">
 	public void loadRegion(@NonNull String worldName, @NonNull String regionName) {
-		controller.loadRegion(worldName, regionName);
+//		controller.loadRegion(worldName, regionName);
 	}
 	// </editor-fold>
 
@@ -472,7 +472,7 @@ public class EditWorldRegionFragment extends Fragment
 					}
 					else {
 						region.setName(newName);
-						controller.saveRegion(region, oldName);
+//						controller.saveRegion(region, oldName);
 					}
 				}
 			}
