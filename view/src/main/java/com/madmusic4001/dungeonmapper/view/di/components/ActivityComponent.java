@@ -36,6 +36,6 @@ public interface ActivityComponent {
 //	FragmentComponent newFragmentComponent(FragmentModule fragmentModule);
 //	ViewComponent newViewComponent(ViewModule viewModule);
 
-//	void injectInto(SelectWorldActivity activity);
+	void injectInto(SelectWorldActivity activity);
 //	void injectInto(EditWorldActivity activity);
 }

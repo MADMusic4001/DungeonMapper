@@ -24,7 +24,6 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.EditWorldPropsController;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.view.di.PerActivity;
 
@@ -42,8 +41,6 @@ import javax.inject.Inject;
 public class RegionListAdapter extends ArrayAdapter<Region> {
 	private static final int LAYOUT_RESOURCE_ID = R.layout.name_timestamps_row;
 
-	@Inject
-	protected EditWorldPropsController controller;
 	private   LayoutInflater           layoutInflater;
 	private int[] colors = new int[]{
 			R.color.list_even_row_background,

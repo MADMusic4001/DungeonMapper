@@ -41,8 +41,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.EditWorldPropsController;
-import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.view.adapters.RegionListAdapter;
@@ -61,14 +59,13 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.OriginLocat
  * @author Mark Danley
  * Created 8/4/2014
  */
-public class EditWorldPropsFragment extends Fragment implements
-		EditWorldPropsController.EditWorldPropsUpdateHandler {
-	@Inject
-	protected EditWorldPropsController		controller;
+public class EditWorldPropsFragment extends Fragment {
+//	@Inject
+//	protected EditWorldPropsController		controller;
 	@Inject
 	protected RegionListAdapter				regionListAdapter;
-	@Inject
-	WorldManager							worldManager;
+//	@Inject
+//	WorldManager							worldManager;
 	private OnEditWorldPropsEventsListener	callbacksImpl = null;
 	private TextView						worldNameView;
 	private CheckBox						zeroBasedCoordinatesView;
@@ -225,72 +222,72 @@ public class EditWorldPropsFragment extends Fragment implements
 	// </editor-fold>
 
 	// <editor-fold desc="EditWorldPropsController.EditWorldPropsUpdateHandle interface implementation methods">
-	@Override
-	public void onWorldLoaded(World world) {
-		this.world = world;
-
-		if(worldNameView != null) {
-			worldNameView.setText(world.getName());
-		}
-		if(zeroBasedCoordinatesView != null) {
-			zeroBasedCoordinatesView.setChecked(world.getOriginOffset() == 0);
-		}
-		if(originView != null) {
-			originView.setSelection(world.getOriginLocation());
-		}
-		if(regionWidthView != null) {
-			regionWidthView.setText(Integer.toString(world.getRegionWidth()));
-		}
-		if(regionHeightView != null) {
-			regionHeightView.setText(Integer.toString(world.getRegionHeight()));
-		}
-
-		Toast.makeText(getActivity(), getString(R.string.edit_world_props_loading_regions_toast), Toast.LENGTH_LONG).show();
+//	@Override
+//	public void onWorldLoaded(World world) {
+//		this.world = world;
+//
+//		if(worldNameView != null) {
+//			worldNameView.setText(world.getName());
+//		}
+//		if(zeroBasedCoordinatesView != null) {
+//			zeroBasedCoordinatesView.setChecked(world.getOriginOffset() == 0);
+//		}
+//		if(originView != null) {
+//			originView.setSelection(world.getOriginLocation());
+//		}
+//		if(regionWidthView != null) {
+//			regionWidthView.setText(Integer.toString(world.getRegionWidth()));
+//		}
+//		if(regionHeightView != null) {
+//			regionHeightView.setText(Integer.toString(world.getRegionHeight()));
+//		}
+//
+//		Toast.makeText(getActivity(), getString(R.string.edit_world_props_loading_regions_toast), Toast.LENGTH_LONG).show();
 //		controller.loadRegionsForWorld(world);
-	}
+//	}
 
-	@Override
-	public void onWorldSaved(World world) {
-		Toast.makeText(getActivity(), getString(R.string.edit_world_props_world_saved_toast), Toast.LENGTH_SHORT).show();
-	}
+//	@Override
+//	public void onWorldSaved(World world) {
+//		Toast.makeText(getActivity(), getString(R.string.edit_world_props_world_saved_toast), Toast.LENGTH_SHORT).show();
+//	}
 
-	@Override
-	public void onRegionsLoaded(Collection<Region> regions) {
-		if(regionListAdapter != null) {
-			regionListAdapter.clear();
-			regionListAdapter.addAll(regions);
-			regionListAdapter.notifyDataSetChanged();
-		}
-		Toast.makeText(getActivity(), getString(R.string.edit_world_props_regions_loaded_toast), Toast.LENGTH_SHORT).show();
-		if(regions.size() > 0) {
-			callbacksImpl.onRegionSelected((Region) regions.toArray()[0], false);
-		}
-	}
+//	@Override
+//	public void onRegionsLoaded(Collection<Region> regions) {
+//		if(regionListAdapter != null) {
+//			regionListAdapter.clear();
+//			regionListAdapter.addAll(regions);
+//			regionListAdapter.notifyDataSetChanged();
+//		}
+//		Toast.makeText(getActivity(), getString(R.string.edit_world_props_regions_loaded_toast), Toast.LENGTH_SHORT).show();
+//		if(regions.size() > 0) {
+//			callbacksImpl.onRegionSelected((Region) regions.toArray()[0], false);
+//		}
+//	}
 
-	@Override
-	public void onSortRegionList(Comparator<Region> comparator) {
-		regionListAdapter.sort(comparator);
-	}
+//	@Override
+//	public void onSortRegionList(Comparator<Region> comparator) {
+//		regionListAdapter.sort(comparator);
+//	}
 
-	@Override
-	public void onRegionCreated(Region newRegion, Collection<Region> regions) {
-		regionListAdapter.notifyDataSetChanged();
-		regionListAdapter.clear();
-		regionListAdapter.addAll(regions);
-		regionListAdapter.notifyDataSetChanged();
-		callbacksImpl.onRegionSelected(newRegion, true);
-	}
+//	@Override
+//	public void onRegionCreated(Region newRegion, Collection<Region> regions) {
+//		regionListAdapter.notifyDataSetChanged();
+//		regionListAdapter.clear();
+//		regionListAdapter.addAll(regions);
+//		regionListAdapter.notifyDataSetChanged();
+//		callbacksImpl.onRegionSelected(newRegion, true);
+//	}
 
-	@Override
-	public void onRegionDeleted(Collection<Region> regions) {
-		regionListAdapter.notifyDataSetChanged();
-		regionListAdapter.clear();
-		regionListAdapter.addAll(regions);
-		regionListAdapter.notifyDataSetChanged();
-		if(regions.size() > 0) {
-			callbacksImpl.onRegionSelected((Region) regions.toArray()[0], false);
-		}
-	}
+//	@Override
+//	public void onRegionDeleted(Collection<Region> regions) {
+//		regionListAdapter.notifyDataSetChanged();
+//		regionListAdapter.clear();
+//		regionListAdapter.addAll(regions);
+//		regionListAdapter.notifyDataSetChanged();
+//		if(regions.size() > 0) {
+//			callbacksImpl.onRegionSelected((Region) regions.toArray()[0], false);
+//		}
+//	}
 	// </editor-fold>
 
 	// <editor-fold desc="Getters and setters">

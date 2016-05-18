@@ -35,7 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.EditWorldRegionController;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
@@ -54,11 +53,7 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.*;
 /**
  *
  */
-public class EditWorldRegionFragment extends Fragment
-		implements EditWorldRegionController.EditWorldRegionUpdateHandler {
-
-	@Inject
-	protected EditWorldRegionController     controller;
+public class EditWorldRegionFragment extends Fragment {
 	private   EditWorldRegionEventsListener callbackListener;
 	private   EditText                      regionNameView;
 	private   GridLayout					selectorsGrid;
@@ -82,56 +77,56 @@ public class EditWorldRegionFragment extends Fragment
 	private boolean showingPalette = true;
 
 	// <editor-fold desc="EditWorldRegionController.EditWorldRegionUpdateHandler interface implementation">
-	@Override
-	public void onRegionLoaded(@NonNull Region region) {
-		this.region = region;
-		if(region != null) {
-			if (regionView != null) {
-				regionView.setRegion(region);
-			}
-			if (region.getName() != null) {
-				regionNameView.setText(region.getName());
-			}
-		}
-	}
+//	@Override
+//	public void onRegionLoaded(@NonNull Region region) {
+//		this.region = region;
+//		if(region != null) {
+//			if (regionView != null) {
+//				regionView.setRegion(region);
+//			}
+//			if (region.getName() != null) {
+//				regionNameView.setText(region.getName());
+//			}
+//		}
+//	}
 
-	@Override
-	public void onRegionSaved(Region region) {
-		String message = String.format(getString(R.string.message_regionSaved), region.getName(),
-									   region.getParent().getName());
-		Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-		callbackListener.regionNameChanged();
-	}
+//	@Override
+//	public void onRegionSaved(Region region) {
+//		String message = String.format(getString(R.string.message_regionSaved), region.getName(),
+//									   region.getParent().getName());
+//		Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+//		callbackListener.regionNameChanged();
+//	}
 
-	@Override
-	public void onLoadCellExitsComplete(Collection<CellExitType> cellExitTypes) {
-		for (CellExitType exit : cellExitTypes) {
-			upExitAdapter.add(exit);
-			northExitAdapter.add(exit);
-			westExitAdapter.add(exit);
-			eastExitAdapter.add(exit);
-			southExitAdapter.add(exit);
-			downExitAdapter.add(exit);
-		}
-		upExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(UP, (CellExitType) upExitSpinner.getSelectedItem());
-		northExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(NORTH, (CellExitType) northExitSpinner.getSelectedItem());
-		westExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(WEST, (CellExitType) westExitSpinner.getSelectedItem());
-		eastExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(EAST, (CellExitType) eastExitSpinner.getSelectedItem());
-		southExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(SOUTH, (CellExitType) southExitSpinner.getSelectedItem());
-		downExitAdapter.notifyDataSetChanged();
-		regionView.setCurrentCellExit(DOWN, (CellExitType) downExitSpinner.getSelectedItem());
-	}
+//	@Override
+//	public void onLoadCellExitsComplete(Collection<CellExitType> cellExitTypes) {
+//		for (CellExitType exit : cellExitTypes) {
+//			upExitAdapter.add(exit);
+//			northExitAdapter.add(exit);
+//			westExitAdapter.add(exit);
+//			eastExitAdapter.add(exit);
+//			southExitAdapter.add(exit);
+//			downExitAdapter.add(exit);
+//		}
+//		upExitAdapter.notifyDataSetChanged();
+//		regionView.setCurrentCellExit(UP, (CellExitType) upExitSpinner.getSelectedItem());
+//		northExitAdapter.notifyDataSetChanged();
+//		regionView.setCurrentCellExit(NORTH, (CellExitType) northExitSpinner.getSelectedItem());
+//		westExitAdapter.notifyDataSetChanged();
+//		regionView.setCurrentCellExit(WEST, (CellExitType) westExitSpinner.getSelectedItem());
+//		eastExitAdapter.notifyDataSetChanged();
+//		regionView.setCurrentCellExit(EAST, (CellExitType) eastExitSpinner.getSelectedItem());
+//		southExitAdapter.notifyDataSetChanged();
+//		regionView.setCurrentCellExit(SOUTH, (CellExitType) southExitSpinner.getSelectedItem());
+//		downExitAdapter.notifyDataSetChanged();
+//		regionView.setCurrentCellExit(DOWN, (CellExitType) downExitSpinner.getSelectedItem());
+//	}
 
-	@Override
-	public void onLoadTerrainsComplete(Collection<Terrain> terrains) {
-		terrainAdapter.addAll(terrains);
-		terrainAdapter.notifyDataSetChanged();
-	}
+//	@Override
+//	public void onLoadTerrainsComplete(Collection<Terrain> terrains) {
+//		terrainAdapter.addAll(terrains);
+//		terrainAdapter.notifyDataSetChanged();
+//	}
 
 	// </editor-fold>
 

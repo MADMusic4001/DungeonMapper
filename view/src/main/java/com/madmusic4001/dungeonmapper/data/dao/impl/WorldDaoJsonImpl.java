@@ -27,6 +27,7 @@ import com.madmusic4001.dungeonmapper.controller.events.WorldPersistentEventPost
 import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
+import com.madmusic4001.dungeonmapper.data.dao.impl.json.DaoFilterJsonImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.DungeonMapperSqlHelper;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.AppSettings;
@@ -107,7 +108,7 @@ public class WorldDaoJsonImpl {
 	public World loadFromFile(@NonNull String name, boolean overwrite) {
 		File file = null;
 		InputStreamReader stream = null;
-		World newWorld = null;
+		VersionedWorld versionedWorld = null;
 
 		try {
 			file = fileUtils.getFile(AppSettings.useExternalStorageForWorlds(),
@@ -121,20 +122,16 @@ public class WorldDaoJsonImpl {
 			stream = new InputStreamReader(new DataInputStream(new BufferedInputStream(
 					new FileInputStream(file.getAbsolutePath()))));
 			Gson gson = new Gson();
-			VersionedWorld versionedWorld = gson.fromJson(stream, VersionedWorld.class);
+			versionedWorld = gson.fromJson(stream, VersionedWorld.class);
 
 			if(versionedWorld.appVersion > APP_VERSION_ID) {
 				throw new DaoException(R.string.exception_versionMismatch);
 			}
+			// Save to SQL database
 			eventBus.post(new WorldPersistentEventPosting(WorldPersistenceEvent.Action.SAVE, versionedWorld.world));
-			// Read in all regions
-			int regionCount = stream.readInt();
-			for (int i = 0; i < regionCount; i++) {
-				readRegion(stream, newWorld);
-			}
 			sqlHelper.getWritableDatabase().setTransactionSuccessful();
 		}
-		catch (IOException | ParseException ex) {
+		catch (IOException ex) {
 			throw new DaoException(R.string.exception_worldLoadError, name, ex);
 		}
 		finally {
@@ -152,7 +149,7 @@ public class WorldDaoJsonImpl {
 			}
 		}
 
-		return newWorld;
+		return versionedWorld.world;
 	}
 
 	/**
@@ -175,17 +172,9 @@ public class WorldDaoJsonImpl {
 				throw new DaoException(R.string.exception_worldLoadError);
 			}
 			stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
-			stream.writeLong(APP_VERSION_ID);
-			stream.writeInt(aWorld.getOriginOffset());
-			stream.writeInt(aWorld.getOriginLocation());
-			stream.writeInt(aWorld.getRegionWidth());
-			stream.writeInt(aWorld.getRegionHeight());
-			stream.writeUTF(dateFormat.format(aWorld.getCreateTs().getTime()));
-			stream.writeUTF(dateFormat.format(aWorld.getModifiedTs().getTime()));
-			stream.writeInt(aWorld.getRegionNameMap().size());
-			for(Region aRegion : aWorld.getRegionNameMap().values()) {
-				saveRegionToFile(stream, aRegion);
-			}
+			Gson gson = new Gson();
+			String json = gson.toJson(aWorld);
+			stream.writeChars(json);
 			stream.flush();
 			return file.getAbsolutePath();
 		} catch (FileNotFoundException ex) {
@@ -236,142 +225,142 @@ public class WorldDaoJsonImpl {
 		}
 	}
 
-	private void readRegion(DataInputStream stream, World parent) {
-		String regionName = "UNKNOWN";
-		Region newRegion;
+//	private void readRegion(DataInputStream stream, World parent) {
+//		String regionName = "UNKNOWN";
+//		Region newRegion;
+//
+//		try {
+//			regionName = stream.readUTF();
+//			newRegion = parent.getRegionNameMap().get(regionName);
+//			if(newRegion == null) {
+//				newRegion = new Region(regionName, parent);
+//			}
+//			Calendar cal = Calendar.getInstance();
+//			cal.setTime(dateFormat.parse(stream.readUTF()));
+//			newRegion.setCreateTs(cal);
+//			cal.setTime(dateFormat.parse(stream.readUTF()));
+//			newRegion.setModifiedTs(cal);
+//			newRegion.setWidth(stream.readInt());
+//			newRegion.setHeight(stream.readInt());
+//			int numCells = stream.readInt();
+//			for(int i = 0; i < numCells; i++) {
+//				readCell(stream, newRegion, parent);
+//			}
+//		}
+//		catch (IOException | ParseException ex) {
+//			throw new DaoException(R.string.exception_regionLoadError, regionName,
+//								   parent.getName());
+//		}
+//	}
 
-		try {
-			regionName = stream.readUTF();
-			newRegion = parent.getRegionNameMap().get(regionName);
-			if(newRegion == null) {
-				newRegion = new Region(regionName, parent);
-			}
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(dateFormat.parse(stream.readUTF()));
-			newRegion.setCreateTs(cal);
-			cal.setTime(dateFormat.parse(stream.readUTF()));
-			newRegion.setModifiedTs(cal);
-			newRegion.setWidth(stream.readInt());
-			newRegion.setHeight(stream.readInt());
-			int numCells = stream.readInt();
-			for(int i = 0; i < numCells; i++) {
-				readCell(stream, newRegion, parent);
-			}
-		}
-		catch (IOException | ParseException ex) {
-			throw new DaoException(R.string.exception_regionLoadError, regionName,
-								   parent.getName());
-		}
-	}
+//	private void readCell(DataInputStream stream, Region parent, World world) {
+//		Cell newCell = new Cell();
+//		int x = -1;
+//		int y = -1;
+//
+//		try {
+//			newCell.setParent(parent);
+//			x = stream.readInt();
+//			newCell.setX(x);
+//			y = stream.readInt();
+//			newCell.setY(y);
+//			newCell.setSolid(stream.readBoolean());
+//			DaoFilter daoFilter = new DaoFilterJsonImpl(DaoFilter.Operator.EQUALS, WorldDaoSqlImpl.WorldsContract.NAME_COLUMN_NAME,
+//					);
+//			terrainDao.load()
+//			terrainManager.getTerrainWithName(stream.readUTF());
+//			parent.putCell(newCell);
+//
+//			// Read cell links
+//			int numLinks = stream.readInt();
+//			for(int i = 0; i < numLinks; i++) {
+//				@DataConstants.Direction int linkDirection = stream.readInt();
+//				String linkRegionName = stream.readUTF();
+//				Region linkParent = world.getRegionNameMap().get(linkRegionName);
+//				if(linkParent == null) {
+//					linkParent = new Region(linkRegionName, world);
+//				}
+//				int linkX = stream.readInt();
+//				int linkY = stream.readInt();
+//				Cell linkCell = linkParent.getCell(linkX, linkY);
+//				if(linkCell == null) {
+//					linkCell = new Cell();
+//					linkCell.setX(linkX);
+//					linkCell.setY(linkY);
+//					linkParent.putCell(linkCell);
+//				}
+//				newCell.setLinkForDirection(linkDirection, linkCell);
+//			}
+//
+//			// Read cell exits
+//			int numExits = stream.readInt();
+//			for(int i = 0; i < numExits; i++) {
+//				@DataConstants.Direction int exitDirection = stream.readInt();
+//				int cellExitId = stream.readInt();
+//				CellExitType exitCell = cellExitManager.getCellExitWithId(cellExitId);
+//				newCell.setExitForDirection(exitDirection, exitCell);
+//			}
+//		}
+//		catch (IOException ex) {
+//			throw new DaoException(R.string.exception_cellLoadError, x, y, parent.getName(),
+//								   parent.getParent().getName());
+//		}
+//	}
 
-	private void readCell(DataInputStream stream, Region parent, World world) {
-		Cell newCell = new Cell();
-		int x = -1;
-		int y = -1;
+//	private void saveRegionToFile(DataOutputStream stream, Region region) {
+//		try {
+//			stream.writeUTF(region.getName());
+//			stream.writeUTF(dateFormat.format(region.getCreateTs().getTime()));
+//			stream.writeUTF(dateFormat.format(region.getModifiedTs().getTime()));
+//			stream.writeInt(region.getWidth());
+//			stream.writeInt(region.getHeight());
+//			stream.writeInt(region.getCells().size());
+//			for(Cell aCell : region.getCells()) {
+//				saveCellToFile(stream, aCell);
+//			}
+//		}
+//		catch (IOException ex) {
+//			throw new DaoException(R.string.exception_regionNotSaved, region.getName(),
+//								   region.getParent().getName());
+//		}
+//	}
 
-		try {
-			newCell.setParent(parent);
-			x = stream.readInt();
-			newCell.setX(x);
-			y = stream.readInt();
-			newCell.setY(y);
-			newCell.setSolid(stream.readBoolean());
-			DaoFilter = new DaoFilter(DaoFilter.Operator.EQUALS, WorldDaoSqlImpl.WorldsContract.NAME_COLUMN_NAME,
-									  )
-			terrainDao.load()
-			terrainManager.getTerrainWithName(stream.readUTF());
-			parent.putCell(newCell);
-
-			// Read cell links
-			int numLinks = stream.readInt();
-			for(int i = 0; i < numLinks; i++) {
-				@DataConstants.Direction int linkDirection = stream.readInt();
-				String linkRegionName = stream.readUTF();
-				Region linkParent = world.getRegionNameMap().get(linkRegionName);
-				if(linkParent == null) {
-					linkParent = new Region(linkRegionName, world);
-				}
-				int linkX = stream.readInt();
-				int linkY = stream.readInt();
-				Cell linkCell = linkParent.getCell(linkX, linkY);
-				if(linkCell == null) {
-					linkCell = new Cell();
-					linkCell.setX(linkX);
-					linkCell.setY(linkY);
-					linkParent.putCell(linkCell);
-				}
-				newCell.setLinkForDirection(linkDirection, linkCell);
-			}
-
-			// Read cell exits
-			int numExits = stream.readInt();
-			for(int i = 0; i < numExits; i++) {
-				@DataConstants.Direction int exitDirection = stream.readInt();
-				int cellExitId = stream.readInt();
-				CellExitType exitCell = cellExitManager.getCellExitWithId(cellExitId);
-				newCell.setExitForDirection(exitDirection, exitCell);
-			}
-		}
-		catch (IOException ex) {
-			throw new DaoException(R.string.exception_cellLoadError, x, y, parent.getName(),
-								   parent.getParent().getName());
-		}
-	}
-
-	private void saveRegionToFile(DataOutputStream stream, Region region) {
-		try {
-			stream.writeUTF(region.getName());
-			stream.writeUTF(dateFormat.format(region.getCreateTs().getTime()));
-			stream.writeUTF(dateFormat.format(region.getModifiedTs().getTime()));
-			stream.writeInt(region.getWidth());
-			stream.writeInt(region.getHeight());
-			stream.writeInt(region.getCells().size());
-			for(Cell aCell : region.getCells()) {
-				saveCellToFile(stream, aCell);
-			}
-		}
-		catch (IOException ex) {
-			throw new DaoException(R.string.exception_regionNotSaved, region.getName(),
-								   region.getParent().getName());
-		}
-	}
-
-	private void saveCellToFile(DataOutputStream stream, Cell cell) {
-		try {
-			stream.writeUTF(cell.getParent().getName());
-			stream.writeInt(cell.getX());
-			stream.writeInt(cell.getY());
-			stream.writeBoolean(cell.isSolid());
-			stream.writeUTF(cell.getTerrain().getName());
-
-			// Save linked cell references
-			stream.writeInt(cell.getNumLinks());
-			for(@DataConstants.Direction int direction = NORTH; direction <= DOWN; direction++) {
-				Cell linkCell = cell.getLinkForDirection(direction);
-				if(linkCell != null) {
-					stream.writeInt(direction);
-					stream.writeUTF(linkCell.getParent().getName());
-					stream.writeInt(linkCell.getX());
-					stream.writeInt(linkCell.getY());
-				}
-			}
-
-			// Save CellExit references
-			stream.writeInt(cell.getNumExits());
-			for(@DataConstants.Direction int direction = NORTH; direction <= DOWN; direction++) {
-				CellExitType exit = cell.getExitForDirection(direction);
-				if(exit != null) {
-					stream.writeInt(direction);
-					stream.writeInt(exit.getId());
-				}
-			}
-		}
-		catch (IOException ex) {
-			throw new DaoException(R.string.exception_cellNotSaved, cell.getX(), cell.getY(),
-								   cell.getParent().getName(),
-								   cell.getParent().getParent().getName());
-		}
-	}
+//	private void saveCellToFile(DataOutputStream stream, Cell cell) {
+//		try {
+//			stream.writeUTF(cell.getParent().getName());
+//			stream.writeInt(cell.getX());
+//			stream.writeInt(cell.getY());
+//			stream.writeBoolean(cell.isSolid());
+//			stream.writeUTF(cell.getTerrain().getName());
+//
+//			// Save linked cell references
+//			stream.writeInt(cell.getNumLinks());
+//			for(@DataConstants.Direction int direction = NORTH; direction <= DOWN; direction++) {
+//				Cell linkCell = cell.getLinkForDirection(direction);
+//				if(linkCell != null) {
+//					stream.writeInt(direction);
+//					stream.writeUTF(linkCell.getParent().getName());
+//					stream.writeInt(linkCell.getX());
+//					stream.writeInt(linkCell.getY());
+//				}
+//			}
+//
+//			// Save CellExit references
+//			stream.writeInt(cell.getNumExits());
+//			for(@DataConstants.Direction int direction = NORTH; direction <= DOWN; direction++) {
+//				CellExitType exit = cell.getExitForDirection(direction);
+//				if(exit != null) {
+//					stream.writeInt(direction);
+//					stream.writeInt(exit.getId());
+//				}
+//			}
+//		}
+//		catch (IOException ex) {
+//			throw new DaoException(R.string.exception_cellNotSaved, cell.getX(), cell.getY(),
+//								   cell.getParent().getName(),
+//								   cell.getParent().getParent().getName());
+//		}
+//	}
 
 	private class VersionedWorld {
 		public long appVersion;

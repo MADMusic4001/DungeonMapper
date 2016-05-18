@@ -27,7 +27,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.SelectWorldController;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.view.di.PerActivity;
 
@@ -45,8 +44,6 @@ import javax.inject.Inject;
 public class WorldListAdapter extends ArrayAdapter<World> {
 	private static final int LAYOUT_RESOURCE_ID = R.layout.name_timestamps_row;
 
-	@Inject
-	protected SelectWorldController controller;
 	private LayoutInflater layoutInflater;
 	private int[] colors = new int[]{
 			R.color.list_even_row_background,
@@ -95,7 +92,8 @@ public class WorldListAdapter extends ArrayAdapter<World> {
 					World world = getItem(position);
 					if(!world.getName().equals(enteredName)) {
 						world.setName(enteredName);
-						controller.updateWorld(world);
+						// TODO: Replace controller code with event
+//						controller.updateWorld(world);
 					}
 				}
 				else {

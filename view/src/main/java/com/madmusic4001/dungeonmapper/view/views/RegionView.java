@@ -51,7 +51,6 @@ import android.widget.Toast;
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
 import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
-import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
@@ -92,8 +91,6 @@ public class RegionView extends GLSurfaceView {
 	private static final int   BYTES_PER_FLOAT      = 4;
 	private static final int   BYTES_PER_SHORT      = 2;
 
-	@Inject
-	protected WorldManager    worldManager;
 	@Inject
 	protected CellExitManager cellExitManger;
 	@Inject

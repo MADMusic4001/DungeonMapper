@@ -31,7 +31,10 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.SelectWorldController;
+import com.madmusic4001.dungeonmapper.controller.events.ImportDatabaseEvent;
+import com.madmusic4001.dungeonmapper.controller.events.WorldPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.WorldSavedEvent;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
@@ -42,6 +45,11 @@ import com.madmusic4001.dungeonmapper.view.adapters.WorldListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.ActivityModule;
 import com.madmusic4001.dungeonmapper.view.utils.BundleConstants;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 
@@ -55,13 +63,12 @@ import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants
  * {@link World} to edit, create a new {@link World}, or delete existing {@link World}.
  */
 public class SelectWorldActivity extends Activity implements
-		SelectWorldController.SelectWorldUpdateHandler,
 		DbImportDialogFragment.ImportDialogListener,
 		FileSelectorDialogFragment.FileSelectorDialogListener {
-//	@Inject
+	@Inject
 	protected WorldListAdapter      adapter;
-//	@Inject
-	protected SelectWorldController controller;
+	@Inject
+	protected EventBus eventBus;
 	private ListView 				listView;
 	private String					fileName;
 
@@ -70,14 +77,34 @@ public class SelectWorldActivity extends Activity implements
 	//**********************************************************************************************
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		if(eventBus != null && !eventBus.isRegistered(this)) {
+			eventBus.register(this);
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		if(eventBus != null) {
+			eventBus.unregister(this);
+		}
+		super.onPause();
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-//		((DungeonMapperApp) getApplication()).getApplicationComponent()
-//				.newActivityComponent(new ActivityModule(this)).injectInto(this);
+		((DungeonMapperApp) getApplication()).getApplicationComponent()
+				.newActivityComponent(new ActivityModule(this)).injectInto(this);
+		if(!eventBus.isRegistered(this)) {
+			eventBus.register(this);
+		}
 		setContentView(R.layout.select_world_layout);
 		initListView();
-		controller.loadWorlds();
+
+		eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Action.READ, null));
 	}
 
 	@Override
@@ -93,7 +120,14 @@ public class SelectWorldActivity extends Activity implements
 			case R.id.actionSettings:
 				return true;
 			case R.id.action_new_world:
-				controller.createWorld(null);
+				World newWorld = new World(getString(R.string.defaultWorldName));
+				newWorld.setCreateTs(Calendar.getInstance());
+				newWorld.setModifiedTs(newWorld.getCreateTs());
+				newWorld.setRegionWidth(16);
+				newWorld.setRegionHeight(16);
+				newWorld.setOriginLocation(DataConstants.SOUTHWEST);
+				newWorld.setOriginOffset(0);
+				eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Action.SAVE, newWorld));
 				return true;
 			case R.id.action_manage_terrains:
 				Intent intent = new Intent(this, EditTerrainActivity.class);
@@ -109,7 +143,7 @@ public class SelectWorldActivity extends Activity implements
 				dialog.show(getFragmentManager(), "");
 				return true;
 			case R.id.action_export:
-				controller.exportDatabase();
+//				controller.exportDatabase();
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -143,7 +177,7 @@ public class SelectWorldActivity extends Activity implements
 			case R.id.select_world_item_delete:
 				world = (World)listView.getItemAtPosition(info.position);
 				if(world != null) {
-					controller.deleteWorld(world);
+					eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Action.DELETE, world));
 					return true;
 				}
 				else {
@@ -156,33 +190,40 @@ public class SelectWorldActivity extends Activity implements
 
 	// <editor-fold desc="SelectWorldController.SelectWorldUpdateHandler interface implementation">
 
-	@Override
-	public void updateWorldList(Collection<World> worlds) {
-		adapter.clear();
-		adapter.addAll(worlds);
-		adapter.notifyDataSetChanged();
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onWorldSavedEvent(WorldSavedEvent event) {
+		String toastString;
+
+		if(event.isSuccessful()) {
+			toastString = getString(R.string.edit_world_props_world_saved_toast);
+			adapter.add(event.getWorld());
+			adapter.notifyDataSetChanged();
+		}
+		else {
+			toastString = String.format(getString(R.string.edit_world_props_save_world_error), event.getWorld().getName());
+		}
+		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
 	}
 
-	@Override
 	public void sortWorldList(Comparator<World> comparator) {
 		adapter.sort(comparator);
 	}
 
-	@Override
-	public void worldsExported(String exportFileName) {
-		DialogFragment dialog = new DbExportedDialogFragment();
-		Bundle bundle = new Bundle();
-		bundle.putString(BundleConstants.EXPORT_DIALOG_FILEPATH,
-						 exportFileName);
-		dialog.setArguments(bundle);
-		dialog.show(getFragmentManager(), "DbExportedDialogFragment");
-	}
+//	@Subscribe(threadMode = ThreadMode.MAIN)
+//	public void onWorldsExported(WorldsExportedEvent event) {
+//		DialogFragment dialog = new DbExportedDialogFragment();
+//		Bundle bundle = new Bundle();
+//		bundle.putString(BundleConstants.EXPORT_DIALOG_FILEPATH,
+//						 event.exportFileName);
+//		dialog.setArguments(bundle);
+//		dialog.show(getFragmentManager(), "DbExportedDialogFragment");
+//	}
 
-	@Override
-	public void worldsImported(boolean success) {
-		Toast.makeText(this, R.string.toast_db_imported, Toast.LENGTH_LONG)
-				.show();
-	}
+//	@Subscribe(threadMode = ThreadMode.MAIN)
+//	public void onWorldsImported(WorldsImportedEvent event) {
+//		Toast.makeText(this, R.string.toast_db_imported, Toast.LENGTH_LONG)
+//				.show();
+//	}
 	// </editor-fold>
 
 	// <editor-fold desc="DbImportDialogFragment.ImportDialogListener interface implementation">
@@ -192,12 +233,12 @@ public class SelectWorldActivity extends Activity implements
 
 	@Override
 	public void onDialogOverwriteClick(DialogFragment dialog) {
-		controller.importDatabase(fileName, true);
+		eventBus.post(new ImportDatabaseEvent(fileName, true));
 	}
 
 	@Override
 	public void onDialogKeepClick(DialogFragment dialog) {
-		controller.importDatabase(fileName, false);
+		eventBus.post(new ImportDatabaseEvent(fileName, false));
 	}
 	// </editor-fold>
 
@@ -226,20 +267,20 @@ public class SelectWorldActivity extends Activity implements
 		headerView.findViewById(R.id.nameHeader).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				controller.sortWorldsByName();
+//				controller.sortWorldsByName();
 			}
 		});
 		headerView.findViewById(R.id.createdHeader).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				controller.sortWorldsByCreatedTs();
+//				controller.sortWorldsByCreatedTs();
 			}
 		});
 		headerView.findViewById(R.id.modifiedHeader).setOnClickListener(new View.OnClickListener
 				() {
 			@Override
 			public void onClick(View v) {
-				controller.sortWorldsByModifiedTs();
+//				controller.sortWorldsByModifiedTs();
 			}
 		});
 
