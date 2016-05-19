@@ -26,6 +26,7 @@ import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
 import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
@@ -121,6 +122,7 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 	private SQLiteOpenHelper sqlHelper;
 	private CellExitTypeDao  cellExitTypeDao;
 	private TerrainDao       terrainDao;
+	private FilterCreator    filterCreator;
 
 	/**
 	 * Creates a new CellDaoSqlImpl instance.
@@ -130,10 +132,11 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 	 */
 	@Inject
 	public CellDaoSqlImpl(SQLiteOpenHelper sqlHelper, CellExitTypeDao cellExitTypeDao,
-						  TerrainDao terrainDao) {
+						  TerrainDao terrainDao, FilterCreator filterCreator) {
 		this.sqlHelper = sqlHelper;
 		this.cellExitTypeDao = cellExitTypeDao;
 		this.terrainDao = terrainDao;
+		this.filterCreator = filterCreator;
 	}
 
 	@Override
@@ -187,13 +190,13 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 
 		List<String> whereArgsList = new ArrayList<>();
 		Collection<DaoFilter> filters = new ArrayList<>();
-		filters.add(createFilter(DaoFilter.Operator.EQUALS,
+		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 								 CellsContract.REGION_ID_COLUMN_NAME,
 								 Integer.valueOf(cell.getParent().getId()).toString()));
-		filters.add(createFilter(DaoFilter.Operator.EQUALS,
+		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 								 CellsContract.X_COORDINATE_COLUMN_NAME,
 								 Integer.valueOf(cell.getX()).toString()));
-		filters.add(createFilter(DaoFilter.Operator.EQUALS,
+		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 								 CellsContract.Y_COORDINATE_COLUMN_NAME,
 								 Integer.valueOf(cell.getY()).toString()));
 		String whereClause = buildWhereArgs(filters, whereArgsList);

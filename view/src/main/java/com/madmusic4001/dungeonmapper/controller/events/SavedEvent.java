@@ -15,32 +15,31 @@
  */
 package com.madmusic4001.dungeonmapper.controller.events;
 
-import java.util.Objects;
+import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- * Created 5/12/2016.
+ * Event notifying subscribers that an instance of T was saved to persistent storage.
  */
-public class WorldPersistenceEvent {
-	public enum Action {
-		SAVE,
-		DELETE,
-		READ;
-	}
-	private Action action;
-	private Object information;
+public class SavedEvent<T> {
+	boolean successful;
+	T item;
 
-	public WorldPersistenceEvent(Action action, Object information) {
-		this.action = action;
-		this.information = information;
+	/**
+	 * Creates a new SavedEvent<T> instance.
+	 *
+	 * @param successful  true if successful, otherwise false
+	 * @param item  the instance of T that was saved
+	 */
+	public SavedEvent(boolean successful, T item) {
+		this.successful = successful;
+		this.item = item;
 	}
 
-	public Action getAction() {
-		return action;
+	// Getters
+	public boolean isSuccessful() {
+		return successful;
 	}
-	public Object getInformation() {
-		return information;
+	public T getItem() {
+		return item;
 	}
 }

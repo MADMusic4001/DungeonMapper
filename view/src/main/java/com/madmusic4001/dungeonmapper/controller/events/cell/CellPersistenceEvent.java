@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.controller.events;
+package com.madmusic4001.dungeonmapper.controller.events.cell;
 
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
@@ -24,31 +24,31 @@ import java.util.Collection;
  * Event representing a request to take some action on a Cell instance or a collection of Cell instances.
  */
 public class CellPersistenceEvent {
-	public enum Action {
+	public enum Operation {
 		SAVE,
 		DELETE,
-		READ
+		LOAD
 	}
-	private Action     action;
-	private Cell       cell;
+	private Operation             operation;
+	private Cell                  cell;
 	private Collection<DaoFilter> filters;
 
 	/**
 	 * Creates a CellPersistenceEvent instance.
 	 *
-	 * @param action  the action being requested in the event
+	 * @param operation  the action being requested in the event
 	 * @param cell  a Cell instance to act on
 	 * @param filters  filters to use to obtain Cell instances to act on
 	 */
-	public CellPersistenceEvent(Action action, Cell cell, Collection<DaoFilter> filters) {
-		this.action = action;
+	public CellPersistenceEvent(Operation operation, Cell cell, Collection<DaoFilter> filters) {
+		this.operation = operation;
 		this.cell = cell;
 		this.filters = filters;
 	}
 
 	// Getters
-	public Action getAction() {
-		return action;
+	public Operation getOperation() {
+		return operation;
 	}
 	public Cell getCell() {
 		return cell;

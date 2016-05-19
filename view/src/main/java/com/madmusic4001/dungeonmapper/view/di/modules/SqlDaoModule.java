@@ -20,12 +20,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
 import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.RegionDao;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellExitTypeTypeDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.DungeonMapperSqlHelper;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.FilterCreatorSqlImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.TerrainDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
@@ -41,8 +44,9 @@ import dagger.Provides;
 @Module(includes = ApplicationModule.class)
 public class SqlDaoModule {
 	@Provides @Singleton
-	CellDao provideCellDao(DungeonMapperSqlHelper helper, CellExitTypeDao cellExitTypeDao, TerrainDao terrainDao) {
-		return new CellDaoSqlImpl(helper, cellExitTypeDao, terrainDao);
+	CellDao provideCellDao(DungeonMapperSqlHelper helper, CellExitTypeDao cellExitTypeDao, TerrainDao terrainDao,
+						   FilterCreator filterCreator) {
+		return new CellDaoSqlImpl(helper, cellExitTypeDao, terrainDao, filterCreator);
 	}
 
 	@Provides @Singleton
@@ -63,5 +67,10 @@ public class SqlDaoModule {
 	@Provides @Singleton
 	WorldDao provideWorldDao(DungeonMapperSqlHelper helper) {
 		return new WorldDaoSqlImpl(helper);
+	}
+
+	@Provides @Singleton
+	FilterCreator provideFilterCreator() {
+		return new FilterCreatorSqlImpl();
 	}
 }

@@ -14,32 +14,19 @@
  * limitations under the License.
  */
 
-package com.madmusic4001.dungeonmapper.data.dao.impl;
+package com.madmusic4001.dungeonmapper.data.dao.impl.json;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.events.WorldPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.WorldPersistentEventPosting;
-import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
-import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
-import com.madmusic4001.dungeonmapper.data.dao.impl.json.DaoFilterJsonImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.DungeonMapperSqlHelper;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
 import com.madmusic4001.dungeonmapper.data.entity.AppSettings;
-import com.madmusic4001.dungeonmapper.data.entity.Cell;
-import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
-import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
-import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.data.util.FileUtils;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -51,19 +38,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collection;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static com.madmusic4001.dungeonmapper.data.util.DataConstants.ALL_FILES_REGEX;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.APP_VERSION_ID;
-import static com.madmusic4001.dungeonmapper.data.util.DataConstants.DOWN;
-import static com.madmusic4001.dungeonmapper.data.util.DataConstants.NORTH;
-import static com.madmusic4001.dungeonmapper.data.util.DataConstants.OriginLocation;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.PROJECTS_DIR;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WORLD_FILE_EXTENSION;
 
@@ -72,48 +53,36 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WORLD_FILE_
  */
 @SuppressWarnings("unused")
 @Singleton
-public class WorldDaoJsonImpl {
+public class WorldDaoJsonImpl implements WorldDao {
 	@SuppressLint("SimpleDateFormat")
 	private static final SimpleDateFormat dateFormat =
 			new SimpleDateFormat("yyyy-MM-dd HH-mm-ss-SSS");
-	private TerrainDao             terrainDao;
-	private CellExitTypeDao		   cellExitTypeDao;
+//	private TerrainDao             terrainDao;
+//	private CellExitTypeDao		   cellExitTypeDao;
 	private FileUtils              fileUtils;
-	private DungeonMapperSqlHelper sqlHelper;
-	private EventBus			   eventBus;
+//	private DungeonMapperSqlHelper sqlHelper;
+//	private EventBus			   eventBus;
 
 	@Inject
-	public WorldDaoJsonImpl(TerrainDao terrainDao,
-							CellExitTypeDao cellExitTypeDao,
-							EventBus eventBus,
-							FileUtils fileUtils,
-							DungeonMapperSqlHelper sqlHelper) {
-		this.terrainDao = terrainDao;
-		this.cellExitTypeDao = cellExitTypeDao;
-		this.eventBus = eventBus;
+	public WorldDaoJsonImpl(FileUtils fileUtils) {
 		this.fileUtils = fileUtils;
-		this.sqlHelper = sqlHelper;
 	}
 
-	/**
-	 * Loads a {@code World} from a file and saves it to the database.
-	 *
-	 * @param name  the name of the {@link World} to load. The file must named based on the world
-	 *                name, nor null
-	 * @param overwrite  true if an existing {@code World} with the same name should be
-	 *                     overwritten with the data from the file or false if the current {@code
-	 *                     World} should be kept as is
-	 * @return a {@link World} instance with the given name
-	 */
-	public World loadFromFile(@NonNull String name, boolean overwrite) {
+	@Override
+	public int count(Collection<DaoFilter> filters) {
+		return 0;
+	}
+
+	@Override
+	public World load(int id) {
 		File file = null;
 		InputStreamReader stream = null;
 		VersionedWorld versionedWorld = null;
 
 		try {
 			file = fileUtils.getFile(AppSettings.useExternalStorageForWorlds(),
-									 PROJECTS_DIR + File.separator + name,
-									 name + WORLD_FILE_EXTENSION);
+									 PROJECTS_DIR + File.separator + String.valueOf(id),
+									 String.valueOf(id) + WORLD_FILE_EXTENSION);
 			if (AppSettings.useExternalStorageForWorlds() &&
 					!fileUtils.isExternalStorageReadable()) {
 				Log.e(this.getClass().getName(), "External storage unavailable");
@@ -127,17 +96,11 @@ public class WorldDaoJsonImpl {
 			if(versionedWorld.appVersion > APP_VERSION_ID) {
 				throw new DaoException(R.string.exception_versionMismatch);
 			}
-			// Save to SQL database
-			eventBus.post(new WorldPersistentEventPosting(WorldPersistenceEvent.Action.SAVE, versionedWorld.world));
-			sqlHelper.getWritableDatabase().setTransactionSuccessful();
 		}
 		catch (IOException ex) {
-			throw new DaoException(R.string.exception_worldLoadError, name, ex);
+			throw new DaoException(R.string.exception_worldLoadError, id, ex);
 		}
 		finally {
-			if(sqlHelper.getWritableDatabase().inTransaction()) {
-				sqlHelper.getWritableDatabase().endTransaction();
-			}
 			if (stream != null) {
 				try {
 					stream.close();
@@ -152,13 +115,14 @@ public class WorldDaoJsonImpl {
 		return versionedWorld.world;
 	}
 
-	/**
-	 * Save a {@code World} instance to an external file.
-	 *
-	 * @param aWorld  the {@link World} instance to be saved to file, not null
-	 * @return the name of the file the {@link World} was saved to.
-	 */
-	public String saveWorldToFile(@NonNull World aWorld) {
+	@Override
+	public Collection<World> load(Collection<DaoFilter> filters) {
+		// TODO: implement this method
+		return null;
+	}
+
+	@Override
+	public boolean save(World aWorld) {
 		DataOutputStream stream = null;
 		File file = null;
 
@@ -176,7 +140,8 @@ public class WorldDaoJsonImpl {
 			String json = gson.toJson(aWorld);
 			stream.writeChars(json);
 			stream.flush();
-			return file.getAbsolutePath();
+//			file.getAbsolutePath();
+			return true;
 		} catch (FileNotFoundException ex) {
 			Log.e(this.getClass().getName(), file.getAbsolutePath() +
 					" could not be opened for writing", ex);
@@ -203,26 +168,28 @@ public class WorldDaoJsonImpl {
 	/**
 	 * Deletes a {@code World} stored in an external file.
 	 *
-	 * @param aWorld  the {@link World} to be deleted, not null.
+	 * @param filters  the filters to use to determine which files to delete.
 	 */
-	public void delete(@NonNull World aWorld) {
-		Collection<File> files;
-		String relativePath = PROJECTS_DIR + File.separator + aWorld.getName();
-		String fileName = ALL_FILES_REGEX;
-
-		files = fileUtils.getFiles(AppSettings.useExternalStorageForWorlds(),
-								   relativePath, fileName);
-
-		for(File aFile : files) {
-			if(!aFile.delete()) {
-				throw new DaoException(R.string.exception_worldNotRemoved, aWorld.getName());
-			}
-		}
-		if(files.size() > 0) {
-			if(!files.iterator().next().getParentFile().delete()) {
-				throw new DaoException(R.string.exception_worldNotRemoved, aWorld.getName());
-			}
-		}
+	public int delete(Collection<DaoFilter> filters) {
+		// TODO: implement this method
+		return -1;
+//		Collection<File> files;
+//		String relativePath = PROJECTS_DIR + File.separator + aWorld.getName();
+//		String fileName = ALL_FILES_REGEX;
+//
+//		files = fileUtils.getFiles(AppSettings.useExternalStorageForWorlds(),
+//								   relativePath, fileName);
+//
+//		for(File aFile : files) {
+//			if(!aFile.delete()) {
+//				throw new DaoException(R.string.exception_worldNotRemoved, aWorld.getName());
+//			}
+//		}
+//		if(files.size() > 0) {
+//			if(!files.iterator().next().getParentFile().delete()) {
+//				throw new DaoException(R.string.exception_worldNotRemoved, aWorld.getName());
+//			}
+//		}
 	}
 
 //	private void readRegion(DataInputStream stream, World parent) {

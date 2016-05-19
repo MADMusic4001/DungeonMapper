@@ -47,21 +47,31 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.APP_VERSION_ID;
 
 /**
  *
  */
 @SuppressWarnings("unused")
-//@Singleton
+@Singleton
 public class TerrainDaoJsonImpl implements TerrainDao {
 	public static final String TERRAIN_DIR = File.separator + "terrains";
 	public static final String TERRAIN_FILE_EXTENSION = ".trn";
-	public static final String TERRAIN_FILES_REGEX = ".*" + File.pathSeparator +
-			TERRAIN_FILE_EXTENSION;
-
-//	@Inject
+	public static final String TERRAIN_FILES_REGEX = ".*" + File.pathSeparator + TERRAIN_FILE_EXTENSION;
+	@Inject
 	protected FileUtils fileUtils;
+
+	/**
+	 * Creates a new TerrainDaoJsonImpl instance with the given parameter.
+	 *
+	 * @param fileUtils  a {@link FileUtils} instance.
+	 */
+	public TerrainDaoJsonImpl(FileUtils fileUtils) {
+		this.fileUtils = fileUtils;
+	}
 
 	@Override
 	public int count(Collection<DaoFilter> filters) {

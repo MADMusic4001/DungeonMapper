@@ -31,10 +31,14 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.ImportDatabaseEvent;
-import com.madmusic4001.dungeonmapper.controller.events.WorldPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.WorldSavedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.LoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
@@ -49,6 +53,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
@@ -66,11 +71,15 @@ public class SelectWorldActivity extends Activity implements
 		DbImportDialogFragment.ImportDialogListener,
 		FileSelectorDialogFragment.FileSelectorDialogListener {
 	@Inject
-	protected WorldListAdapter      adapter;
+	protected WorldListAdapter  adapter;
 	@Inject
-	protected EventBus eventBus;
-	private ListView 				listView;
-	private String					fileName;
+	protected EventBus          eventBus;
+	@Inject
+	protected WorldEventHandler worldEventHandler;
+	@Inject
+	protected FilterCreator filterCreator;
+	private   ListView          listView;
+	private   String            fileName;
 
 	//**********************************************************************************************
 	// Activity lifecycle event handlers
@@ -104,7 +113,7 @@ public class SelectWorldActivity extends Activity implements
 		setContentView(R.layout.select_world_layout);
 		initListView();
 
-		eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Action.READ, null));
+		eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.LOAD, null, null));
 	}
 
 	@Override
@@ -127,7 +136,7 @@ public class SelectWorldActivity extends Activity implements
 				newWorld.setRegionHeight(16);
 				newWorld.setOriginLocation(DataConstants.SOUTHWEST);
 				newWorld.setOriginOffset(0);
-				eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Action.SAVE, newWorld));
+				eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, newWorld, null));
 				return true;
 			case R.id.action_manage_terrains:
 				Intent intent = new Intent(this, EditTerrainActivity.class);
@@ -177,7 +186,11 @@ public class SelectWorldActivity extends Activity implements
 			case R.id.select_world_item_delete:
 				world = (World)listView.getItemAtPosition(info.position);
 				if(world != null) {
-					eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Action.DELETE, world));
+					Collection<DaoFilter> filters = new ArrayList<>();
+					filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+															  WorldDaoSqlImpl.WorldsContract._ID,
+															  String.valueOf(world.getId())));
+					eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.DELETE, null, filters));
 					return true;
 				}
 				else {
@@ -190,17 +203,45 @@ public class SelectWorldActivity extends Activity implements
 
 	// <editor-fold desc="SelectWorldController.SelectWorldUpdateHandler interface implementation">
 
+	/**
+	 * Responds to a WorldSavedEvent by adding the saved world to the adapter and displaying a toast to the user if successful,
+	 * otherwise displaying a toast and leaving the adapter unchanged.
+	 *
+	 * @param event  a WorldSavedEvent instance
+	 */
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldSavedEvent(WorldSavedEvent event) {
+	public void onWorldSavedEvent(SavedEvent<World> event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
-			toastString = getString(R.string.edit_world_props_world_saved_toast);
-			adapter.add(event.getWorld());
+			toastString = getString(R.string.toast_world_saved);
+			adapter.add(event.getItem());
 			adapter.notifyDataSetChanged();
 		}
 		else {
-			toastString = String.format(getString(R.string.edit_world_props_save_world_error), event.getWorld().getName());
+			toastString = String.format(getString(R.string.toast_save_world_error), event.getItem().getName());
+		}
+		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
+	}
+
+	/**
+	 * Responds to a LoadedEvent<World> by updating the adapter with the new collection of World instances and displaying a
+	 * toast if successful, otherwise displaying a toast and clearing the adapter.
+	 *
+	 * @param event  a LoadedEvent<World> instance
+	 */
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onWorldsLoadedEvent(LoadedEvent<World> event) {
+		String toastString;
+
+		if(event.isSuccessful()) {
+			toastString = String.format(getString(R.string.toast_worlds_loaded), event.getItems().size());
+			adapter.clear();
+			adapter.addAll(event.getItems());
+			adapter.notifyDataSetChanged();
+		}
+		else {
+			toastString = getString(R.string.toast_load_worlds_error);
 		}
 		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
 	}

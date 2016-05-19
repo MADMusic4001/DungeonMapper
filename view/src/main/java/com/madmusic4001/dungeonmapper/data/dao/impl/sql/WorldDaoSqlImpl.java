@@ -134,6 +134,7 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 		String[] whereArgs = new String[whereArgsList.size()];
 
 		SQLiteDatabase db = sqlHelper.getReadableDatabase();
+		db.beginTransactionNonExclusive();
 		try {
 			Cursor cursor = db.query(WorldsContract.TABLE_NAME,
 									 columnNames,
@@ -178,7 +179,7 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 		try {
 			if (aWorld.getId() == -1) {
 				aWorld.setId((int) database.insert(WorldsContract.TABLE_NAME, null, values));
-				result = (aWorld.getId() == -1);
+				result = (aWorld.getId() != -1);
 			}
 			else {
 				values.put(WorldsContract._ID, aWorld.getId());

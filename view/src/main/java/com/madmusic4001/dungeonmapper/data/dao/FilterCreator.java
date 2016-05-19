@@ -13,31 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.controller.events;
+package com.madmusic4001.dungeonmapper.data.dao;
 
 /**
- * Event representing the results of a request to delete 1 or more cell instances.
+ * ${CLASS_DESCRIPTION}
+ *
+ * @author Mark
+ * Created 5/18/2016.
  */
-public class CellDeletedEvent {
-	boolean success;
-	int numDeleted;
-
+public interface FilterCreator {
 	/**
-	 * Creates a CellDeletedEvent instance.
+	 * Creates a DaoFilter instance from the given values.
 	 *
-	 * @param success  true, if the cell(s) were deleted
-	 * @param numDeleted  the number of cells that were deleted
+	 * @param operator  the operator to use when comparing the field value.
+	 * @param fieldName  the name of the field to filter on.
+	 * @param value  the value to use in the filter comparison.
+	 * @return  a DaoFilter instance.
 	 */
-	public CellDeletedEvent(boolean success, int numDeleted) {
-		this.success = success;
-		this.numDeleted = numDeleted;
-	}
-
-	// Getters
-	public boolean isSuccess() {
-		return success;
-	}
-	public int getNumDeleted() {
-		return numDeleted;
-	}
+	public DaoFilter createDaoFilter(DaoFilter.Operator operator, String fieldName, String value);
 }

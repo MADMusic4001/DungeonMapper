@@ -18,6 +18,7 @@ package com.madmusic4001.dungeonmapper.view.di.modules;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellEventHandler;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
+import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
 
 import org.greenrobot.eventbus.EventBus;
@@ -33,15 +34,15 @@ import dagger.Provides;
 @Module(includes = ApplicationModule.class)
 public class EventHandlerModule {
 	@Provides @Singleton
-	CellEventHandler provideCellEventHandler(EventBus eventBus, CellDao cellDao) {
-		CellEventHandler handler = new CellEventHandler(eventBus, cellDao);
+	CellEventHandler provideCellEventHandler(EventBus eventBus, CellDao cellDao, FilterCreator filterCreator) {
+		CellEventHandler handler = new CellEventHandler(eventBus, cellDao, filterCreator);
 		eventBus.register(handler);
 		return handler;
 	}
 
 	@Provides @Singleton
-	WorldEventHandler provideWorldEventHandler(EventBus eventBus, WorldDao worldDao) {
-		WorldEventHandler handler = new WorldEventHandler(eventBus, worldDao);
+	WorldEventHandler provideWorldEventHandler(EventBus eventBus, WorldDao worldDao, FilterCreator filterCreator) {
+		WorldEventHandler handler = new WorldEventHandler(eventBus, worldDao, filterCreator);
 		eventBus.register(handler);
 		return handler;
 	}

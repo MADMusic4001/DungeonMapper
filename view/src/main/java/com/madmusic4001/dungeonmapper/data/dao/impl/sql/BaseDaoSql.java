@@ -54,10 +54,6 @@ public abstract class BaseDaoSql {
 	public static final String AND = "and";
 	public static final String PLACEHOLDER = "?";
 
-	public DaoFilter createFilter(DaoFilter.Operator operation, String columnName, String value) {
-		return new DaoFilterSqlImpl(operation, columnName, value);
-	}
-
 	public String buildWhereArgs(Collection<DaoFilter> filters, Collection<String> args) {
 		boolean isFirst = true;
 		String whereClause = "";

@@ -13,29 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.controller.events;
+package com.madmusic4001.dungeonmapper.controller.events.cell;
 
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
 import java.util.Collection;
 
 /**
- * Event representing the results of a request to load Cell instances from persistent storage.
+ * Event representing a request to take some action on a Cell instance or a collection of Cell instances and that needs to
+ * execute in the same thread as the posting thread.
  */
-public class CellsLoadedEvent {
-	Collection<Cell> cells;
-
+public class CellPersistenceEventPosting extends CellPersistenceEvent {
 	/**
-	 * Creates a CellsLoadedEvent instance.
-	 *
-	 * @param cells  the collection of cells that were loaded
+	 * @see CellPersistenceEvent#CellPersistenceEvent(Operation, Cell, Collection)
 	 */
-	public CellsLoadedEvent(Collection<Cell> cells) {
-		this.cells = cells;
-	}
-
-	// Getters
-	public Collection<Cell> getCells() {
-		return cells;
+	public CellPersistenceEventPosting(Operation operation, Cell cell,
+									   Collection<DaoFilter> filters) {
+		super(operation, cell, filters);
 	}
 }

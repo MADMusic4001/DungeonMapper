@@ -15,17 +15,25 @@
  */
 package com.madmusic4001.dungeonmapper.controller.eventhandlers;
 
-import com.madmusic4001.dungeonmapper.controller.events.CellDeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.CellPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.CellSavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.CellsLoadedEvent;
+import android.util.Log;
+
+import com.madmusic4001.dungeonmapper.controller.events.DeletedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cell.CellPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cell.CellPersistenceEventPosting;
+import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.LoadedEvent;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
+import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -38,30 +46,68 @@ import javax.inject.Singleton;
 public class CellEventHandler {
 	private EventBus eventBus;
 	private CellDao cellDao;
+	private FilterCreator filterCreator;
 
 	@Inject
-	public CellEventHandler(EventBus eventBus, CellDao cellDao) {
+	public CellEventHandler(EventBus eventBus, CellDao cellDao, FilterCreator filterCreator) {
 		this.eventBus = eventBus;
 		this.cellDao = cellDao;
+		this.filterCreator = filterCreator;
 	}
 
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void onCellPersistenceEvent(CellPersistenceEvent event) {
-		boolean result;
-
-		switch (event.getAction()) {
+		switch (event.getOperation()) {
 			case SAVE:
-				result = cellDao.save(event.getCell());
-				eventBus.post(new CellSavedEvent(result, event.getCell()));
+				saveCell(event);
 				break;
 			case DELETE:
-				int numAffected = cellDao.delete(event.getFilters());
-				eventBus.post(new CellDeletedEvent(numAffected >= 0, numAffected));
+				deleteCells(event);
 				break;
-			case READ:
-				Collection<Cell> cells = cellDao.load(event.getFilters());
-				eventBus.post(new CellsLoadedEvent(cells));
+			case LOAD:
+				loadCells(event);
 				break;
 		}
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onCellPersistenceEvent(CellPersistenceEventPosting event) {
+		switch (event.getOperation()) {
+			case SAVE:
+				saveCell(event);
+				break;
+			case DELETE:
+				deleteCells(event);
+				break;
+			case LOAD:
+				loadCells(event);
+				break;
+		}
+	}
+
+	private void saveCell(CellPersistenceEvent event) {
+		eventBus.post(new SavedEvent(cellDao.save(event.getCell()), event.getCell()));
+	}
+
+	private void deleteCells(CellPersistenceEvent event) {
+		Collection<DaoFilter> filters = new ArrayList<>();
+		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+												  CellDaoSqlImpl.CellsContract._ID,
+												  String.valueOf(event.getCell().getId())));
+		int deletedCount = cellDao.delete(filters);
+		eventBus.post(new DeletedEvent(deletedCount >= 0, deletedCount));
+	}
+
+	private void loadCells(CellPersistenceEvent event) {
+		Collection<Cell> cells = null;
+		boolean success = true;
+		try {
+			cells = cellDao.load(event.getFilters());
+		}
+		catch(DaoException ex) {
+			Log.e("CellEventHandler", ex.getMessage(), ex);
+			success = false;
+		}
+		eventBus.post(new LoadedEvent<Cell>(success, cells));
 	}
 }

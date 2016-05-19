@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.controller.events;
+package com.madmusic4001.dungeonmapper.data.dao.impl.json;
+
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
+
+import javax.inject.Singleton;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- * Created 5/18/2016.
+ * Class used to create {@link DaoFilterJsonImpl} instances.
  */
-public class WorldPersistentEventPosting extends WorldPersistenceEvent{
-	public WorldPersistentEventPosting(Action action, Object information) {
-		super(action, information);
+@Singleton
+public class FilterCreatorJsonImpl implements FilterCreator {
+	@Override
+	public DaoFilter createDaoFilter(DaoFilter.Operator operator, String fieldName, String value) {
+		return new DaoFilterJsonImpl(operator, fieldName, value);
 	}
 }

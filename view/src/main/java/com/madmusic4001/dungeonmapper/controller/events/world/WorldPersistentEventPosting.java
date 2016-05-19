@@ -13,29 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.controller.events;
+package com.madmusic4001.dungeonmapper.controller.events.world;
 
-import com.madmusic4001.dungeonmapper.data.entity.Cell;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.entity.World;
+
+import java.util.Collection;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- * Created 5/12/2016.
+ * Event requesting a persistent storage operation to be performed on a World instance or instances in the same thread as the
+ * poster thread.
  */
-public class CellSavedEvent {
-	boolean successful;
-	Cell cell;
-
-	public CellSavedEvent(boolean successful, Cell cell) {
-		this.successful = successful;
-		this.cell = cell;
-	}
-
-	public boolean isSuccessful() {
-		return successful;
-	}
-	public Cell getCell() {
-		return cell;
+public class WorldPersistentEventPosting extends WorldPersistenceEvent{
+	public WorldPersistentEventPosting(Operation operation, World world, Collection<DaoFilter> filters) {
+		super(operation, world, filters);
 	}
 }
