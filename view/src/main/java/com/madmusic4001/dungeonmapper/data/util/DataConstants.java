@@ -30,7 +30,7 @@ import javax.inject.Singleton;
 @Singleton
 public final class DataConstants {
 	public static final long   APP_VERSION_ID       = 20140717001L;
-	public static final String PROJECTS_DIR         = File.separator + "projects";
+	public static final String WORLDS_DIR = File.separator + "worlds";
 	public static final int    DB_VERSION           = 1;
 	public static final String DB_NAME              = "dungeon_mapper_db";
 	public static final String PACKAGE_NAME         = "com.madmusic4001.rpgmaker";

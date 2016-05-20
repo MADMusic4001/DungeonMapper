@@ -20,6 +20,7 @@ package com.madmusic4001.dungeonmapper.controller.events;
  */
 public class DatabaseExportedEvent {
 	private boolean successful;
+	private String fileName;
 	private int worldCount;
 	private int regionCount;
 	private int cellCount;
@@ -30,15 +31,17 @@ public class DatabaseExportedEvent {
 	 * Create a new DatabaseExportedEvent instance with the given parameters.
 	 *
 	 * @param successful  true if the export succeeded, otherwise false
+	 * @param fileName  the name of the file the database was written to
 	 * @param worldCount  the number of worlds that were exported
 	 * @param regionCount  the number of regions that were exported
 	 * @param cellCount  the number of cells that were exported
 	 * @param cellExitTypeCount  the number of cell exit types that were exported
 	 * @param terrainCount  the number of terrains that were exported
 	 */
-	public DatabaseExportedEvent(boolean successful, int worldCount, int regionCount, int cellCount, int cellExitTypeCount,
+	public DatabaseExportedEvent(boolean successful, String fileName, int worldCount, int regionCount, int cellCount, int cellExitTypeCount,
 								 int terrainCount) {
 		this.successful = successful;
+		this.fileName = fileName;
 		this.worldCount = worldCount;
 		this.regionCount = regionCount;
 		this.cellCount = cellCount;
@@ -46,9 +49,12 @@ public class DatabaseExportedEvent {
 		this.terrainCount = terrainCount;
 	}
 
-	// Getter
+	// Getters
 	public boolean isSuccessful() {
 		return successful;
+	}
+	public String getFileName() {
+		return fileName;
 	}
 	public int getWorldCount() {
 		return worldCount;

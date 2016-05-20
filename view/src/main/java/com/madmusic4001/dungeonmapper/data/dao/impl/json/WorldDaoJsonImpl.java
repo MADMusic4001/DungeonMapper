@@ -45,7 +45,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.APP_VERSION_ID;
-import static com.madmusic4001.dungeonmapper.data.util.DataConstants.PROJECTS_DIR;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WORLDS_DIR;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WORLD_FILE_EXTENSION;
 
 /**
@@ -62,6 +62,7 @@ public class WorldDaoJsonImpl implements WorldDao {
 	private FileUtils              fileUtils;
 //	private DungeonMapperSqlHelper sqlHelper;
 //	private EventBus			   eventBus;
+	private String saveFileName;
 
 	@Inject
 	public WorldDaoJsonImpl(FileUtils fileUtils) {
@@ -81,7 +82,7 @@ public class WorldDaoJsonImpl implements WorldDao {
 
 		try {
 			file = fileUtils.getFile(AppSettings.useExternalStorageForWorlds(),
-									 PROJECTS_DIR + File.separator + String.valueOf(id),
+									 WORLDS_DIR + File.separator + String.valueOf(id),
 									 String.valueOf(id) + WORLD_FILE_EXTENSION);
 			if (AppSettings.useExternalStorageForWorlds() &&
 					!fileUtils.isExternalStorageReadable()) {
@@ -121,15 +122,19 @@ public class WorldDaoJsonImpl implements WorldDao {
 		return null;
 	}
 
+	public String getSaveFileName() {
+		return saveFileName;
+	}
+
 	@Override
 	public boolean save(World aWorld) {
 		DataOutputStream stream = null;
 		File file = null;
 
 		try {
+			saveFileName = aWorld.getName() + WORLD_FILE_EXTENSION;
 			file = fileUtils.getFile(AppSettings.useExternalStorageForWorlds(),
-									 PROJECTS_DIR,
-									 aWorld.getName() + WORLD_FILE_EXTENSION);
+					WORLDS_DIR, saveFileName);
 			if(AppSettings.useExternalStorageForWorlds() &&
 					!fileUtils.isExternalStorageReadable()) {
 				Log.e(this.getClass().getName(), "External storage unavailable");
@@ -174,7 +179,7 @@ public class WorldDaoJsonImpl implements WorldDao {
 		// TODO: implement this method
 		return -1;
 //		Collection<File> files;
-//		String relativePath = PROJECTS_DIR + File.separator + aWorld.getName();
+//		String relativePath = WORLDS_DIR + File.separator + aWorld.getName();
 //		String fileName = ALL_FILES_REGEX;
 //
 //		files = fileUtils.getFiles(AppSettings.useExternalStorageForWorlds(),

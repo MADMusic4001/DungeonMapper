@@ -65,6 +65,6 @@ public class ExportEventHandler {
 			}
 			worldCount++;
 		}
-		eventBus.post(new DatabaseExportedEvent(result, worldCount, 0, 0, 0, 0));
+		eventBus.post(new DatabaseExportedEvent(result, worldDaoJson.getSaveFileName(), worldCount, 0, 0, 0, 0));
 	}
 }

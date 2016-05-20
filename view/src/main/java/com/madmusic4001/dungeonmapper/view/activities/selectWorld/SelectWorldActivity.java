@@ -32,6 +32,9 @@ import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
+import com.madmusic4001.dungeonmapper.controller.events.DatabaseExportedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.DatabaseImportedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.ExportDatabaseEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ImportDatabaseEvent;
 import com.madmusic4001.dungeonmapper.controller.events.LoadedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
@@ -41,6 +44,7 @@ import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
+import com.madmusic4001.dungeonmapper.data.util.WorldComparator;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 import com.madmusic4001.dungeonmapper.view.activities.editTerrain.EditTerrainActivity;
 import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldActivity;
@@ -78,6 +82,8 @@ public class SelectWorldActivity extends Activity implements
 	protected WorldEventHandler worldEventHandler;
 	@Inject
 	protected FilterCreator filterCreator;
+	@Inject
+	protected WorldComparator worldComparator;
 	private   ListView          listView;
 	private   String            fileName;
 
@@ -152,7 +158,7 @@ public class SelectWorldActivity extends Activity implements
 				dialog.show(getFragmentManager(), "");
 				return true;
 			case R.id.action_export:
-//				controller.exportDatabase();
+				eventBus.post(new ExportDatabaseEvent("temp_export_file_name"));
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -246,25 +252,21 @@ public class SelectWorldActivity extends Activity implements
 		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
 	}
 
-	public void sortWorldList(Comparator<World> comparator) {
-		adapter.sort(comparator);
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onDatabaseExported(DatabaseExportedEvent event) {
+		DialogFragment dialog = new DbExportedDialogFragment();
+		Bundle bundle = new Bundle();
+		bundle.putString(BundleConstants.EXPORT_DIALOG_FILEPATH,
+						 event.getFileName());
+		dialog.setArguments(bundle);
+		dialog.show(getFragmentManager(), "DbExportedDialogFragment");
 	}
 
-//	@Subscribe(threadMode = ThreadMode.MAIN)
-//	public void onWorldsExported(WorldsExportedEvent event) {
-//		DialogFragment dialog = new DbExportedDialogFragment();
-//		Bundle bundle = new Bundle();
-//		bundle.putString(BundleConstants.EXPORT_DIALOG_FILEPATH,
-//						 event.exportFileName);
-//		dialog.setArguments(bundle);
-//		dialog.show(getFragmentManager(), "DbExportedDialogFragment");
-//	}
-
-//	@Subscribe(threadMode = ThreadMode.MAIN)
-//	public void onWorldsImported(WorldsImportedEvent event) {
-//		Toast.makeText(this, R.string.toast_db_imported, Toast.LENGTH_LONG)
-//				.show();
-//	}
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onDatabaseImported(DatabaseImportedEvent event) {
+		Toast.makeText(this, R.string.toast_db_imported, Toast.LENGTH_LONG)
+				.show();
+	}
 	// </editor-fold>
 
 	// <editor-fold desc="DbImportDialogFragment.ImportDialogListener interface implementation">
@@ -308,20 +310,20 @@ public class SelectWorldActivity extends Activity implements
 		headerView.findViewById(R.id.nameHeader).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-//				controller.sortWorldsByName();
+				adapter.sort(worldComparator.getWorldNameComparator());
 			}
 		});
 		headerView.findViewById(R.id.createdHeader).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-//				controller.sortWorldsByCreatedTs();
+				adapter.sort(worldComparator.getWorldCreateTsComparator());
 			}
 		});
 		headerView.findViewById(R.id.modifiedHeader).setOnClickListener(new View.OnClickListener
 				() {
 			@Override
 			public void onClick(View v) {
-//				controller.sortWorldsByModifiedTs();
+				adapter.sort(worldComparator.getWorldModifiedTsCompartor());
 			}
 		});
 
