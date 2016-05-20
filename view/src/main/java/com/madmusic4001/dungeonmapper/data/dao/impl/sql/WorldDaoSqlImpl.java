@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
@@ -65,6 +66,41 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 			WorldsContract.MODIFIED_TS_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
 			CONSTRAINT + "unique_world_name" +
 				UNIQUE + "(" + WorldsContract.NAME_COLUMN_NAME + "));";
+	public static final String CREATE_TABLE_WORLDS_V2                =
+		CREATE_TABLE + WorldsContract.TABLE_NAME + "_V2 (" +
+			WorldsContract._ID + INTEGER + NOT_NULL + PRIMARY_KEY + COMMA +
+			WorldsContract.NAME_COLUMN_NAME + TEXT + NOT_NULL + COMMA +
+			WorldsContract.REGION_ORIGIN_OFFSET_COLUMN_NAME + INTEGER + NOT_NULL +
+				CHECK + "(" + WorldsContract.REGION_ORIGIN_OFFSET_COLUMN_NAME + IN + "(0,1))" + COMMA +
+			WorldsContract.REGION_ORIGIN_POSITION_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
+			WorldsContract.REGION_WIDTH_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
+			WorldsContract.REGION_HEIGHT_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
+			WorldsContract.CREATE_TS_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
+			WorldsContract.MODIFIED_TS_COLUMN_NAME + INTEGER + NOT_NULL + ");";
+	public static final String COPY_WORLDS_TO_V2 =
+		INSERT_INTO + WorldsContract.TABLE_NAME + "_V2 (" +
+				WorldsContract._ID + COMMA +
+				WorldsContract.NAME_COLUMN_NAME + COMMA +
+				WorldsContract.CREATE_TS_COLUMN_NAME + COMMA +
+				WorldsContract.MODIFIED_TS_COLUMN_NAME + COMMA +
+				WorldsContract.REGION_HEIGHT_COLUMN_NAME + COMMA +
+				WorldsContract.REGION_ORIGIN_OFFSET_COLUMN_NAME + COMMA +
+				WorldsContract.REGION_ORIGIN_POSITION_COLUMN_NAME + COMMA +
+				WorldsContract.REGION_WIDTH_COLUMN_NAME + ")" +
+				SELECT +
+					WorldsContract._ID + COMMA +
+					WorldsContract.NAME_COLUMN_NAME + COMMA +
+					WorldsContract.CREATE_TS_COLUMN_NAME + COMMA +
+					WorldsContract.MODIFIED_TS_COLUMN_NAME + COMMA +
+					WorldsContract.REGION_HEIGHT_COLUMN_NAME + COMMA +
+					WorldsContract.REGION_ORIGIN_OFFSET_COLUMN_NAME + COMMA +
+					WorldsContract.REGION_ORIGIN_POSITION_COLUMN_NAME + COMMA +
+					WorldsContract.REGION_WIDTH_COLUMN_NAME +
+				FROM + WorldsContract.TABLE_NAME + ";";
+	public static final String DROP_TABLE_WORLD =
+		DROP_TABLE + WorldsContract.TABLE_NAME + ";";
+	public static final String RENAME_WORLD_V2_TO_WORLD =
+		ALTER_TABLE + WorldsContract.TABLE_NAME + "_v2" + RENAME_TO + WorldsContract.TABLE_NAME + ";";
 	private static String[] columnNames           = {
 			WorldsContract._ID,
 			WorldsContract.NAME_COLUMN_NAME,
@@ -175,6 +211,7 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 		values.put(WorldsContract.MODIFIED_TS_COLUMN_NAME, Calendar.getInstance().getTimeInMillis());
 
 		SQLiteDatabase database = sqlHelper.getWritableDatabase();
+		Log.e("WorldDaoSqlImpl", "Database version = " + database.getVersion());
 		database.beginTransaction();
 		try {
 			if (aWorld.getId() == -1) {

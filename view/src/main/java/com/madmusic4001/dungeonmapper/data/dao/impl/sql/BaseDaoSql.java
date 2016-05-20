@@ -24,6 +24,9 @@ import java.util.Collection;
  */
 public abstract class BaseDaoSql {
 	public static final String CREATE_TABLE = "CREATE TABLE ";
+	public static final String DROP_TABLE = "DROP TABLE ";
+	public static final String ALTER_TABLE = "ALTER TABLE ";
+	public static final String RENAME_TO = " RENAME TO ";
 	public static final String TEXT = " TEXT ";
 	public static final String INTEGER = " INTEGER ";
 	public static final String LONG = " LONG ";
@@ -39,11 +42,12 @@ public abstract class BaseDaoSql {
 	public static final String UNIQUE = " UNIQUE ";
 	public static final String REFERENCES = "REFERENCES ";
 	public static final String CHECK = " CHECK ";
-	public static final String SELECT = "SELECT";
+	public static final String SELECT = "SELECT ";
 	public static final String INSERT = "INSERT";
+	public static final String INSERT_INTO = "INSERT INTO ";
 	public static final String UPDATE = "UPDATE";
 	public static final String DELETE = "DELETE";
-	public static final String FROM = "FROM";
+	public static final String FROM = " FROM ";
 	public static final String WHERE = "WHERE";
 	public static final String ON = " ON ";
 	public static final String IN = " IN ";
@@ -53,6 +57,7 @@ public abstract class BaseDaoSql {
 	public static final String NOT = "!";
 	public static final String AND = "and";
 	public static final String PLACEHOLDER = "?";
+	public static final String DROP = " DROP ";
 
 	public String buildWhereArgs(Collection<DaoFilter> filters, Collection<String> args) {
 		boolean isFirst = true;

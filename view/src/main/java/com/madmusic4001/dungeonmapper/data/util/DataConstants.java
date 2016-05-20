@@ -31,7 +31,8 @@ import javax.inject.Singleton;
 public final class DataConstants {
 	public static final long   APP_VERSION_ID       = 20140717001L;
 	public static final String WORLDS_DIR = File.separator + "worlds";
-	public static final int    DB_VERSION           = 1;
+	public static final int    DB_VERSION           = 2;
+	public static final int    DB_VERSION_1         = 1;
 	public static final String DB_NAME              = "dungeon_mapper_db";
 	public static final String PACKAGE_NAME         = "com.madmusic4001.rpgmaker";
 	public static final String WORLD_FILE_EXTENSION = ".wrl";

@@ -33,9 +33,9 @@ import dagger.Subcomponent;
 @PerActivity
 @Subcomponent(modules = ActivityModule.class)
 public interface ActivityComponent {
-//	FragmentComponent newFragmentComponent(FragmentModule fragmentModule);
+	FragmentComponent newFragmentComponent(FragmentModule fragmentModule);
 //	ViewComponent newViewComponent(ViewModule viewModule);
 
 	void injectInto(SelectWorldActivity activity);
-//	void injectInto(EditWorldActivity activity);
+	void injectInto(EditWorldActivity activity);
 }

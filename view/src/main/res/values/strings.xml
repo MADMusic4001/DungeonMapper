@@ -8,14 +8,15 @@
   <string name="title_terrainDetail">Terrain Detail</string>
 
   <!-- EditWorldPropsFragment toast strings -->
+  <string name="toast_worlds_loaded">%1$s worlds loaded successfully</string>
   <string name="toast_load_worlds_error">A fatal error occurred loading worlds</string>
   <string name="toast_load_world_error">A fatal error occurred loading world %1$s</string>
-  <string name="toast_save_world_error">A fatal error occurred saving world %1$s</string>
-  <string name="toast_regions_load_error">A fatal error occurred loading regions for world %1$s</string>
-  <string name="toast_loading_regions">Loading regions...</string>
-  <string name="toast_worlds_loaded">%1$s worlds loaded successfully</string>
   <string name="toast_world_saved">World saved successfully.</string>
-  <string name="toast_regions_saved">Regions loaded successfully.</string>
+  <string name="toast_save_world_error">A fatal error occurred saving world %1$s</string>
+  <string name="toast_loading_regions">Loading regions...</string>
+  <string name="toast_regions_loaded">%1$s regions loaded successfully</string>
+  <string name="toast_regions_load_error">A fatal error occurred loading regions for world %1$s</string>
+  <string name="toast_regions_saved">Regions saved successfully.</string>
 
   <!-- Name/Timestamps list row header strings -->
   <string name="label_name">Name</string>

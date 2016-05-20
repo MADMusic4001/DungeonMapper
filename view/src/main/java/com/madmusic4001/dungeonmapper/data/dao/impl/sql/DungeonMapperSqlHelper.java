@@ -160,8 +160,23 @@ public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
 	 */
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO Auto-generated method stub
-
+		Log.e("DungeonMapperSqlHelper", "Upgrading DB from " + oldVersion + " to " + newVersion);
+		if (oldVersion == DataConstants.DB_VERSION_1 && newVersion == DataConstants.DB_VERSION) {
+			try {
+				db.beginTransaction();
+				db.execSQL(WorldDaoSqlImpl.CREATE_TABLE_WORLDS_V2);
+				db.execSQL(WorldDaoSqlImpl.COPY_WORLDS_TO_V2);
+				db.execSQL(WorldDaoSqlImpl.DROP_TABLE_WORLD);
+				db.execSQL(WorldDaoSqlImpl.RENAME_WORLD_V2_TO_WORLD);
+				db.setTransactionSuccessful();
+				Log.w("DungeonMapperSqlHelper", "Worlds table upgraded from V1 to V2");
+			}
+			catch (SQLException ex) {
+				Log.e("DungeonMapperSqlHelper", "SqlException in onUpgrade - ", ex);
+			}
+			finally {
+				db.endTransaction();
+			}
+		}
 	}
-
 }

@@ -93,9 +93,9 @@ public class EditWorldActivity extends Activity
 		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onCreate");
 		super.onCreate(savedInstanceState);
 
-//		activityComponent = ((DungeonMapperApp) getApplication()).getApplicationComponent()
-//				.newActivityComponent(new ActivityModule(this));
-//		activityComponent.injectInto(this);
+		activityComponent = ((DungeonMapperApp) getApplication()).getApplicationComponent()
+				.newActivityComponent(new ActivityModule(this));
+		activityComponent.injectInto(this);
 		Log.d("Lifecycle", "activityComponent created");
 
 		if (savedInstanceState != null) {
