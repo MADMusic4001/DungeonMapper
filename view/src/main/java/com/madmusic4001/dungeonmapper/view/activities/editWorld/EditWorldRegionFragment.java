@@ -76,7 +76,14 @@ public class EditWorldRegionFragment extends Fragment {
 	private Region  region    = null;
 	private boolean showingPalette = true;
 
-	// <editor-fold desc="EditWorldRegionController.EditWorldRegionUpdateHandler interface implementation">
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		setHasOptionsMenu(true);
+	}
+
+// <editor-fold desc="EditWorldRegionController.EditWorldRegionUpdateHandler interface implementation">
 //	@Override
 //	public void onRegionLoaded(@NonNull Region region) {
 //		this.region = region;
@@ -148,8 +155,8 @@ public class EditWorldRegionFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState) {
 		View layout = inflater.inflate(R.layout.edit_region_fragment, container, false);
-//		((EditWorldActivity) getActivity()).getActivityComponent().
-//				newFragmentComponent(new FragmentModule(this)).injectInto(this);
+		((EditWorldActivity) getActivity()).getActivityComponent().
+				newFragmentComponent(new FragmentModule(this)).injectInto(this);
 
 		initRegionNameView(layout);
 
@@ -182,7 +189,6 @@ public class EditWorldRegionFragment extends Fragment {
 //		controller.loadCellExits();
 //		controller.loadTerrains();
 
-		setHasOptionsMenu(true);
 		return layout;
 	}
 

@@ -21,7 +21,7 @@ import com.madmusic4001.dungeonmapper.data.entity.World;
 import java.util.Collection;
 
 /**
- * Event requesting an persistent storage operation to be performed on a World instance or instances.
+ * Event requesting an persistent storage operation to be performed on a {@link World} instance or instances.
  */
 public class WorldPersistenceEvent {
 	public enum Operation {

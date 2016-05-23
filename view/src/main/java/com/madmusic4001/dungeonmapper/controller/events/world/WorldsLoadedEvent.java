@@ -21,11 +21,11 @@ import com.madmusic4001.dungeonmapper.data.entity.World;
 import java.util.Collection;
 
 /**
- * Event representing the results of a request to load World instances from persistent storage.
+ * Event representing the results of a request to load {@link World} instances from persistent storage.
  */
 public class WorldsLoadedEvent extends LoadedEvent<World> {
 	/**
-	 * @see LoadedEvent
+	 * @see LoadedEvent#LoadedEvent(boolean, Collection)
 	 */
 	public WorldsLoadedEvent(boolean successful, Collection<World> items) {
 		super(successful, items);

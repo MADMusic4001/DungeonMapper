@@ -21,11 +21,11 @@ import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import java.util.Collection;
 
 /**
- * Event representing the results of a request to load Cell instances from persistent storage.
+ * Event representing the results of a request to load {@link Cell} instances from persistent storage.
  */
 public class CellsLoadedEvent extends LoadedEvent<Cell> {
 	/**
-	 * @see LoadedEvent
+	 * @see LoadedEvent#LoadedEvent(boolean, Collection)
 	 */
 	public CellsLoadedEvent(boolean successful, Collection<Cell> items) {
 		super(successful, items);

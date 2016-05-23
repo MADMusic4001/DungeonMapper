@@ -44,33 +44,33 @@ import dagger.Provides;
 @Module(includes = ApplicationModule.class)
 public class SqlDaoModule {
 	@Provides @Singleton
-	CellDao provideCellDao(DungeonMapperSqlHelper helper, CellExitTypeDao cellExitTypeDao, TerrainDao terrainDao,
+	public CellDao provideCellDao(DungeonMapperSqlHelper helper, CellExitTypeDao cellExitTypeDao, TerrainDao terrainDao,
 						   FilterCreator filterCreator) {
 		return new CellDaoSqlImpl(helper, cellExitTypeDao, terrainDao, filterCreator);
 	}
 
 	@Provides @Singleton
-	CellExitTypeDao provideCellExitDao(Context context, DungeonMapperSqlHelper helper) {
+	public CellExitTypeDao provideCellExitDao(Context context, DungeonMapperSqlHelper helper) {
 		return new CellExitTypeTypeDaoSqlImpl(context, helper);
 	}
 
 	@Provides @Singleton
-	RegionDao provideRegionDao(DungeonMapperSqlHelper helper, WorldDao worldDao) {
+	public RegionDao provideRegionDao(DungeonMapperSqlHelper helper, WorldDao worldDao) {
 		return new RegionDaoSqlImpl(helper, worldDao);
 	}
 
 	@Provides @Singleton
-	TerrainDao provideTerrainDao(Context context, DungeonMapperSqlHelper helper) {
+	public TerrainDao provideTerrainDao(Context context, DungeonMapperSqlHelper helper) {
 		return new TerrainDaoSqlImpl(context, helper);
 	}
 
 	@Provides @Singleton
-	WorldDao provideWorldDao(DungeonMapperSqlHelper helper) {
+	public WorldDao provideWorldDao(DungeonMapperSqlHelper helper) {
 		return new WorldDaoSqlImpl(helper);
 	}
 
 	@Provides @Singleton
-	FilterCreator provideFilterCreator() {
+	public FilterCreator provideFilterCreator() {
 		return new FilterCreatorSqlImpl();
 	}
 }

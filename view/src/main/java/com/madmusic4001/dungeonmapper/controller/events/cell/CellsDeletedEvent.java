@@ -25,7 +25,7 @@ import java.util.Collection;
  */
 public class CellsDeletedEvent extends DeletedEvent<Cell> {
 	/**
-	 * @see DeletedEvent
+	 * @see DeletedEvent#DeletedEvent(boolean, int, Collection)
 	 */
 	public CellsDeletedEvent(boolean success, int numDeleted, Collection<Cell> deleted) {
 		super(success, numDeleted, deleted);

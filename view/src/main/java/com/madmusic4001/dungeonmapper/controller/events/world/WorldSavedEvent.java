@@ -19,7 +19,7 @@ import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 
 /**
- * Generic event notifying subscribers that a World instance was saved to persistent storage.
+ * Generic event notifying subscribers that a {@link World} instance was saved to persistent storage.
  */
 public class WorldSavedEvent extends SavedEvent<World> {
 	/**

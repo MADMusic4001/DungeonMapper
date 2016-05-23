@@ -40,12 +40,12 @@ public class FragmentModule {
 	}
 
 	@Provides @PerFragment
-	EditWorldPropsFragment provideEditWorldPropsFragment() {
+	public EditWorldPropsFragment provideEditWorldPropsFragment() {
 		return this.editWorldPropsFragment;
 	}
 
 	@Provides @PerFragment
-	EditWorldRegionFragment provideEditWorldRegionFragment() {
+	public EditWorldRegionFragment provideEditWorldRegionFragment() {
 		return this.editWorldRegionFragment;
 	}
 }

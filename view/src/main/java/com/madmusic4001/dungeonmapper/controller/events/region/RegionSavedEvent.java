@@ -19,7 +19,7 @@ import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 
 /**
- * Generic event notifying subscribers that a Region instance was saved to persistent storage.
+ * Generic event notifying subscribers that a {@link Region} instance was saved to persistent storage.
  */
 public class RegionSavedEvent extends SavedEvent<Region> {
 	/**

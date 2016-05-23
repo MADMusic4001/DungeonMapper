@@ -45,7 +45,7 @@ import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
-import com.madmusic4001.dungeonmapper.data.util.WorldComparator;
+import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 import com.madmusic4001.dungeonmapper.view.activities.FileSelectorDialogFragment;
 import com.madmusic4001.dungeonmapper.view.activities.editTerrain.EditTerrainActivity;
@@ -80,9 +80,9 @@ public class SelectWorldActivity extends Activity implements
 	@Inject
 	protected WorldEventHandler worldEventHandler;
 	@Inject
-	protected FilterCreator filterCreator;
+	protected FilterCreator     filterCreator;
 	@Inject
-	protected WorldComparator worldComparator;
+	protected ComparatorUtils   comparatorUtils;
 	private   ListView          listView;
 	private   String            fileName;
 
@@ -328,20 +328,20 @@ public class SelectWorldActivity extends Activity implements
 		headerView.findViewById(R.id.nameHeader).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				adapter.sort(worldComparator.getWorldNameComparator());
+				adapter.sort(comparatorUtils.getWorldNameComparator());
 			}
 		});
 		headerView.findViewById(R.id.createdHeader).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				adapter.sort(worldComparator.getWorldCreateTsComparator());
+				adapter.sort(comparatorUtils.getWorldCreateTsComparator());
 			}
 		});
 		headerView.findViewById(R.id.modifiedHeader).setOnClickListener(new View.OnClickListener
 				() {
 			@Override
 			public void onClick(View v) {
-				adapter.sort(worldComparator.getWorldModifiedTsCompartor());
+				adapter.sort(comparatorUtils.getWorldModifiedTsCompartor());
 			}
 		});
 

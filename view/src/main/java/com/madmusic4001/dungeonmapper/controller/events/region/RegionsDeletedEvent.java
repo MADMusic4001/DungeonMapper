@@ -25,7 +25,7 @@ import java.util.Collection;
  */
 public class RegionsDeletedEvent extends DeletedEvent<Region> {
 	/**
-	 * @see DeletedEvent
+	 * @see DeletedEvent#DeletedEvent(boolean, int, Collection)
 	 */
 	public RegionsDeletedEvent(boolean success, int numDeleted, Collection<Region> deleted) {
 		super(success, numDeleted, deleted);

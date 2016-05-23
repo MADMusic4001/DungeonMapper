@@ -73,7 +73,7 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 			CONSTRAINT + "fk_cell_to_map" +
 				FOREIGN_KEY + "(" + CellsContract.REGION_ID_COLUMN_NAME + ")" +
 				REFERENCES + RegionDaoSqlImpl.RegionsContract.TABLE_NAME + "(" + RegionDaoSqlImpl.RegionsContract._ID + ")" +
-					ON + CASCADE + DELETE + COMMA +
+					ON + DELETE + CASCADE + COMMA +
 			CONSTRAINT + "fk_cell_to_terrain" +
 				FOREIGN_KEY + "(" + CellsContract.TERRAIN_ID_COLUMN_NAME + ")" +
 				REFERENCES + TerrainDaoSqlImpl.TerrainsContract.TABLE_NAME + "(" + TerrainDaoSqlImpl.TerrainsContract._ID + ")" +

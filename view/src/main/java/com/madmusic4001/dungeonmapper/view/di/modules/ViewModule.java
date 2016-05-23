@@ -24,8 +24,8 @@ import dagger.Provides;
 /**
  * Provides a RegionView instance for dependency injection.
  */
-//@PerActivity
-//@Module
+@PerActivity
+@Module
 public class ViewModule {
 	RegionView        regionView;
 
@@ -33,9 +33,8 @@ public class ViewModule {
 		this.regionView = regionView;
 	}
 
-//	@Provides
-//	@PerActivity
-	RegionView regionView() {
+	@Provides @PerActivity
+	public RegionView regionView() {
 		return this.regionView;
 	}
 }

@@ -25,7 +25,7 @@ import java.util.Collection;
  */
 public class WorldsDeletedEvent extends DeletedEvent<World> {
 	/**
-	 * @see DeletedEvent
+	 * @see DeletedEvent#DeletedEvent(boolean, int, Collection)
 	 */
 	public WorldsDeletedEvent(boolean success, int numDeleted, Collection<World> deleted) {
 		super(success, numDeleted, deleted);

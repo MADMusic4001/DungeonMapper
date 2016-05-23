@@ -48,7 +48,7 @@ import dagger.Provides;
 @Module
 public class JsonDaoModule {
 	@Provides @Singleton
-	Gson provideGson() {
+	public Gson provideGson() {
 		Type cellSparseArrayType = new TypeToken<SparseArray<Cell>>() {}.getType();
 		Type bitmapSparseArrayType = new TypeToken<SparseArray<Bitmap>>() {}.getType();
 		Gson gson = new GsonBuilder()
@@ -59,12 +59,12 @@ public class JsonDaoModule {
 	}
 
 	@Provides @Singleton
-	TerrainDao provideTerrainDao(FileUtils fileUtils) {
+	public TerrainDao provideTerrainDao(FileUtils fileUtils) {
 		return new TerrainDaoJsonImpl(fileUtils);
 	}
 
 	@Provides @Singleton
-	WorldDao provideWorldDao(FileUtils fileUtils) {
+	public WorldDao provideWorldDao(FileUtils fileUtils) {
 		return new WorldDaoJsonImpl(fileUtils);
 	}
 }

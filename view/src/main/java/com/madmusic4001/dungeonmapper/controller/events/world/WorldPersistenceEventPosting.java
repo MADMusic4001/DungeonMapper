@@ -21,10 +21,13 @@ import com.madmusic4001.dungeonmapper.data.entity.World;
 import java.util.Collection;
 
 /**
- * Event requesting a persistent storage operation to be performed on a World instance or instances in the same thread as the
- * poster thread.
+ * Event representing a request to take some action on one or more {@link World} instances and that needs to
+ * execute in the same thread as the posting thread.
  */
 public class WorldPersistenceEventPosting extends WorldPersistenceEvent{
+	/**
+	 * @see WorldPersistenceEvent#WorldPersistenceEvent(Operation, World, Collection)
+     */
 	public WorldPersistenceEventPosting(Operation operation, World world, Collection<DaoFilter> filters) {
 		super(operation, world, filters);
 	}

@@ -12,7 +12,7 @@ import javax.inject.Singleton;
  * Created by madanle on 5/19/16.
  */
 @Singleton
-public class WorldComparator {
+public class ComparatorUtils {
 	public enum SortBy {
 		NAME,
 		NAME_DESCENDING,
@@ -108,7 +108,7 @@ public class WorldComparator {
 	 * framework.
      */
 	@Inject
-	public WorldComparator() {
+	public ComparatorUtils() {
 	}
 
 	/**

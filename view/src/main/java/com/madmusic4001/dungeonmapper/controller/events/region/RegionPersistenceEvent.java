@@ -21,7 +21,7 @@ import com.madmusic4001.dungeonmapper.data.entity.Region;
 import java.util.Collection;
 
 /**
- * Event requesting an persistent storage operation to be performed on a Region instance or instances.
+ * Event requesting an persistent storage operation to be performed on a {@link Region} instance or instances.
  */
 public class RegionPersistenceEvent {
 	public enum Operation {

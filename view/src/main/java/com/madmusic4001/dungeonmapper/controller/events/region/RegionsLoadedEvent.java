@@ -21,11 +21,11 @@ import com.madmusic4001.dungeonmapper.data.entity.Region;
 import java.util.Collection;
 
 /**
- * Event representing the results of a request to load Region instances from persistent storage.
+ * Event representing the results of a request to load {@link Region} instances from persistent storage.
  */
 public class RegionsLoadedEvent extends LoadedEvent<Region> {
 	/**
-	 * @see LoadedEvent
+	 * @see LoadedEvent#LoadedEvent(boolean, Collection)
 	 */
 	public RegionsLoadedEvent(boolean successful, Collection<Region> items) {
 		super(successful, items);

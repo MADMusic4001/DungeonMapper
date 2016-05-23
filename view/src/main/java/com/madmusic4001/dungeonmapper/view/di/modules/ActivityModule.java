@@ -43,12 +43,12 @@ public class ActivityModule {
 	}
 
 	@Provides @PerActivity
-	SelectWorldActivity selectWorldActivity() {
+	public SelectWorldActivity selectWorldActivity() {
 		return this.selectWorldActivity;
 	}
 
 	@Provides @PerActivity
-	EditWorldActivity editWorldActivity() {
+	public EditWorldActivity editWorldActivity() {
 		return this.editWorldActivity;
 	}
 }

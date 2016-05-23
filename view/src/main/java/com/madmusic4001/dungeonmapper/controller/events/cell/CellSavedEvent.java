@@ -19,11 +19,11 @@ import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
 /**
- * Generic event notifying subscribers that a Cell instance was saved to persistent storage.
+ * Generic event notifying subscribers that a {@link Cell} instance was saved to persistent storage.
  */
 public class CellSavedEvent extends SavedEvent<Cell> {
 	/**
-	 * @see SavedEvent
+	 * @see SavedEvent#SavedEvent(boolean, Object)
 	 */
 	public CellSavedEvent(boolean successful, Cell item) {
 		super(successful, item);

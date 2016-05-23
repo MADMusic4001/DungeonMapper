@@ -53,7 +53,7 @@ public class ApplicationModule {
 	 * @return a Context instance.
 	 */
 	@Provides @Singleton
-	Context provideApplicationContext() {
+	public Context provideApplicationContext() {
 		return this.application;
 	}
 
@@ -64,7 +64,7 @@ public class ApplicationModule {
 	 * @return an Application instance
 	 */
 	@Provides @Singleton
-	Application provideApplication(DungeonMapperApp app) {
+	public Application provideApplication(DungeonMapperApp app) {
 		return app;
 	}
 
@@ -74,7 +74,7 @@ public class ApplicationModule {
 	 * @return a DungeonMapperApp instance.
 	 */
 	@Provides @Singleton
-	DungeonMapperApp provideDungeonMapperApp() {
+	public DungeonMapperApp provideDungeonMapperApp() {
 		return application;
 	}
 
@@ -85,7 +85,7 @@ public class ApplicationModule {
 	 * @return a SharedPreferences instance.
 	 */
 	@Provides @Singleton
-	SharedPreferences provideSharedPrefs(Application app) {
+	public SharedPreferences provideSharedPrefs(Application app) {
 		return app.getSharedPreferences(PREFS_DEFAULT, Context.MODE_PRIVATE);
 	}
 
@@ -95,7 +95,7 @@ public class ApplicationModule {
 	 * @return an EventBus instance.
 	 */
 	@Provides @Singleton
-	EventBus providesEventBus() {
+	public EventBus providesEventBus() {
 		return new EventBus();
 	}
 }

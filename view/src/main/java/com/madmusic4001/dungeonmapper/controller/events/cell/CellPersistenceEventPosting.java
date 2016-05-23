@@ -21,7 +21,7 @@ import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import java.util.Collection;
 
 /**
- * Event representing a request to take some action on a Cell instance or a collection of Cell instances and that needs to
+ * Event representing a request to take some action on one or more {@link Cell} instances and that needs to
  * execute in the same thread as the posting thread.
  */
 public class CellPersistenceEventPosting extends CellPersistenceEvent {

@@ -21,7 +21,7 @@ import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import java.util.Collection;
 
 /**
- * Event representing a request to take some action on a Cell instance or a collection of Cell instances.
+ * Event representing a request to take some action on one or more {@link Cell} instances.
  */
 public class CellPersistenceEvent {
 	public enum Operation {
