@@ -16,7 +16,6 @@
 
 package com.madmusic4001.dungeonmapper.view.activities.editWorld;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
@@ -41,11 +40,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.events.LoadedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionPersistenceEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionsLoadedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldSavedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldsLoadedEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
@@ -61,7 +61,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 
 import javax.inject.Inject;
 
@@ -116,8 +115,8 @@ public class EditWorldPropsFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, final ViewGroup container,
 							 Bundle savedInstanceState) {
 		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onCreateView");
-		Log.d(this.getClass().getName(), "Component = " + ((EditWorldActivity)activity).getActivityComponent());
-		((EditWorldActivity)activity).getActivityComponent().
+		Log.d(this.getClass().getName(), "Component = " + ((EditWorldActivity)getActivity()).getActivityComponent());
+		((EditWorldActivity)getActivity()).getActivityComponent().
 				newFragmentComponent(new FragmentModule(this)).injectInto(this);
 
 		View layout = inflater.inflate(R.layout.edit_world_fragment, container, false);
@@ -252,7 +251,7 @@ public class EditWorldPropsFragment extends Fragment {
 
 	// <editor-fold desc="EditWorldPropsController.EditWorldPropsUpdateHandle interface implementation methods">
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldLoaded(LoadedEvent<World> event) {
+	public void onWorldLoaded(WorldsLoadedEvent event) {
 		this.world = event.getItems().iterator().next();
 
 		if(worldNameView != null) {
@@ -280,20 +279,20 @@ public class EditWorldPropsFragment extends Fragment {
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldSaved(SavedEvent<World> event) {
+	public void onWorldSaved(WorldSavedEvent event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
 			toastString = getString(R.string.toast_world_saved);
 		}
 		else {
-			toastString = getString(R.string.toast_save_world_error);
+			toastString = getString(R.string.toast_world_save_error);
 		}
 		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionsLoaded(LoadedEvent<Region> event) {
+	public void onRegionsLoaded(RegionsLoadedEvent event) {
 		String toastString;
 
 		if(event.isSuccessful()) {

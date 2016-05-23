@@ -20,12 +20,10 @@ import android.util.Log;
 import com.madmusic4001.dungeonmapper.controller.events.DeletedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.cell.CellPersistenceEvent;
 import com.madmusic4001.dungeonmapper.controller.events.cell.CellPersistenceEventPosting;
-import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.LoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cell.CellSavedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cell.CellsDeletedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cell.CellsLoadedEvent;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
-import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
-import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
 
@@ -33,7 +31,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -46,15 +43,25 @@ import javax.inject.Singleton;
 public class CellEventHandler {
 	private EventBus eventBus;
 	private CellDao cellDao;
-	private FilterCreator filterCreator;
 
+	/**
+	 * Creates a new CellEventHandler instance.
+	 *
+	 * @param eventBus  a {@link EventBus} instance
+	 * @param cellDao  a {@link CellDao} instance
+	 */
 	@Inject
-	public CellEventHandler(EventBus eventBus, CellDao cellDao, FilterCreator filterCreator) {
+	public CellEventHandler(EventBus eventBus, CellDao cellDao) {
 		this.eventBus = eventBus;
 		this.cellDao = cellDao;
-		this.filterCreator = filterCreator;
 	}
 
+	/**
+	 * Responds to requests to perform a persistent storage operation for a Cell instance or instances. The work will be
+	 * performed a separate thread from the poster.
+	 *
+	 * @param event  a {@link CellPersistenceEvent} instance containing the information need to complete the request
+	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void onCellPersistenceEvent(CellPersistenceEvent event) {
 		switch (event.getOperation()) {
@@ -70,6 +77,12 @@ public class CellEventHandler {
 		}
 	}
 
+	/**
+	 * Responds to requests to perform a persistent storage operation for a Cell instance or instances. The work will be
+	 * performed in the same thread as the poster.
+	 *
+	 * @param event  a {@link CellPersistenceEventPosting} instance containing the information need to complete the request
+	 */
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onCellPersistenceEvent(CellPersistenceEventPosting event) {
 		switch (event.getOperation()) {
@@ -86,16 +99,13 @@ public class CellEventHandler {
 	}
 
 	private void saveCell(CellPersistenceEvent event) {
-		eventBus.post(new SavedEvent(cellDao.save(event.getCell()), event.getCell()));
+		eventBus.post(new CellSavedEvent(cellDao.save(event.getCell()), event.getCell()));
 	}
 
 	private void deleteCells(CellPersistenceEvent event) {
-		Collection<DaoFilter> filters = new ArrayList<>();
-		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-												  CellDaoSqlImpl.CellsContract._ID,
-												  String.valueOf(event.getCell().getId())));
-		int deletedCount = cellDao.delete(filters);
-		eventBus.post(new DeletedEvent(deletedCount >= 0, deletedCount));
+		Collection<Cell> cellsDeleted = cellDao.load(event.getFilters());
+		int deletedCount = cellDao.delete(event.getFilters());
+		eventBus.post(new CellsDeletedEvent(deletedCount >= 0, deletedCount, cellsDeleted));
 	}
 
 	private void loadCells(CellPersistenceEvent event) {
@@ -108,6 +118,6 @@ public class CellEventHandler {
 			Log.e("CellEventHandler", ex.getMessage(), ex);
 			success = false;
 		}
-		eventBus.post(new LoadedEvent<Cell>(success, cells));
+		eventBus.post(new CellsLoadedEvent(success, cells));
 	}
 }

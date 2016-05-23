@@ -18,14 +18,12 @@ package com.madmusic4001.dungeonmapper.controller.eventhandlers;
 import android.util.Log;
 
 import com.madmusic4001.dungeonmapper.controller.events.DeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.LoadedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistentEventPosting;
-import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
-import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEventPosting;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldSavedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldsDeletedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldsLoadedEvent;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
 
@@ -33,7 +31,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Singleton;
@@ -45,19 +42,16 @@ import javax.inject.Singleton;
 public class WorldEventHandler {
 	private EventBus eventBus;
 	private WorldDao worldDao;
-	private FilterCreator filterCreator;
 
 	/**
 	 * Creates a WorldEventHandler instance with the given parameters.
 	 *
 	 * @param eventBus  a {@link EventBus} instance
 	 * @param worldDao  a {@link WorldDao} instance
-	 * @param filterCreator  a {@link FilterCreator} instance
 	 */
-	public WorldEventHandler(EventBus eventBus, WorldDao worldDao, FilterCreator filterCreator) {
+	public WorldEventHandler(EventBus eventBus, WorldDao worldDao) {
 		this.eventBus = eventBus;
 		this.worldDao = worldDao;
-		this.filterCreator = filterCreator;
 	}
 
 	/**
@@ -85,10 +79,10 @@ public class WorldEventHandler {
 	 * Responds to requests to perform a persistent storage operation for a World instance or instances. The work will be
 	 * performed in the same thread as the poster.
 	 *
-	 * @param event  a {@link WorldPersistenceEvent} instance containing the information need to complete the request
+	 * @param event  a {@link WorldPersistenceEventPosting} instance containing the information need to complete the request
 	 */
 	@Subscribe(threadMode = ThreadMode.POSTING)
-	public void onWorldPersistenceEvent(WorldPersistentEventPosting event) {
+	public void onWorldPersistenceEvent(WorldPersistenceEventPosting event) {
 		switch (event.getOperation()) {
 			case SAVE:
 				saveWorld(event);
@@ -103,16 +97,13 @@ public class WorldEventHandler {
 	}
 
 	private void saveWorld(WorldPersistenceEvent event) {
-		eventBus.post(new SavedEvent<>(worldDao.save(event.getWorld()), event.getWorld()));
+		eventBus.post(new WorldSavedEvent(worldDao.save(event.getWorld()), event.getWorld()));
 	}
 
 	private void deleteWorld(WorldPersistenceEvent event) {
-		Collection<DaoFilter> filters = new ArrayList<>();
-		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-											 WorldDaoSqlImpl.WorldsContract._ID,
-											 String.valueOf(event.getWorld().getId())));
-		int deletedCount = worldDao.delete(filters);
-		eventBus.post(new DeletedEvent<World>(deletedCount >= 0, deletedCount));
+		Collection<World> worldsDeleted = worldDao.load(event.getFilters());
+		int deletedCount = worldDao.delete(event.getFilters());
+		eventBus.post(new WorldsDeletedEvent(deletedCount >= 0, deletedCount, worldsDeleted));
 	}
 
 	private void loadWorlds(WorldPersistenceEvent event) {
@@ -125,6 +116,6 @@ public class WorldEventHandler {
 			Log.e("WorldEventHandler", ex.getMessage(), ex);
 			success = false;
 		}
-		eventBus.post(new LoadedEvent<>(success, worlds));
+		eventBus.post(new WorldsLoadedEvent(success, worlds));
 	}
 }

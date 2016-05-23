@@ -13,33 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.controller.events;
+package com.madmusic4001.dungeonmapper.controller.events.cell;
 
+import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
 /**
- * Generic event notifying subscribers that an instance of T was saved to persistent storage.
+ * Generic event notifying subscribers that a Cell instance was saved to persistent storage.
  */
-public abstract class SavedEvent<T> {
-	boolean successful;
-	T item;
-
+public class CellSavedEvent extends SavedEvent<Cell> {
 	/**
-	 * Creates a new SavedEvent<T> instance.
-	 *
-	 * @param successful  true if successful, otherwise false
-	 * @param item  the instance of T that was saved
+	 * @see SavedEvent
 	 */
-	public SavedEvent(boolean successful, T item) {
-		this.successful = successful;
-		this.item = item;
-	}
-
-	// Getters
-	public boolean isSuccessful() {
-		return successful;
-	}
-	public T getItem() {
-		return item;
+	public CellSavedEvent(boolean successful, Cell item) {
+		super(successful, item);
 	}
 }

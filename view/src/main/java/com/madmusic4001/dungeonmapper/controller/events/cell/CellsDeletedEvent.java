@@ -13,33 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.controller.events;
+package com.madmusic4001.dungeonmapper.controller.events.cell;
 
+import com.madmusic4001.dungeonmapper.controller.events.DeletedEvent;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
+import java.util.Collection;
+
 /**
- * Generic event notifying subscribers that an instance of T was saved to persistent storage.
+ * Event representing the results of a request to delete 1 or more {@link Cell} instances.
  */
-public abstract class SavedEvent<T> {
-	boolean successful;
-	T item;
-
+public class CellsDeletedEvent extends DeletedEvent<Cell> {
 	/**
-	 * Creates a new SavedEvent<T> instance.
-	 *
-	 * @param successful  true if successful, otherwise false
-	 * @param item  the instance of T that was saved
+	 * @see DeletedEvent
 	 */
-	public SavedEvent(boolean successful, T item) {
-		this.successful = successful;
-		this.item = item;
-	}
-
-	// Getters
-	public boolean isSuccessful() {
-		return successful;
-	}
-	public T getItem() {
-		return item;
+	public CellsDeletedEvent(boolean success, int numDeleted, Collection<Cell> deleted) {
+		super(success, numDeleted, deleted);
 	}
 }

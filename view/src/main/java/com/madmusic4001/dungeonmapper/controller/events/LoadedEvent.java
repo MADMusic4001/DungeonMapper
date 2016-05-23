@@ -18,9 +18,9 @@ package com.madmusic4001.dungeonmapper.controller.events;
 import java.util.Collection;
 
 /**
- * Event representing the results of a request to load Cell instances from persistent storage.
+ * Generic event representing the results of a request to load instances of T from persistent storage.
  */
-public class LoadedEvent<T> {
+public abstract class LoadedEvent<T> {
 	boolean successful;
 	Collection<T> items;
 

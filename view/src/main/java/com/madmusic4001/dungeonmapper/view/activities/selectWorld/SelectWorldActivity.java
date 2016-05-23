@@ -36,9 +36,10 @@ import com.madmusic4001.dungeonmapper.controller.events.DatabaseExportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.DatabaseImportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ExportDatabaseEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ImportDatabaseEvent;
-import com.madmusic4001.dungeonmapper.controller.events.LoadedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldSavedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldsDeletedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldsLoadedEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
@@ -46,9 +47,9 @@ import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.data.util.WorldComparator;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
+import com.madmusic4001.dungeonmapper.view.activities.FileSelectorDialogFragment;
 import com.madmusic4001.dungeonmapper.view.activities.editTerrain.EditTerrainActivity;
 import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldActivity;
-import com.madmusic4001.dungeonmapper.view.activities.FileSelectorDialogFragment;
 import com.madmusic4001.dungeonmapper.view.adapters.WorldListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.ActivityModule;
 import com.madmusic4001.dungeonmapper.view.utils.BundleConstants;
@@ -60,12 +61,10 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Comparator;
 
 import javax.inject.Inject;
 
-import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants
-		.EDIT_WORLD_INTENT_WORLD_NAME;
+import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WORLD_INTENT_WORLD_NAME;
 
 /**
  * Displays the list of saved {@link World} instances and allows the user to select an existing
@@ -191,6 +190,7 @@ public class SelectWorldActivity extends Activity implements
 				}
 			case R.id.select_world_item_delete:
 				world = (World)listView.getItemAtPosition(info.position);
+				Log.e("SelectWorldActivity", "Deleting world id " + world.getId());
 				if(world != null) {
 					Collection<DaoFilter> filters = new ArrayList<>();
 					filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
@@ -216,7 +216,7 @@ public class SelectWorldActivity extends Activity implements
 	 * @param event  a WorldSavedEvent instance
 	 */
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldSavedEvent(SavedEvent<World> event) {
+	public void onWorldSavedEvent(WorldSavedEvent event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
@@ -225,7 +225,7 @@ public class SelectWorldActivity extends Activity implements
 			adapter.notifyDataSetChanged();
 		}
 		else {
-			toastString = String.format(getString(R.string.toast_save_world_error), event.getItem().getName());
+			toastString = String.format(getString(R.string.toast_world_save_error), event.getItem().getName());
 		}
 		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
 	}
@@ -237,7 +237,7 @@ public class SelectWorldActivity extends Activity implements
 	 * @param event  a LoadedEvent<World> instance
 	 */
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldsLoadedEvent(LoadedEvent<World> event) {
+	public void onWorldsLoadedEvent(WorldsLoadedEvent event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
@@ -247,7 +247,25 @@ public class SelectWorldActivity extends Activity implements
 			adapter.notifyDataSetChanged();
 		}
 		else {
-			toastString = getString(R.string.toast_load_worlds_error);
+			toastString = getString(R.string.toast_worlds_load_error);
+		}
+		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onWorldDeletedEvent(WorldsDeletedEvent event) {
+		String toastString;
+
+		if(event.isSuccessful()) {
+			toastString = String.format(getString(R.string.toast_worlds_deleted), event.getNumDeleted());
+			for(World world : event.getDeleted()) {
+				Log.e("SelectWorldActivity", "Deleted world id " + world.getId());
+				adapter.remove(world);
+			}
+			adapter.notifyDataSetChanged();
+		}
+		else {
+			toastString = getString(R.string.toast_worlds_deleted_error);
 		}
 		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
 	}

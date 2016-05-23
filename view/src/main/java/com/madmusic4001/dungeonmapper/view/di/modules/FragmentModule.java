@@ -23,12 +23,10 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- * Created 7/19/2015.
+ * Provides methods to allow the dependency injection engine to get instances of Fragment instances for injection into other
+ * classes.
  */
-//@Module
+@Module
 public class FragmentModule {
 	EditWorldPropsFragment  editWorldPropsFragment;
 	EditWorldRegionFragment editWorldRegionFragment;
@@ -41,13 +39,13 @@ public class FragmentModule {
 		this.editWorldRegionFragment = editWorldRegionFragment;
 	}
 
-//	@Provides @PerFragment
-	EditWorldPropsFragment editWorldPropsFragment() {
+	@Provides @PerFragment
+	EditWorldPropsFragment provideEditWorldPropsFragment() {
 		return this.editWorldPropsFragment;
 	}
 
-//	@Provides @PerFragment
-	EditWorldRegionFragment editWorldRegionFragment() {
+	@Provides @PerFragment
+	EditWorldRegionFragment provideEditWorldRegionFragment() {
 		return this.editWorldRegionFragment;
 	}
 }

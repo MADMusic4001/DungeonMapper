@@ -15,29 +15,37 @@
  */
 package com.madmusic4001.dungeonmapper.controller.events;
 
+import java.util.Collection;
+
 /**
  * Event representing the results of a request to delete 1 or more instances of T.
  */
-public class DeletedEvent<T> {
-	boolean success;
-	int numDeleted;
+public abstract class DeletedEvent<T> {
+	boolean successful;
+	int     numDeleted;
+	Collection<T> deleted;
 
 	/**
 	 * Creates a DeletedEvent<T> instance.
 	 *
-	 * @param success  true, if the cell(s) were deleted
+	 * @param successful  true, if the cell(s) were deleted
 	 * @param numDeleted  the number of instance of T that were deleted
+	 * @param deleted  the T instances that were deleted
 	 */
-	public DeletedEvent(boolean success, int numDeleted) {
-		this.success = success;
+	public DeletedEvent(boolean successful, int numDeleted, Collection<T> deleted) {
+		this.successful = successful;
 		this.numDeleted = numDeleted;
+		this.deleted = deleted;
 	}
 
 	// Getters
-	public boolean isSuccess() {
-		return success;
+	public boolean isSuccessful() {
+		return successful;
 	}
 	public int getNumDeleted() {
 		return numDeleted;
+	}
+	public Collection<T> getDeleted() {
+		return deleted;
 	}
 }

@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.madmusic4001.dungeonmapper.controller.events.world;
+package com.madmusic4001.dungeonmapper.controller.events.cell;
 
-import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
-import com.madmusic4001.dungeonmapper.data.entity.World;
+import com.madmusic4001.dungeonmapper.controller.events.LoadedEvent;
+import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
 import java.util.Collection;
 
 /**
- * Event requesting a persistent storage operation to be performed on a World instance or instances in the same thread as the
- * poster thread.
+ * Event representing the results of a request to load Cell instances from persistent storage.
  */
-public class WorldPersistentEventPosting extends WorldPersistenceEvent{
-	public WorldPersistentEventPosting(Operation operation, World world, Collection<DaoFilter> filters) {
-		super(operation, world, filters);
+public class CellsLoadedEvent extends LoadedEvent<Cell> {
+	/**
+	 * @see LoadedEvent
+	 */
+	public CellsLoadedEvent(boolean successful, Collection<Cell> items) {
+		super(successful, items);
 	}
 }
