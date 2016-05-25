@@ -41,7 +41,9 @@ import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionSavedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionsDeletedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionsLoadedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldSavedEvent;
@@ -170,9 +172,7 @@ public class EditWorldPropsFragment extends Fragment {
 		if (id == R.id.actionNewRegion) {
 			if(world != null) {
 				Region region = new Region(getString(R.string.defaultRegionName), world);
-
-				eventBus.post(new RegionPersistenceEvent(RegionPersistenceEvent.Operation.SAVE,
-														 region, null));
+				eventBus.post(new RegionPersistenceEvent(RegionPersistenceEvent.Operation.SAVE, region, null));
 			}
 			result = true;
 		}
@@ -252,7 +252,7 @@ public class EditWorldPropsFragment extends Fragment {
 	}
 	// </editor-fold>
 
-	// <editor-fold desc="EditWorldPropsController.EditWorldPropsUpdateHandle interface implementation methods">
+	// <editor-fold desc="EventBus subscriber methods">
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onWorldsLoaded(WorldsLoadedEvent event) {
 		this.world = event.getItems().iterator().next();
@@ -318,30 +318,35 @@ public class EditWorldPropsFragment extends Fragment {
 		}
 	}
 
-//	@Override
-//	public void onSortRegionList(Comparator<Region> comparator) {
-//		regionListAdapter.sort(comparator);
-//	}
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onRegionSaved(RegionSavedEvent event) {
+		if(event.isSuccessful()) {
+			regionListAdapter.add(event.getItem());
+			regionListAdapter.notifyDataSetChanged();
+		}
+	}
 
-//	@Override
-//	public void onRegionCreated(Region newRegion, Collection<Region> regions) {
-//		regionListAdapter.notifyDataSetChanged();
-//		regionListAdapter.clear();
-//		regionListAdapter.addAll(regions);
-//		regionListAdapter.notifyDataSetChanged();
-//		callbacksImpl.onRegionSelected(newRegion, true);
-//	}
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onRegionsDeleted(RegionsDeletedEvent event) {
+		String toastString;
 
-//	@Override
-//	public void onRegionDeleted(Collection<Region> regions) {
-//		regionListAdapter.notifyDataSetChanged();
-//		regionListAdapter.clear();
-//		regionListAdapter.addAll(regions);
-//		regionListAdapter.notifyDataSetChanged();
-//		if(regions.size() > 0) {
-//			callbacksImpl.onRegionSelected((Region) regions.toArray()[0], false);
-//		}
-//	}
+		if(event.isSuccessful()) {
+			for (Region deletedRegion : event.getDeleted()) {
+				regionListAdapter.remove(deletedRegion);
+			}
+			if (regionListAdapter.getCount() > 0) {
+				regionListAdapter.notifyDataSetChanged();
+			}
+			else {
+				regionListAdapter.notifyDataSetInvalidated();
+			}
+			toastString = String.format(getString(R.string.toast_worlds_deleted), event.getDeleted().size());
+		}
+		else {
+			toastString = getString(R.string.toast_worlds_deleted_error);
+		}
+		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+	}
 	// </editor-fold>
 
 	// <editor-fold desc="Getters and setters">

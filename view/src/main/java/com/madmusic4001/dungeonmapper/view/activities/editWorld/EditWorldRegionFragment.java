@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
@@ -43,6 +44,10 @@ import com.madmusic4001.dungeonmapper.view.adapters.CellExitSpinnerAdapter;
 import com.madmusic4001.dungeonmapper.view.adapters.TerrainSpinnerAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 import com.madmusic4001.dungeonmapper.view.views.RegionView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Collection;
 
@@ -54,6 +59,8 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.*;
  *
  */
 public class EditWorldRegionFragment extends Fragment {
+	@Inject
+	protected EventBus                      eventBus;
 	private   EditWorldRegionEventsListener callbackListener;
 	private   EditText                      regionNameView;
 	private   GridLayout					selectorsGrid;
@@ -83,19 +90,19 @@ public class EditWorldRegionFragment extends Fragment {
 		setHasOptionsMenu(true);
 	}
 
-// <editor-fold desc="EditWorldRegionController.EditWorldRegionUpdateHandler interface implementation">
-//	@Override
-//	public void onRegionLoaded(@NonNull Region region) {
-//		this.region = region;
-//		if(region != null) {
-//			if (regionView != null) {
-//				regionView.setRegion(region);
-//			}
-//			if (region.getName() != null) {
-//				regionNameView.setText(region.getName());
-//			}
-//		}
-//	}
+	// <editor-fold desc="EditWorldRegionController.EditWorldRegionUpdateHandler interface implementation">
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onRegionSelected(RegionSelectedEvent event) {
+		this.region = event.getRegion();
+		if(region != null) {
+			if (regionView != null) {
+				regionView.setRegion(region);
+			}
+			if (region.getName() != null) {
+				regionNameView.setText(region.getName());
+			}
+		}
+	}
 
 //	@Override
 //	public void onRegionSaved(Region region) {
@@ -138,18 +145,6 @@ public class EditWorldRegionFragment extends Fragment {
 	// </editor-fold>
 
 	// <editor-fold desc="Fragment lifecycle event handlers">
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-
-		try {
-			callbackListener = (EditWorldRegionEventsListener) activity;
-		}
-		catch (ClassCastException ex) {
-			throw new ClassCastException(activity.toString()
-												 + " must implement OnEditWorldPropsEventsListener");
-		}
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -264,12 +259,18 @@ public class EditWorldRegionFragment extends Fragment {
 	@Override
 	public void onPause() {
 		regionView.onPause();
+		if(eventBus != null) {
+			eventBus.unregister(this);
+		}
 		super.onPause();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		if(eventBus != null && !eventBus.isRegistered(this)) {
+			eventBus.register(this);
+		}
 		regionView.onResume();
 	}
 
