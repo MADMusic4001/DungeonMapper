@@ -24,6 +24,6 @@ package com.madmusic4001.dungeonmapper.view.utils;
 public final class IntentConstants {
 	public static final String INTENT_PREFIX = "com.madmusic4001.dungeonmapper";
 	public static final String EDIT_WORLD_PREFIX = ".edit_world";
-	public static final String EDIT_WORLD_INTENT_WORLD_NAME = INTENT_PREFIX + EDIT_WORLD_PREFIX +
-			".world_name";
+	public static final String EDIT_WORLD_INTENT_WORLD_ID = INTENT_PREFIX + EDIT_WORLD_PREFIX +
+			".world_id";
 }

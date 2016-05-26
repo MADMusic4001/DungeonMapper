@@ -64,7 +64,7 @@ import java.util.Collection;
 
 import javax.inject.Inject;
 
-import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WORLD_INTENT_WORLD_NAME;
+import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WORLD_INTENT_WORLD_ID;
 
 /**
  * Displays the list of saved {@link World} instances and allows the user to select an existing
@@ -362,7 +362,7 @@ public class SelectWorldActivity extends Activity implements
 
 	private void editWorld(@NonNull World world) {
 		Intent intent = new Intent(getApplicationContext(), EditWorldActivity.class);
-		intent.putExtra(EDIT_WORLD_INTENT_WORLD_NAME, world.getName());
+		intent.putExtra(EDIT_WORLD_INTENT_WORLD_ID, world.getId());
 		startActivity(intent);
 	}
 	// </editor-fold>

@@ -35,7 +35,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionPersistenceEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
@@ -49,6 +53,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -61,6 +66,8 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.*;
 public class EditWorldRegionFragment extends Fragment {
 	@Inject
 	protected EventBus                      eventBus;
+	@Inject
+	protected FilterCreator                 filterCreator;
 	private   EditWorldRegionEventsListener callbackListener;
 	private   EditText                      regionNameView;
 	private   GridLayout					selectorsGrid;
@@ -191,7 +198,7 @@ public class EditWorldRegionFragment extends Fragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-//		controller.loadRegion(callbackListener.getWorldName(), callbackListener.getRegionName());
+//		controller.loadRegion(callbackListener.getWorldId(), callbackListener.getRegionName());
 	}
 
 	/**
@@ -425,8 +432,15 @@ public class EditWorldRegionFragment extends Fragment {
 	// </editor-fold>
 
 	// <editor-fold desc="Public action methods">
-	public void loadRegion(@NonNull String worldName, @NonNull String regionName) {
-//		controller.loadRegion(worldName, regionName);
+	public void loadRegion(int worldId, int regionId) {
+		Collection<DaoFilter> filters = new ArrayList<>(1);
+		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+				RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
+				String.valueOf(worldId)));
+		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+				RegionDaoSqlImpl.RegionsContract._ID,
+				String.valueOf(regionId)));
+		eventBus.post(new RegionPersistenceEvent(RegionPersistenceEvent.Operation.LOAD, null, filters));
 	}
 	// </editor-fold>
 
@@ -440,7 +454,7 @@ public class EditWorldRegionFragment extends Fragment {
 		 * @return the name of the {@link com.madmusic4001.dungeonmapper.data.entity.World}
 		 * containing the {@link Region} to display in the UI.
 		 */
-		String getWorldName();
+		String getWorldId();
 
 		/**
 		 * Gets the currently selected {@code Region} name to display in the UI.

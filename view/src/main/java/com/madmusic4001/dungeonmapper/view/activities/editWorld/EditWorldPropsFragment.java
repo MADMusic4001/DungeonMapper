@@ -55,6 +55,7 @@ import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
+import com.madmusic4001.dungeonmapper.data.util.StringUtils;
 import com.madmusic4001.dungeonmapper.view.adapters.RegionListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 
@@ -123,6 +124,9 @@ public class EditWorldPropsFragment extends Fragment {
 		Log.d(this.getClass().getName(), "Component = " + ((EditWorldActivity)getActivity()).getActivityComponent());
 		((EditWorldActivity)getActivity()).getActivityComponent().
 				newFragmentComponent(new FragmentModule(this)).injectInto(this);
+		if(eventBus != null && !eventBus.isRegistered(this)) {
+			eventBus.register(this);
+		}
 
 		View layout = inflater.inflate(R.layout.edit_world_fragment, container, false);
 
@@ -243,11 +247,11 @@ public class EditWorldPropsFragment extends Fragment {
 //		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
 //	}
 
-	public void loadWorld(String worldName) {
+	public void loadWorld(int worldId) {
 		Collection<DaoFilter> filters = new ArrayList<>(1);
 		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-												  WorldDaoSqlImpl.WorldsContract.NAME_COLUMN_NAME,
-												  worldName));
+												  WorldDaoSqlImpl.WorldsContract._ID,
+												  String.valueOf(worldId)));
 		eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.LOAD, null, filters));
 	}
 	// </editor-fold>
@@ -503,7 +507,15 @@ public class EditWorldPropsFragment extends Fragment {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				if (!hasFocus) {
-					int newWidth = Integer.valueOf(regionWidthView.getText().toString());
+					int newWidth = 16;
+					try {
+						newWidth = Integer.valueOf(regionWidthView.getText().toString());
+					} catch (NumberFormatException ex) {
+						if(world != null) {
+							newWidth = world.getRegionWidth();
+							regionWidthView.setText(String.valueOf(newWidth));
+						}
+					}
 					if (world != null && world.getRegionWidth() != newWidth) {
 						world.setRegionWidth(newWidth);
 						eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
@@ -563,7 +575,15 @@ public class EditWorldPropsFragment extends Fragment {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				if (!hasFocus) {
-					int newHeight = Integer.valueOf(regionHeightView.getText().toString());
+					int newHeight = 0;
+					try {
+						newHeight = Integer.valueOf(regionHeightView.getText().toString());
+					} catch (NumberFormatException ex) {
+						if(world != null) {
+							newHeight = world.getRegionHeight();
+							regionHeightView.setText(String.valueOf(newHeight));
+						}
+					}
 					if (world != null && world.getRegionHeight() != newHeight) {
 						world.setRegionHeight(newHeight);
 						eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
