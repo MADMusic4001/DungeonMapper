@@ -75,7 +75,6 @@ public class EditWorldActivity extends Activity {
 		}
 		else {
 			worldId = getIntent().getExtras().getInt(EDIT_WORLD_INTENT_WORLD_ID);
-			Log.e("EditWorldActivity", "Activity starting with world ID " + worldId);
 		}
 
 		setContentView(R.layout.edit_world);
@@ -105,12 +104,9 @@ public class EditWorldActivity extends Activity {
 	protected void onStart() {
 		super.onStart();
 		if(propsFragment != null) {
-			Log.d(this.getClass().getName(), "Calling propsFragment.loadWorld(\"" + worldId + "\")");
 			propsFragment.loadWorld(worldId);
 		}
 		if(regionFragment != null) {
-			Log.d(this.getClass().getName(), "Calling regionFragment.setRegion(\"" + worldId + "\", \"" +
-					selectedRegionId + "\")");
 			regionFragment.setRegion(worldId, selectedRegionId);
 		}
 	}

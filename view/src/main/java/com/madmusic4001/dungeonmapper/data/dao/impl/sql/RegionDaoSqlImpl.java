@@ -31,6 +31,7 @@ import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
+import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -193,18 +194,22 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 			db.beginTransactionNonExclusive();
 		}
 		try {
+			Log.e("RegionDaoSqlImpl", "Saving region " + aRegion);
 			if (aRegion.getId() == -1L) {
 				aRegion.setId((int) db.insert(RegionsContract.TABLE_NAME, null, values));
-				if (aRegion.getId() == -1L) {
+				result = (aRegion.getId() != DataConstants.UNINITIALIZED);
+				if (aRegion.getId() == DataConstants.UNINITIALIZED) {
 					throw new DaoException(R.string.exception_regionNotSaved);
 				}
 			}
 			else {
-            	result = (db.updateWithOnConflict(RegionsContract.TABLE_NAME,
+				int updateCount = db.updateWithOnConflict(RegionsContract.TABLE_NAME,
 										   values,
 										   RegionsContract._ID + "=?",
 										   new String[] {Long.toString(aRegion.getId())},
-										   SQLiteDatabase.CONFLICT_IGNORE) != 1);
+										   SQLiteDatabase.CONFLICT_IGNORE);
+				result = (updateCount != 1);
+				Log.e("RegionDaoSqlImpl", "Update count = " + updateCount);
         	}
 			if(result && newTransaction) {
 				db.setTransactionSuccessful();
