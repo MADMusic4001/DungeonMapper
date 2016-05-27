@@ -16,10 +16,9 @@
 
 package com.madmusic4001.dungeonmapper.view.activities.editWorld;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,8 +34,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellExitTypeEventHandler;
+import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandler;
+import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypesLoadedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionSavedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionsLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.terrain.TerrainsLoadedEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
@@ -58,7 +63,14 @@ import java.util.Collection;
 
 import javax.inject.Inject;
 
-import static com.madmusic4001.dungeonmapper.data.util.DataConstants.*;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.DOWN;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.EAST;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.NORTH;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SAVED_REGION_NAME;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SELECTED_WORLD_NAME;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SOUTH;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.UP;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WEST;
 
 /**
  *
@@ -68,7 +80,10 @@ public class EditWorldRegionFragment extends Fragment {
 	protected EventBus                      eventBus;
 	@Inject
 	protected FilterCreator                 filterCreator;
-	private   EditWorldRegionEventsListener callbackListener;
+	@Inject
+	protected CellExitTypeEventHandler      cellExitTypeEventHandler;
+	@Inject
+	protected TerrainEventHandler           terrainEventHandler;
 	private   EditText                      regionNameView;
 	private   GridLayout					selectorsGrid;
 	private   RegionView                    regionView;
@@ -87,8 +102,12 @@ public class EditWorldRegionFragment extends Fragment {
 	private   Spinner                       downExitSpinner;
 	private   Spinner                       terrainSpinner;
 	private boolean isVisible = false;
+	private int regionId = DataConstants.UNINITIALIZED;
+	private int worldId = DataConstants.UNINITIALIZED;
 	private Region  region    = null;
 	private boolean showingPalette = true;
+
+	// <editor-fold desc="Fragment lifecycle event handlers">
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -97,69 +116,17 @@ public class EditWorldRegionFragment extends Fragment {
 		setHasOptionsMenu(true);
 	}
 
-	// <editor-fold desc="EditWorldRegionController.EditWorldRegionUpdateHandler interface implementation">
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionSelected(RegionSelectedEvent event) {
-		this.region = event.getRegion();
-		if(region != null) {
-			if (regionView != null) {
-				regionView.setRegion(region);
-			}
-			if (region.getName() != null) {
-				regionNameView.setText(region.getName());
-			}
-		}
-	}
-
-//	@Override
-//	public void onRegionSaved(Region region) {
-//		String message = String.format(getString(R.string.message_regionSaved), region.getName(),
-//									   region.getParent().getName());
-//		Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-//		callbackListener.regionNameChanged();
-//	}
-
-//	@Override
-//	public void onLoadCellExitsComplete(Collection<CellExitType> cellExitTypes) {
-//		for (CellExitType exit : cellExitTypes) {
-//			upExitAdapter.add(exit);
-//			northExitAdapter.add(exit);
-//			westExitAdapter.add(exit);
-//			eastExitAdapter.add(exit);
-//			southExitAdapter.add(exit);
-//			downExitAdapter.add(exit);
-//		}
-//		upExitAdapter.notifyDataSetChanged();
-//		regionView.setCurrentCellExit(UP, (CellExitType) upExitSpinner.getSelectedItem());
-//		northExitAdapter.notifyDataSetChanged();
-//		regionView.setCurrentCellExit(NORTH, (CellExitType) northExitSpinner.getSelectedItem());
-//		westExitAdapter.notifyDataSetChanged();
-//		regionView.setCurrentCellExit(WEST, (CellExitType) westExitSpinner.getSelectedItem());
-//		eastExitAdapter.notifyDataSetChanged();
-//		regionView.setCurrentCellExit(EAST, (CellExitType) eastExitSpinner.getSelectedItem());
-//		southExitAdapter.notifyDataSetChanged();
-//		regionView.setCurrentCellExit(SOUTH, (CellExitType) southExitSpinner.getSelectedItem());
-//		downExitAdapter.notifyDataSetChanged();
-//		regionView.setCurrentCellExit(DOWN, (CellExitType) downExitSpinner.getSelectedItem());
-//	}
-
-//	@Override
-//	public void onLoadTerrainsComplete(Collection<Terrain> terrains) {
-//		terrainAdapter.addAll(terrains);
-//		terrainAdapter.notifyDataSetChanged();
-//	}
-
-	// </editor-fold>
-
-	// <editor-fold desc="Fragment lifecycle event handlers">
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 							 Bundle savedInstanceState) {
 		View layout = inflater.inflate(R.layout.edit_region_fragment, container, false);
 		((EditWorldActivity) getActivity()).getActivityComponent().
 				newFragmentComponent(new FragmentModule(this)).injectInto(this);
+		if(!eventBus.isRegistered(this)) {
+			eventBus.register(this);
+		}
 
+		loadRegion();
 		initRegionNameView(layout);
 
 		selectorsGrid = (GridLayout)layout.findViewById(R.id.selectorsGrid);
@@ -198,7 +165,7 @@ public class EditWorldRegionFragment extends Fragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-//		controller.loadRegion(callbackListener.getWorldId(), callbackListener.getRegionName());
+//		controller.setRegion(callbackListener.getWorldId(), callbackListener.getRegionName());
 	}
 
 	/**
@@ -266,7 +233,7 @@ public class EditWorldRegionFragment extends Fragment {
 	@Override
 	public void onPause() {
 		regionView.onPause();
-		if(eventBus != null) {
+		if(eventBus != null && eventBus.isRegistered(this)) {
 			eventBus.unregister(this);
 		}
 		super.onPause();
@@ -431,42 +398,103 @@ public class EditWorldRegionFragment extends Fragment {
 //    }
 	// </editor-fold>
 
-	// <editor-fold desc="Public action methods">
-	public void loadRegion(int worldId, int regionId) {
-		Collection<DaoFilter> filters = new ArrayList<>(1);
-		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-				RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
-				String.valueOf(worldId)));
-		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-				RegionDaoSqlImpl.RegionsContract._ID,
-				String.valueOf(regionId)));
-		eventBus.post(new RegionPersistenceEvent(RegionPersistenceEvent.Operation.LOAD, null, filters));
+	// <editor-fold desc="Eventbus subscription handler methods">
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onRegionsLoaded(RegionsLoadedEvent event) {
+		if(event.isSuccessful()) {
+			for(Region aRegion : event.getItems()) {
+				Log.e("EditWorldRegionFrag", "Region loaded: " + region);
+				if(aRegion.getId() == this.regionId && aRegion.getParent().getId() == this.worldId) {
+					this.region = aRegion;
+					regionNameView.setText(aRegion.getName());
+				}
+			}
+		}
 	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onRegionSelected(RegionSelectedEvent event) {
+		this.region = event.getRegion();
+		if(region != null) {
+			this.regionId = region.getId();
+			this.worldId = region.getParent().getId();
+			if (regionView != null) {
+				regionView.setRegion(region);
+			}
+			if (region.getName() != null) {
+				regionNameView.setText(region.getName());
+			}
+		}
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onRegionSaved(RegionSavedEvent event) {
+		String toastString;
+		Region region = event.getItem();
+
+		if(event.isSuccessful()) {
+			toastString = getString(R.string.toast_region_saved);
+		}
+		else {
+			toastString = String.format(getString(R.string.toast_region_save_error), region != null ? region.getName() : "unknown");
+		}
+		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onLoadCellExitTypesComplete(CellExitTypesLoadedEvent event) {
+		String toastString;
+		if(event.isSuccessful()) {
+			toastString = String.format(getString(R.string.toast_cell_exit_types_loaded), event.getItems().size());
+			for (CellExitType exit : event.getItems()) {
+				upExitAdapter.add(exit);
+				northExitAdapter.add(exit);
+				westExitAdapter.add(exit);
+				eastExitAdapter.add(exit);
+				southExitAdapter.add(exit);
+				downExitAdapter.add(exit);
+			}
+			upExitAdapter.notifyDataSetChanged();
+			regionView.setCurrentCellExit(UP, (CellExitType) upExitSpinner.getSelectedItem());
+			northExitAdapter.notifyDataSetChanged();
+			regionView.setCurrentCellExit(NORTH, (CellExitType) northExitSpinner.getSelectedItem());
+			westExitAdapter.notifyDataSetChanged();
+			regionView.setCurrentCellExit(WEST, (CellExitType) westExitSpinner.getSelectedItem());
+			eastExitAdapter.notifyDataSetChanged();
+			regionView.setCurrentCellExit(EAST, (CellExitType) eastExitSpinner.getSelectedItem());
+			southExitAdapter.notifyDataSetChanged();
+			regionView.setCurrentCellExit(SOUTH, (CellExitType) southExitSpinner.getSelectedItem());
+			downExitAdapter.notifyDataSetChanged();
+			regionView.setCurrentCellExit(DOWN, (CellExitType) downExitSpinner.getSelectedItem());
+		}
+		else {
+			toastString = getString(R.string.toast_cell_exit_types_load_error);
+		}
+		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+	}
+
+	@Subscribe
+	public void onLoadTerrainsComplete(TerrainsLoadedEvent event) {
+		String toastString;
+
+		if(event.isSuccessful()) {
+			toastString = String.format(getString(R.string.toast_terrains_loaded), event.getItems().size());
+			terrainAdapter.addAll(event.getItems());
+			terrainAdapter.notifyDataSetChanged();
+		}
+		else {
+			toastString = getString(R.string.toast_terrains_load_error);
+		}
+		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+	}
+
 	// </editor-fold>
 
-	// <editor-fold desc="Callback interface declaration">
-
-	public interface EditWorldRegionEventsListener {
-
-		/**
-		 * Gets the name of the {@code World} containing the {@code Region} to display in the UI.
-		 *
-		 * @return the name of the {@link com.madmusic4001.dungeonmapper.data.entity.World}
-		 * containing the {@link Region} to display in the UI.
-		 */
-		String getWorldId();
-
-		/**
-		 * Gets the currently selected {@code Region} name to display in the UI.
-		 *
-		 * @return the name of the currently selected {@link Region}.
-		 */
-		String getRegionName();
-
-		/**
-		 * Notifies that the name of a region changed
-		 */
-		void regionNameChanged();
+	// <editor-fold desc="Public action methods">
+	public void setRegion(int worldId, int regionId) {
+		this.regionId = regionId;
+		this.worldId = worldId;
+		loadRegion();
 	}
 	// </editor-fold>
 
@@ -612,6 +640,19 @@ public class EditWorldRegionFragment extends Fragment {
 
 		if(region != null) {
 			regionView.setRegion(region);
+		}
+	}
+
+	private void loadRegion() {
+		Collection<DaoFilter> filters = new ArrayList<>(1);
+		if(filterCreator != null) {
+			filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+					RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
+					String.valueOf(worldId)));
+			filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+					RegionDaoSqlImpl.RegionsContract._ID,
+					String.valueOf(regionId)));
+			eventBus.post(new RegionPersistenceEvent(RegionPersistenceEvent.Operation.LOAD, null, filters));
 		}
 	}
 	// </editor-fold>

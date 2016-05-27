@@ -25,15 +25,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.controller.eventhandlers.RegionEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
-import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 import com.madmusic4001.dungeonmapper.view.di.components.ActivityComponent;
 import com.madmusic4001.dungeonmapper.view.di.modules.ActivityModule;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import javax.inject.Inject;
 
 import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WORLD_INTENT_WORLD_ID;
 
@@ -44,6 +47,10 @@ public class EditWorldActivity extends Activity {
 	private static final String ACTIVE_WORLD_ID_KEY = "saved_world_id";
 	private static final String ACTIVE_REGION_ID_KEY = "saved_region_id";
 
+	@Inject
+	protected EventBus              eventBus;
+	@Inject
+	protected RegionEventHandler    regionEventHandler;
 	private ActivityComponent		activityComponent;
 	private EditWorldPropsFragment	propsFragment;
 	private EditWorldRegionFragment regionFragment;
@@ -58,6 +65,9 @@ public class EditWorldActivity extends Activity {
 		activityComponent = ((DungeonMapperApp) getApplication()).getApplicationComponent()
 				.newActivityComponent(new ActivityModule(this));
 		activityComponent.injectInto(this);
+		if(!eventBus.isRegistered(this)) {
+			eventBus.register(this);
+		}
 
 		if (savedInstanceState != null) {
 			worldId = savedInstanceState.getInt(ACTIVE_WORLD_ID_KEY);
@@ -99,15 +109,26 @@ public class EditWorldActivity extends Activity {
 			propsFragment.loadWorld(worldId);
 		}
 		if(regionFragment != null) {
-			Log.d(this.getClass().getName(), "Calling regionFragment.loadRegion(\"" + worldId + "\", \"" +
+			Log.d(this.getClass().getName(), "Calling regionFragment.setRegion(\"" + worldId + "\", \"" +
 					selectedRegionId + "\")");
-			regionFragment.loadRegion(worldId, selectedRegionId);
+			regionFragment.setRegion(worldId, selectedRegionId);
 		}
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		if(eventBus != null && !eventBus.isRegistered(this)) {
+			eventBus.register(this);
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		if(eventBus != null && eventBus.isRegistered(this)) {
+			eventBus.unregister(this);
+		}
+		super.onPause();
 	}
 
 	@Override
@@ -136,7 +157,7 @@ public class EditWorldActivity extends Activity {
 	}
 	// </editor-fold>
 
-	// <editor-fold> desc="EditWorldPropsFragment.OnEditWorldPropsEventsListener interface implementation">
+	// <editor-fold> desc="EventBus event handler methods">
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onRegionSelected(RegionSelectedEvent event) {
 		selectedRegionId = event.getRegion().getId();
@@ -149,33 +170,15 @@ public class EditWorldActivity extends Activity {
 						.commit();
 				propsFragment = null;
 			}
-			else {
-				regionFragment.loadRegion(worldId, selectedRegionId);
-			}
+			regionFragment.setRegion(worldId, selectedRegionId);
 		}
 	}
 	// </editor-fold>
 
-	// <editor-fold desc="EditWorldRegionFragment.EditWorldRegionEventsListener interface implementation">
-//	@Override
-//	public String getRegionName() {
-//		return selectedRegionId;
-//	}
-
-//	@Override
-//	public void regionNameChanged() {
-//		if(propsFragment != null) {
-//			propsFragment.updateRegionsList();
-//		}
-//	}
-
+	// <editor-fold desc="Getters and setters">
 	public int getWorldId() {
 		return worldId;
 	}
-	// </editor-fold>
-
-	// <editor-fold desc="Private plumbing methods">
-
 	public ActivityComponent getActivityComponent() {
 		return activityComponent;
 	}

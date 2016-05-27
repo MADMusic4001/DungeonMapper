@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.madmusic4001.dungeonmapper.R;
@@ -49,8 +50,6 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 		public static final String TABLE_NAME = 	"regions";
 		public static final String WORLD_ID_COLUMN_NAME    = "world_id";
 		public static final String NAME_COLUMN_NAME        = "name";
-		public static final String WIDTH_COLUMN_NAME       = "width";
-		public static final String HEIGHT_COLUMN_NAME      = "height";
 		public static final String CREATE_TS_COLUMN_NAME   = "create_ts";
 		public static final String MODIFIED_TS_COLUMN_NAME = "modified_ts";
 	}
@@ -66,7 +65,7 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 				REFERENCES + WorldDaoSqlImpl.WorldsContract.TABLE_NAME + "(" + WorldDaoSqlImpl.WorldsContract._ID + ")" +
 					ON + DELETE + CASCADE + COMMA +
 			CONSTRAINT + "unique_world_map_name" +
-				UNIQUE + "(" + RegionsContract.WORLD_ID_COLUMN_NAME + COMMA + RegionsContract.NAME_COLUMN_NAME + "));";
+				UNIQUE + "(" + RegionsContract.WORLD_ID_COLUMN_NAME + COMMA + RegionsContract._ID + "));";
 
 	// Connected regions table constants
 	public static abstract class ConnectedRegionsContract implements BaseColumns {
@@ -94,18 +93,14 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 			RegionsContract._ID,
 			RegionsContract.WORLD_ID_COLUMN_NAME,
 			RegionsContract.NAME_COLUMN_NAME,
-			RegionsContract.WIDTH_COLUMN_NAME,
-			RegionsContract.HEIGHT_COLUMN_NAME,
 			RegionsContract.CREATE_TS_COLUMN_NAME,
 			RegionsContract.MODIFIED_TS_COLUMN_NAME
 	};
 	private static final int      REGION_ID_INDEX   = 0;
 	private static final int      WORLD_ID_INDEX    = 1;
 	private static final int      NAME_INDEX        = 2;
-	private static final int      WIDTH_INDEX       = 3;
-	private static final int      HEIGHT_INDEX      = 4;
-	private static final int      CREATE_TS_INDEX   = 5;
-	private static final int      MODIFIED_TS_INDEX = 6;
+	private static final int      CREATE_TS_INDEX   = 3;
+	private static final int      MODIFIED_TS_INDEX = 4;
 
 	// Member variables
 	private SparseArray<Region> regionCache = new SparseArray<>(10);
@@ -145,6 +140,10 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 		if((whereClause != null && !whereClause.isEmpty()) || regionCache.size() == 0) {
 			regionCache.clear();
 			SQLiteDatabase db = sqlHelper.getReadableDatabase();
+			boolean newTransaction = !db.inTransaction();
+			if(newTransaction) {
+				db.beginTransaction();
+			}
 			try {
 				cursor = db.query(RegionsContract.TABLE_NAME,
 								  regionColumns,
@@ -161,15 +160,19 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 					cursor.moveToNext();
 				}
 				cursor.close();
-				db.setTransactionSuccessful();
+				if(newTransaction) {
+					db.setTransactionSuccessful();
+				}
 			}
 			finally {
-				db.endTransaction();
+				if(newTransaction) {
+					db.endTransaction();
+				}
 			}
 		}
 		Collection<Region> regionNameCollection = new ArrayList<>(regionCache.size());
 		for(int i = 0; i < regionCache.size(); i++) {
-			regionNameCollection.add(regionCache.get(i));
+			regionNameCollection.add(regionCache.valueAt(i));
 		}
 		return regionNameCollection;
 	}
@@ -185,6 +188,10 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 		values.put(RegionsContract.MODIFIED_TS_COLUMN_NAME, Calendar.getInstance().getTimeInMillis());
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransactionNonExclusive();
+		}
 		try {
 			if (aRegion.getId() == -1L) {
 				aRegion.setId((int) db.insert(RegionsContract.TABLE_NAME, null, values));
@@ -199,12 +206,14 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 										   new String[] {Long.toString(aRegion.getId())},
 										   SQLiteDatabase.CONFLICT_IGNORE) != 1);
         	}
-			if(result) {
+			if(result && newTransaction) {
 				db.setTransactionSuccessful();
 			}
     	}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return result;
 	}
@@ -217,13 +226,22 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 		String[] whereArgs = new String[whereArgsList.size()];
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			result = db.delete(RegionsContract.TABLE_NAME,
 								whereClause,
 								whereArgsList.toArray(whereArgs));
+			if(result >= 0 && newTransaction) {
+				db.setTransactionSuccessful();
+			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return result;
 	}
@@ -235,8 +253,6 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 		World aWorld = worldDao.load(worldId);
         Region region = new Region(cursor.getString(NAME_INDEX), aWorld);
         region.setId(cursor.getInt(REGION_ID_INDEX));
-		region.setWidth(cursor.getInt(WIDTH_INDEX));
-		region.setHeight(cursor.getInt(HEIGHT_INDEX));
         cal = Calendar.getInstance();
         cal.setTimeInMillis(cursor.getLong(CREATE_TS_INDEX));
         region.setCreateTs(cal);

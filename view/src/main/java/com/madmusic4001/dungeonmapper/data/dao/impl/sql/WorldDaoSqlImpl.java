@@ -21,7 +21,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
-import android.util.Log;
 
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
@@ -141,6 +140,10 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 		World theWorld = null;
 
 		SQLiteDatabase db = sqlHelper.getReadableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			Cursor cursor = db.query(WorldsContract.TABLE_NAME,
 									 columnNames,
@@ -153,10 +156,14 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 				theWorld = createInstance(cursor);
 			}
 			cursor.close();
-			db.setTransactionSuccessful();
+			if(newTransaction) {
+				db.setTransactionSuccessful();
+			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 
 		return theWorld;
@@ -170,7 +177,10 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 		String[] whereArgs = new String[whereArgsList.size()];
 
 		SQLiteDatabase db = sqlHelper.getReadableDatabase();
-		db.beginTransactionNonExclusive();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			Cursor cursor = db.query(WorldsContract.TABLE_NAME,
 									 columnNames,
@@ -188,11 +198,15 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 					cursor.moveToNext();
 				}
 				cursor.close();
-				db.setTransactionSuccessful();
+				if(newTransaction) {
+					db.setTransactionSuccessful();
+				}
 			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return worlds;
 	}
@@ -210,26 +224,30 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 		values.put(WorldsContract.CREATE_TS_COLUMN_NAME, aWorld.getCreateTs().getTimeInMillis());
 		values.put(WorldsContract.MODIFIED_TS_COLUMN_NAME, Calendar.getInstance().getTimeInMillis());
 
-		SQLiteDatabase database = sqlHelper.getWritableDatabase();
-		Log.e("WorldDaoSqlImpl", "Database version = " + database.getVersion());
-		database.beginTransaction();
+		SQLiteDatabase db = sqlHelper.getWritableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			if (aWorld.getId() == -1) {
-				aWorld.setId((int) database.insert(WorldsContract.TABLE_NAME, null, values));
+				aWorld.setId((int) db.insert(WorldsContract.TABLE_NAME, null, values));
 				result = (aWorld.getId() != -1);
 			}
 			else {
 				values.put(WorldsContract._ID, aWorld.getId());
-				int count = database.update(WorldsContract.TABLE_NAME, values, WorldsContract._ID + EQUALS + PLACEHOLDER,
+				int count = db.update(WorldsContract.TABLE_NAME, values, WorldsContract._ID + EQUALS + PLACEHOLDER,
 								  new String[]{Long.toString(aWorld.getId())});
 				result = (count == 1);
 			}
-			if(result) {
-				database.setTransactionSuccessful();
+			if(result && newTransaction) {
+				db.setTransactionSuccessful();
 			}
 		}
 		finally {
-			database.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return result;
 	}
@@ -241,18 +259,23 @@ public class WorldDaoSqlImpl extends BaseDaoSql implements WorldDao {
 		String whereClause = buildWhereArgs(filters, whereArgsList);
 		String[] whereArgs = new String[whereArgsList.size()];
 
-		SQLiteDatabase database = sqlHelper.getWritableDatabase();
-		database.beginTransaction();
+		SQLiteDatabase db = sqlHelper.getWritableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
-			result = database.delete(WorldsContract.TABLE_NAME,
+			result = db.delete(WorldsContract.TABLE_NAME,
 							whereClause,
 							whereArgsList.toArray(whereArgs));
-			if(result  >= 0) {
-				database.setTransactionSuccessful();
+			if(result  >= 0 && newTransaction) {
+				db.setTransactionSuccessful();
 			}
 		}
 		finally {
-			database.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return result;
 	}

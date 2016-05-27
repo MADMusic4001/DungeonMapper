@@ -82,12 +82,14 @@ public class RegionListAdapter extends ArrayAdapter<Region> {
 		rowView.setBackgroundColor(getContext().getResources().getColor(
 				colors[position % colors.length]));
 		Region region = getItem(position);
-		holder.nameView.setText(region.getName());
+		if(region != null) {
+			holder.nameView.setText(region.getName());
 
-		holder.createdView.setText(getFormattedDateOrTime(region.getCreateTs()
-																  .getTimeInMillis()));
-		holder.modifiedView.setText(getFormattedDateOrTime(region.getModifiedTs()
-																   .getTimeInMillis()));
+			holder.createdView.setText(getFormattedDateOrTime(region.getCreateTs()
+					.getTimeInMillis()));
+			holder.modifiedView.setText(getFormattedDateOrTime(region.getModifiedTs()
+					.getTimeInMillis()));
+		}
 		return rowView;
 	}
 

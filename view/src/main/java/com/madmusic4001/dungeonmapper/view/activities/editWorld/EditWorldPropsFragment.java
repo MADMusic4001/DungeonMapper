@@ -40,6 +40,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.controller.eventhandlers.RegionEventHandler;
+import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionPersistenceEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionSavedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
@@ -55,7 +57,6 @@ import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
-import com.madmusic4001.dungeonmapper.data.util.StringUtils;
 import com.madmusic4001.dungeonmapper.view.adapters.RegionListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 
@@ -82,6 +83,10 @@ public class EditWorldPropsFragment extends Fragment {
 	protected FilterCreator                 filterCreator;
 	@Inject
 	protected ComparatorUtils               comparatorUtils;
+	@Inject
+	protected WorldEventHandler             worldEventHandler;
+	@Inject
+	protected RegionEventHandler            regionEventHandler;
 	private TextView						worldNameView;
 	private CheckBox						zeroBasedCoordinatesView;
 	private Spinner							originView;
@@ -89,7 +94,6 @@ public class EditWorldPropsFragment extends Fragment {
 	private TextView						regionHeightView;
 	private ListView						regionsListView;
 	private World							world;
-	private EditWorldActivity				activity;
 
 	// <editor-fold desc="Fragment lifecycle event handlers">
 
@@ -230,23 +234,6 @@ public class EditWorldPropsFragment extends Fragment {
 	// </editor-fold>
 
 	// <editor-fold desc="Public action methods">
-//	@Subscribe(threadMode = ThreadMode.MAIN)
-//	public void onRegionsLoaded(LoadedEvent<Region> event) {
-//		String toastString;
-//
-//		regionListAdapter.clear();
-//		if(event.isSuccessful()) {
-//			regionListAdapter.addAll(event.getItems());
-//			regionListAdapter.notifyDataSetChanged();
-//			toastString = String.format(getString(R.string.toast_regions_loaded), event.getItems().size());
-//		}
-//		else {
-//			regionListAdapter.notifyDataSetInvalidated();
-//			toastString = getString(R.string.toast_regions_load_error);
-//		}
-//		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
-//	}
-
 	public void loadWorld(int worldId) {
 		Collection<DaoFilter> filters = new ArrayList<>(1);
 		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
@@ -303,7 +290,7 @@ public class EditWorldPropsFragment extends Fragment {
 		String toastString;
 
 		if(event.isSuccessful()) {
-			toastString = getString(R.string.toast_regions_loaded);
+			toastString = String.format(getString(R.string.toast_regions_loaded), event.getItems().size());
 			if(regionListAdapter != null) {
 				regionListAdapter.addAll(event.getItems());
 				regionListAdapter.notifyDataSetChanged();
@@ -356,22 +343,6 @@ public class EditWorldPropsFragment extends Fragment {
 	// <editor-fold desc="Getters and setters">
 	public World getWorld() {
 		return world;
-	}
-	// </editor-fold>
-
-	// <editor-fold desc="Interface declarations">
-	/**
-	 * Defines methods to allow the fragment to communicate with the implementer (EditWorldActivity).
-	 */
-	public interface OnEditWorldPropsEventsListener {
-		/**
-		 * Notifies the implementer when a {@code Region} is selected by the user.
-		 *
-		 * @param region the selected {@link Region}.
-		 * @param switchFragment  true if the edit regions fragment should be displayed, false if
-		 *                              the world props fragment should remain.
-		 */
-		void onRegionSelected(Region region, boolean switchFragment);
 	}
 	// </editor-fold>
 
@@ -507,15 +478,7 @@ public class EditWorldPropsFragment extends Fragment {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				if (!hasFocus) {
-					int newWidth = 16;
-					try {
-						newWidth = Integer.valueOf(regionWidthView.getText().toString());
-					} catch (NumberFormatException ex) {
-						if(world != null) {
-							newWidth = world.getRegionWidth();
-							regionWidthView.setText(String.valueOf(newWidth));
-						}
-					}
+					int newWidth = Integer.valueOf(regionWidthView.getText().toString());
 					if (world != null && world.getRegionWidth() != newWidth) {
 						world.setRegionWidth(newWidth);
 						eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
@@ -575,15 +538,7 @@ public class EditWorldPropsFragment extends Fragment {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				if (!hasFocus) {
-					int newHeight = 0;
-					try {
-						newHeight = Integer.valueOf(regionHeightView.getText().toString());
-					} catch (NumberFormatException ex) {
-						if(world != null) {
-							newHeight = world.getRegionHeight();
-							regionHeightView.setText(String.valueOf(newHeight));
-						}
-					}
+					int newHeight = Integer.valueOf(regionHeightView.getText().toString());
 					if (world != null && world.getRegionHeight() != newHeight) {
 						world.setRegionHeight(newHeight);
 						eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));

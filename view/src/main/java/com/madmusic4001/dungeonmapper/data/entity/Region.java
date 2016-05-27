@@ -95,6 +95,20 @@ public class Region {
 		cells.add(newCell);
 	}
 
+	@Override
+	public String toString() {
+		return "Region{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", parent=" + parent +
+				", createTs=" + createTs +
+				", modifiedTs=" + modifiedTs +
+				", width=" + width +
+				", height=" + height +
+				", cells=" + cells +
+				'}';
+	}
+
 	public int getId() {
 		return id;
 	}
