@@ -27,8 +27,8 @@ import dagger.Subcomponent;
  * @author Mark
  * Created 7/26/2015.
  */
-//@PerActivity
-//@Subcomponent(modules = ViewModule.class)
+@PerActivity
+@Subcomponent(modules = ViewModule.class)
 public interface ViewComponent {
 	void injectInto(RegionView view);
 }

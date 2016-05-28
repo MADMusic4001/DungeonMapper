@@ -72,7 +72,18 @@ import javax.inject.Inject;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import static com.madmusic4001.dungeonmapper.data.util.DataConstants.*;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.DOWN;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.Direction;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.EAST;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.NORTH;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.NORTHEAST;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.NUM_EXIT_DIRECTIONS;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.OriginLocation;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SOUTH;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SOUTHEAST;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SOUTHWEST;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.UP;
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WEST;
 
 /**
  *
@@ -163,13 +174,16 @@ public class RegionView extends GLSurfaceView {
 	private GestureDetector detector;
 
 	/**
-	 * Create a new MapView with a reference to the context and the given attributes.
+	 * Creates a new RegionView with a reference to the context and the given attributes.
+	 *
+	 * @param context  the android context
+	 * @param attrs  the view attributes for the view
 	 */
 	public RegionView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-////		ViewComponent viewComponent = ((EditWorldActivity) context).getActivityComponent()
-////				.newViewComponent(new ViewModule(this));
-//		viewComponent.injectInto(this);
+		ViewComponent viewComponent = ((EditWorldActivity) context).getActivityComponent()
+				.newViewComponent(new ViewModule(this));
+		viewComponent.injectInto(this);
 
 		initView();
 	}

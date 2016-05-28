@@ -158,6 +158,10 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 		String[] whereArgs = new String[whereArgsList.size()];
 
 		SQLiteDatabase db = sqlHelper.getReadableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			Cursor cursor = db.query(CellsContract.TABLE_NAME,
 									 projection,
@@ -175,11 +179,15 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 					cursor.moveToNext();
 				}
 				cursor.close();
-				db.setTransactionSuccessful();
+				if(newTransaction) {
+					db.setTransactionSuccessful();
+				}
 			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return cells;
 	}
@@ -215,7 +223,10 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 		values.put(CellsContract.IS_SOLID_COLUMN_NAME, cell.isSolid());
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
-		db.beginTransaction();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			if(cell.getId() == -1) {
 				cell.setId((int) db.insertOrThrow(CellsContract.TABLE_NAME, null, values));
@@ -228,13 +239,17 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 									whereArgsList.toArray(whereArgs)) != 1);
 			}
 			persistCellExits(cell, db);
-			db.setTransactionSuccessful();
+			if(newTransaction) {
+				db.setTransactionSuccessful();
+			}
 		}
 		catch(SQLiteConstraintException ex) {
 			throw new DaoException(ex, R.string.exception_cellNotSaved, cell.getX(), cell.getY());
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return result;
 	}
@@ -246,18 +261,23 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 		String whereClause = buildWhereArgs(filters, whereArgsList);
 		String[] whereArgs = new String[whereArgsList.size()];
 
-		SQLiteDatabase database = sqlHelper.getWritableDatabase();
-		database.beginTransaction();
+		SQLiteDatabase db = sqlHelper.getWritableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
-			result = database.delete(CellsContract.TABLE_NAME,
+			result = db.delete(CellsContract.TABLE_NAME,
 									  whereClause,
 									  whereArgsList.toArray(whereArgs));
-			if(result > 0) {
-				database.setTransactionSuccessful();
+			if(result > 0 && newTransaction) {
+				db.setTransactionSuccessful();
 			}
 		}
 		finally {
-			database.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return result;
 	}

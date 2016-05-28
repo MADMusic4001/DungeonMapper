@@ -136,6 +136,10 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 
 		if(terrain == null) {
 			SQLiteDatabase db = sqlHelper.getReadableDatabase();
+			boolean newTransaction = !db.inTransaction();
+			if(newTransaction) {
+				db.beginTransaction();
+			}
 			try {
 				Cursor cursor = db.query(TerrainsContract.TABLE_NAME,
 										 terrainColumnNames,
@@ -148,10 +152,14 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 					terrain = createInstance(cursor);
 				}
 				cursor.close();
-				db.setTransactionSuccessful();
+				if(newTransaction) {
+					db.setTransactionSuccessful();
+				}
 			}
 			finally {
-				db.endTransaction();
+				if(newTransaction) {
+					db.endTransaction();
+				}
 			}
 		}
 		return terrain;
@@ -165,6 +173,10 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 		String[] whereArgs = new String[whereArgsList.size()];
 
 		SQLiteDatabase db = sqlHelper.getReadableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			Cursor cursor = db.query(TerrainsContract.TABLE_NAME,
 									 terrainColumnNames,
@@ -183,7 +195,7 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 			cursor.close();
 
 			for (int i=0; i < terrainCache.size(); i++) {
-				Terrain terrain = terrainCache.get(i);
+				Terrain terrain = terrainCache.valueAt(i);
 				if (terrain.isUserCreated()) {
 					loadDisplayNames(db, terrain);
 				}
@@ -191,14 +203,18 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 					setAppBitmapForDeviceResolution(terrain);
 				}
 			}
-			db.setTransactionSuccessful();
+			if(newTransaction) {
+				db.setTransactionSuccessful();
+			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 
 		for(int i = 0; i < terrainCache.size(); i++) {
-			terrainList.add(terrainCache.get(i));
+			terrainList.add(terrainCache.valueAt(i));
 		}
 		return terrainList;
 	}
@@ -222,6 +238,10 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 		}
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			db.beginTransaction();
 			if (terrain.getId() == -1) {
@@ -246,12 +266,14 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 												values, SQLiteDatabase.CONFLICT_REPLACE) != -1);
 				}
 			}
-			if(result) {
+			if(result && newTransaction) {
 				db.setTransactionSuccessful();
 			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return result;
 	}
@@ -264,16 +286,22 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 		String[] whereArgs = new String[whereArgsList.size()];
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			result = db.delete(TerrainsContract.TABLE_NAME,
 								whereClause,
 								whereArgsList.toArray(whereArgs));
-			if(result >= 0) {
+			if(result >= 0 && newTransaction) {
 				db.setTransactionSuccessful();
 			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 
 		return result;

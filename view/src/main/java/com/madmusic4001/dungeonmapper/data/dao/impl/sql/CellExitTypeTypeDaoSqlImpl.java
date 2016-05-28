@@ -134,6 +134,10 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 		String[] whereArgs = new String[whereArgsList.size()];
 
 		SQLiteDatabase db = sqlHelper.getReadableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			Cursor cursor = db.query(CellExitsTypesContract.TABLE_NAME,
 									 new String[]{"COUNT(*)"},
@@ -146,10 +150,14 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 			cursor.moveToNext();
 			count = cursor.getInt(0);
 			cursor.close();
-			db.setTransactionSuccessful();
+			if(newTransaction) {
+				db.setTransactionSuccessful();
+			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return count;
 	}
@@ -159,18 +167,32 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 		CellExitType cellExitType = cellExitTypeCache.get(id);
 		if (cellExitType == null) {
 			SQLiteDatabase db = sqlHelper.getReadableDatabase();
-			Cursor cursor = db.query(CellExitsTypesContract.TABLE_NAME,
-									 cellExitTypesColumnNames,
-									 CellExitsTypesContract._ID + "=?",
-									 new String[]{String.valueOf(id)},
-									 null,
-									 null,
-									 null);
-
-			if (cursor.moveToFirst()) {
-				cellExitType = createInstance(cursor);
+			boolean newTransaction = !db.inTransaction();
+			if(newTransaction) {
+				db.beginTransaction();
 			}
-			cursor.close();
+			try {
+				Cursor cursor = db.query(CellExitsTypesContract.TABLE_NAME,
+										 cellExitTypesColumnNames,
+										 CellExitsTypesContract._ID + "=?",
+										 new String[]{String.valueOf(id)},
+										 null,
+										 null,
+										 null);
+
+				if (cursor.moveToFirst()) {
+					cellExitType = createInstance(cursor);
+				}
+				cursor.close();
+				if(newTransaction) {
+					db.setTransactionSuccessful();
+				}
+			}
+			finally {
+				if(newTransaction) {
+					db.endTransaction();
+				}
+			}
 		}
 		return cellExitType;
 	}
@@ -187,6 +209,10 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 
 		if(cellExitTypeCache.size() == 0) {
 			SQLiteDatabase db = sqlHelper.getReadableDatabase();
+			boolean newTransaction = !db.inTransaction();
+			if(newTransaction) {
+				db.beginTransaction();
+			}
 			try {
 				Cursor cursor = db.query(CellExitsTypesContract.TABLE_NAME,
 										 cellExitTypesColumnNames,
@@ -213,10 +239,14 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 						setAppBitmapForDeviceResolution(cellExitType);
 					}
 				}
-				db.setTransactionSuccessful();
+				if(newTransaction) {
+					db.setTransactionSuccessful();
+				}
 			}
 			finally {
-				db.endTransaction();
+				if(newTransaction) {
+					db.endTransaction();
+				}
 			}
 		}
 
@@ -237,7 +267,10 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 		values.put(CellExitsTypesContract.IS_SOLID, cellExitType.isSolid());
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
-		db.beginTransaction();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			if (cellExitType.getId() == -1) {
 				cellExitType.setId((int) db.insert(CellExitsTypesContract.TABLE_NAME, null, values));
@@ -265,12 +298,14 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 					Log.e(this.getClass().getName(), "Error closing ByteArrayOutputStream", ex);
 				}
 			}
-			if(result) {
+			if(result && newTransaction) {
 				db.setTransactionSuccessful();
 			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return result;
 	}
@@ -283,16 +318,22 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 		String[] whereArgs = new String[whereArgsList.size()];
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
 		try {
 			result = db.delete(CellExitsTypesContract.TABLE_NAME,
 								whereClause,
 								whereArgsList.toArray(whereArgs));
-			if(result >= 0) {
+			if(result >= 0 && newTransaction) {
 				db.setTransactionSuccessful();
 			}
 		}
 		finally {
-			db.endTransaction();
+			if(newTransaction) {
+				db.endTransaction();
+			}
 		}
 		return result;
 	}
