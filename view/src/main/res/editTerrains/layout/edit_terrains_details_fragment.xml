@@ -28,7 +28,7 @@
             android:paddingTop="4dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/label_displayNamesCaps"
             android:layout_below="@id/nameView"/>
         <View
@@ -60,7 +60,7 @@
             android:layout_marginLeft="4dp"
             android:layout_marginStart="4dp"
             android:layout_below="@id/displayNameEdit"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/label_bitmap"/>
         <View
             android:id="@+id/bitmapsDivider"

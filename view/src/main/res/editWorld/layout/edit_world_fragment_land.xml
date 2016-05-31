@@ -53,7 +53,7 @@
       android:layout_marginLeft="4dp"
       android:layout_marginStart="4dp"
       android:text="@string/label_originLoc"
-      android:textAppearance="?android:attr/textAppearanceMedium" />
+      android:textAppearance="?android:attr/textAppearanceSmall" />
   <Spinner
       android:id="@+id/originLocSpinner"
       android:layout_width="wrap_content"
@@ -74,7 +74,7 @@
       android:layout_marginLeft="4dp"
       android:layout_marginStart="4dp"
       android:text="@string/label_regionWidth"
-      android:textAppearance="?android:attr/textAppearanceMedium" />
+      android:textAppearance="?android:attr/textAppearanceSmall" />
   <EditText
       android:id="@+id/mapWidthEdit"
       android:layout_width="wrap_content"
@@ -108,7 +108,7 @@
       android:layout_toLeftOf="@id/mapHeightEdit"
       android:layout_toStartOf="@id/mapHeightEdit"
       android:text="@string/label_regionHeight"
-      android:textAppearance="?android:attr/textAppearanceMedium" />
+      android:textAppearance="?android:attr/textAppearanceSmall" />
   <View
       android:id="@+id/mapSizeDivider"
       style="@style/Divider"

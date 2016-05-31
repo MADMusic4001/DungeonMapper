@@ -4,10 +4,10 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="10dp"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp"
-    tools:context="com.madmusic4001.rpgmapmaker.activities.SelectWorldActivity"
+    android:layout_marginBottom="0dp"
+    android:layout_marginLeft="0dp"
+    android:layout_marginRight="0dp"
+    tools:context=".view.activities.selectWorld.SelectWorldActivity"
     tools:ignore="MergeRootFrame" >
 
     <ListView
@@ -15,8 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
         android:descendantFocusability="afterDescendants">
     </ListView>
 

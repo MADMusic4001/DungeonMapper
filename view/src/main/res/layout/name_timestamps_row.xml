@@ -11,7 +11,7 @@
         android:layout_weight="5"
         android:gravity="start"
         android:padding="10dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:hint="@string/label_worldName"/>
 
     <TextView
@@ -19,17 +19,17 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="4"
-        android:gravity="end"
+        android:gravity="start"
         android:padding="10dp"
         android:selectAllOnFocus="true"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
         android:id="@+id/modifiedView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="4"
-        android:gravity="end"
+        android:gravity="start"
         android:padding="10dp"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 </LinearLayout>
