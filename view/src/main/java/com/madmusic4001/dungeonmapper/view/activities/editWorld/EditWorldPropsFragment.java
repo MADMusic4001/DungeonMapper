@@ -45,6 +45,7 @@ import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionPersistenceEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionSavedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionSizeChangedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionsDeletedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionsLoadedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEvent;
@@ -482,9 +483,12 @@ public class EditWorldPropsFragment extends Fragment {
 					if (world != null && world.getRegionWidth() != newWidth) {
 						world.setRegionWidth(newWidth);
 						eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
+						for(Region aRegion : world.getRegionNameMap().values()) {
+							aRegion.setHeight(newWidth);
+						}
+						eventBus.post(new RegionSizeChangedEvent(world.getRegionHeight(), newWidth));
 						Log.d(((Object) this).getClass().getName(), "Executed "
 								+ "EditWorldPropsController#saveWorld(World world)");
-						//TODO: Update region fragment with new width
 					}
 				}
 			}
@@ -542,9 +546,12 @@ public class EditWorldPropsFragment extends Fragment {
 					if (world != null && world.getRegionHeight() != newHeight) {
 						world.setRegionHeight(newHeight);
 						eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
+						for(Region aRegion : world.getRegionNameMap().values()) {
+							aRegion.setHeight(newHeight);
+						}
+						eventBus.post(new RegionSizeChangedEvent(newHeight, world.getRegionWidth()));
 						Log.d(((Object) this).getClass().getName(), "Executed "
 								+ "EditWorldPropsController#saveWorld(World world)");
-						//TODO: Update region fragment with new height
 					}
 				}
 			}
