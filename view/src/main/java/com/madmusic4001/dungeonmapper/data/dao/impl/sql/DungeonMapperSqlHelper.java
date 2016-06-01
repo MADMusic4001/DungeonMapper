@@ -26,11 +26,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellDaoSqlImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.CellExitTypeTypeDaoSqlImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.TerrainDaoSqlImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 
 import javax.inject.Inject;
@@ -110,13 +105,13 @@ public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
 			values.clear();
 			values.put(CellExitTypeTypeDaoSqlImpl.CellExitsTypesContract.USER_CREATED, false);
             // Get resource array listing app defined cell exits
-			TypedArray appCellExitsInfo = resources.obtainTypedArray(R.array.appCellExitsInfo);
+			TypedArray appCellExitTypesInfo = resources.obtainTypedArray(R.array.appCellExitTypesInfo);
 			try {
-				int numCellExits = appCellExitsInfo.length();
+				int numCellExits = appCellExitTypesInfo.length();
                 // For each cell exit in the resource array
 				for(int i=0; i < numCellExits; i++) {
                     // Get resource id of the resource array for an app defined cell exit
-					int resourceId = appCellExitsInfo.getResourceId(i,
+					int resourceId = appCellExitTypesInfo.getResourceId(i,
 										DataConstants.ID_WHEN_RESOURCE_NOT_FOUND);
                     // Save the name of typed array resource in the NAME field of the table
                     values.put(CellExitTypeTypeDaoSqlImpl.CellExitsTypesContract.NAME,
@@ -135,7 +130,7 @@ public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
 				}
 			}
 			finally {
-				appCellExitsInfo.recycle();
+				appCellExitTypesInfo.recycle();
 			}
 			db.setTransactionSuccessful();
 			db.endTransaction();

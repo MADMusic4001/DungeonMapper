@@ -18,6 +18,11 @@ package com.madmusic4001.dungeonmapper.data.entity;
 
 import android.support.annotation.NonNull;
 
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -43,6 +48,10 @@ public class Region {
 	public Region(String name, World world) {
 		this.name = name;
 		this.parent = world;
+		if(world != null) {
+			this.width = world.getRegionWidth();
+			this.height = world.getRegionHeight();
+		}
 	}
 
 	/**
@@ -149,6 +158,9 @@ public class Region {
 		this.height = height;
 	}
     public List<Cell> getCells() {
+		if(cells == null) {
+			cells = new ArrayList<>(width * height);
+		}
         return cells;
     }
 	public void setCells(List<Cell> cells) {

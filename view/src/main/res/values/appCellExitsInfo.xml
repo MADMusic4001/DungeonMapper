@@ -60,7 +60,7 @@
         <item>@string/stairsDown</item>
         <item>true</item>
     </array>
-    <array name="appCellExitsInfo">
+    <array name="appCellExitTypesInfo">
         <item>@array/clear_cell_exit</item>
         <item>@array/door_cell_exit</item>
         <item>@array/secret_cell_exit</item>

@@ -49,6 +49,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.controller.events.cell.CellPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
 import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
 import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
@@ -61,6 +63,10 @@ import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldActivity;
 import com.madmusic4001.dungeonmapper.view.di.components.ViewComponent;
 import com.madmusic4001.dungeonmapper.view.di.modules.ViewModule;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -106,6 +112,8 @@ public class RegionView extends GLSurfaceView {
 	protected CellExitManager cellExitManger;
 	@Inject
 	protected TerrainManager  terrainManager;
+	@Inject
+	protected EventBus eventBus;
 
 	// Domain objects
 	private Region      region;
@@ -184,6 +192,7 @@ public class RegionView extends GLSurfaceView {
 		ViewComponent viewComponent = ((EditWorldActivity) context).getActivityComponent()
 				.newViewComponent(new ViewModule(this));
 		viewComponent.injectInto(this);
+		eventBus.register(this);
 
 		initView();
 	}
@@ -260,7 +269,7 @@ public class RegionView extends GLSurfaceView {
 		queueEvent(new Runnable() {
 			@Override
 			public void run() {
-//				worldManager.saveCell(cell);
+				eventBus.post(new CellPersistenceEvent(CellPersistenceEvent.Operation.SAVE, cell, null));
 				mapRenderer.createSpritesForCell(cell, true);
 				requestRender();
 			}
@@ -356,7 +365,7 @@ public class RegionView extends GLSurfaceView {
 					queueEvent(new Runnable() {
 						@Override
 						public void run() {
-//							worldManager.saveCell(finalCell);
+							eventBus.post(new CellPersistenceEvent(CellPersistenceEvent.Operation.SAVE, finalCell, null));
 							mapRenderer.createSpritesForCell(finalCell, true);
 						}
 					});
@@ -1144,6 +1153,11 @@ public class RegionView extends GLSurfaceView {
 
 	private void calcTotalContentSize() {
 		if (region != null) {
+			Log.i("RegionView", "region.getWidth() = " + region.getWidth());
+			Log.i("RegionView", "region.getHeight() = " + region.getHeight());
+			Log.i("RegionView", "cellSizePixels = " + cellSizePixels);
+			Log.i("RegionView", "borderLineSizePixels = " + borderLineSizePixels);
+			Log.i("RegionView", "gridLineSizePixels = " + gridLineSizePixels);
 			totalContentWidth = (int) Math.ceil(
 					region.getWidth() * cellSizePixels
 							+ 2 * borderLineSizePixels
@@ -1197,4 +1211,9 @@ public class RegionView extends GLSurfaceView {
 		return cellCoordinates;
 	}
 	// </editor-fold>
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onRegionSelected(RegionSelectedEvent event) {
+		setRegion(event.getRegion());
+	}
 }

@@ -230,7 +230,7 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 				cursor.close();
 
 				for(int i = 0; i < cellExitTypeCache.size(); i++) {
-					CellExitType cellExitType = cellExitTypeCache.get(i);
+					CellExitType cellExitType = cellExitTypeCache.valueAt(i);
 					if(cellExitType.isUserCreated()) {
 						bitmapSelectionArgs[0] = String.valueOf(cellExitType.getId());
 						loadBitmaps(db, cellExitType, bitmapSelectionArgs, currentDensityDpi);
@@ -251,8 +251,8 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 		}
 
 		List<CellExitType> cellExitTypes = new ArrayList<>(cellExitTypeCache.size());
-		for(int i=0; i < cellExitTypes.size(); i++) {
-			cellExitTypes.add(cellExitTypeCache.get(i));
+		for(int i=0; i < cellExitTypeCache.size(); i++) {
+			cellExitTypes.add(cellExitTypeCache.valueAt(i));
 		}
 		return cellExitTypes;
 	}
@@ -387,7 +387,6 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 											   ID_WHEN_RESOURCE_NOT_FOUND)));
 			BitmapDrawable drawable;
 			if(cellExitInfo.getResourceId(UP, ID_WHEN_RESOURCE_NOT_FOUND) != ID_WHEN_RESOURCE_NOT_FOUND) {
-				Log.d(this.getClass().getName(), "Resource id = " + cellExitInfo.getResourceId(UP, ID_WHEN_RESOURCE_NOT_FOUND));
 				if ((drawable = ((BitmapDrawable) cellExitInfo.getDrawable(UP))) != null) {
 					cellExitType.addBitmapForDirection(UP, drawable.getBitmap());
 				}

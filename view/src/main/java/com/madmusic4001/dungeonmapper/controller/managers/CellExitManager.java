@@ -17,6 +17,7 @@
 package com.madmusic4001.dungeonmapper.controller.managers;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
@@ -99,6 +100,7 @@ public class CellExitManager {
     private BitmapPacker createPacker() {
         // Estimate atlas size based on number of cell exits using device dpi bitmap sizes
         int numExits = getCellExits().size()*2;
+		Log.e("CellExitManager", "numExits = " + numExits);
         int width = (int)Math.ceil(Math.sqrt(numExits));
         // Calculate how many pixels would be needed to put all bitmaps in row
         // then take the square root to get the size to make it a square texture atlas
@@ -111,7 +113,7 @@ public class CellExitManager {
         rowLength |= rowLength >> 8;
         rowLength |= rowLength >> 16;
         rowLength++;
-        return new BitmapPacker(rowLength, rowLength, PADDING_SIZE, true);
+        return rowLength > 0 ? new BitmapPacker(rowLength, rowLength, PADDING_SIZE, true) : null;
     }
 
     private void packBitmaps(BitmapPacker packer) {
@@ -142,7 +144,9 @@ public class CellExitManager {
     public BitmapPacker getBitmapPacker() {
         if(packer == null) {
             packer = createPacker();
-            packBitmaps(packer);
+			if(packer != null) {
+				packBitmaps(packer);
+			}
         }
         return packer;
     }
