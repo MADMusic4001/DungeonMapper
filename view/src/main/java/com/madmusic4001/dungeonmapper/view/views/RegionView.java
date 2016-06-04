@@ -92,7 +92,7 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.UP;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WEST;
 
 /**
- *
+ * Draws a map of a region.
  */
 public class RegionView extends GLSurfaceView {
 	private static final int   FLOAT_SIZE           = 4;
@@ -1215,5 +1215,6 @@ public class RegionView extends GLSurfaceView {
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onRegionSelected(RegionSelectedEvent event) {
 		setRegion(event.getRegion());
+		Log.e("RegionView", "Selected region: " + region);
 	}
 }

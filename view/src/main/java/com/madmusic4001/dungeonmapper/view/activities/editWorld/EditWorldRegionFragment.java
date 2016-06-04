@@ -403,7 +403,7 @@ public class EditWorldRegionFragment extends Fragment {
 	public void onRegionsLoaded(RegionsLoadedEvent event) {
 		if(event.isSuccessful()) {
 			for(Region aRegion : event.getItems()) {
-				Log.e("EditWorldRegionFrag", "Region loaded: " + region);
+				Log.e("EditWorldRegionFrag", "Region loaded: " + aRegion);
 				if(aRegion.getId() == this.regionId && aRegion.getParent().getId() == this.worldId) {
 					this.region = aRegion;
 					regionNameView.setText(aRegion.getName());
