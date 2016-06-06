@@ -15,6 +15,9 @@
  */
 package com.madmusic4001.dungeonmapper.controller.events.world;
 
+import com.madmusic4001.dungeonmapper.controller.events.DeletedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.LoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.SavedEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 
@@ -23,7 +26,7 @@ import java.util.Collection;
 /**
  * Event requesting an persistent storage operation to be performed on a {@link World} instance or instances.
  */
-public class WorldPersistenceRequest {
+public class WorldEvent {
 	public static class Save {
 		private World                 world;
 
@@ -75,6 +78,24 @@ public class WorldPersistenceRequest {
 		// Getters
 		public Collection<DaoFilter> getFilters() {
 			return filters;
+		}
+	}
+
+	public static class Saved extends SavedEvent<World> {
+		public Saved(boolean successful, World item) {
+			super(successful, item);
+		}
+	}
+
+	public static class Deleted extends DeletedEvent<World> {
+		public Deleted(boolean successful, int numDeleted, Collection<World> deleted) {
+			super(successful, numDeleted, deleted);
+		}
+	}
+
+	public static class Loaded extends LoadedEvent<World> {
+		public Loaded(boolean successful, Collection<World> items) {
+			super(successful, items);
 		}
 	}
 }

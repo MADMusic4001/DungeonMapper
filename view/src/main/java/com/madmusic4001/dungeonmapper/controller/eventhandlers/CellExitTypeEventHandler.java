@@ -2,12 +2,10 @@ package com.madmusic4001.dungeonmapper.controller.eventhandlers;
 
 import android.util.Log;
 
-import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypePersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypePersistenceEventPosting;
-import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypeSavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypesDeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypesLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypeEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypeEventPosting;
 import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
 
@@ -44,64 +42,60 @@ public class CellExitTypeEventHandler {
      * Responds to requests to perform a persistent storage operation for a CellExitType instance or instances. The work will be
      * performed a separate thread from the poster.
      *
-     * @param event  a {@link CellExitTypePersistenceEvent} instance containing the information need to complete the request
+     * @param event  a {@link CellExitTypeEvent} instance containing the information need to complete the request
      */
     @Subscribe(threadMode = ThreadMode.ASYNC)
-    public void onCellPersistenceEvent(CellExitTypePersistenceEvent event) {
-        switch (event.getOperation()) {
-            case SAVE:
-                saveCell(event);
-                break;
-            case DELETE:
-                deleteCells(event);
-                break;
-            case LOAD:
-                loadCells(event);
-                break;
-        }
+    public void onSaveCellExitTypeEvent(CellExitTypeEvent.Save event) {
+        saveCellExitType(event.getCellExitType());
+    }
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void onDeleteCellExitTypesEvent(CellExitTypeEvent.Delete event) {
+        deleteCellExitTypes(event.getFilters());
+    }
+    @Subscribe(threadMode = ThreadMode.ASYNC)
+    public void onLoadCellExitTypesEvent(CellExitTypeEvent.Load event) {
+        loadCellExitTypes(event.getFilters());
     }
 
     /**
      * Responds to requests to perform a persistent storage operation for a CellExitType instance or instances. The work will be
      * performed in the same thread as the poster.
      *
-     * @param event  a {@link CellExitTypePersistenceEventPosting} instance containing the information need to complete the request
+     * @param event  a {@link CellExitTypeEventPosting} instance containing the information need to complete the request
      */
     @Subscribe(threadMode = ThreadMode.POSTING)
-    public void onCellPersistenceEvent(CellExitTypePersistenceEventPosting event) {
-        switch (event.getOperation()) {
-            case SAVE:
-                saveCell(event);
-                break;
-            case DELETE:
-                deleteCells(event);
-                break;
-            case LOAD:
-                loadCells(event);
-                break;
-        }
+    public void onSaveCellExitTypeEvent(CellExitTypeEventPosting.Save event) {
+        saveCellExitType(event.getCellExitType());
+    }
+    @Subscribe(threadMode = ThreadMode.POSTING)
+    public void onDeleteCellExitTypesEvent(CellExitTypeEventPosting.Delete event) {
+        deleteCellExitTypes(event.getFilters());
+    }
+    @Subscribe(threadMode = ThreadMode.POSTING)
+    public void onLoadCellExitTypesEvent(CellExitTypeEventPosting.Load event) {
+        loadCellExitTypes(event.getFilters());
     }
 
-    private void saveCell(CellExitTypePersistenceEvent event) {
-        eventBus.post(new CellExitTypeSavedEvent(cellExitTypeDao.save(event.getCellExitType()), event.getCellExitType()));
+    private void saveCellExitType(CellExitType cellExitType) {
+        eventBus.post(new CellExitTypeEvent.Saved(cellExitTypeDao.save(cellExitType), cellExitType));
     }
 
-    private void deleteCells(CellExitTypePersistenceEvent event) {
-        Collection<CellExitType> cellExitTypesDeleted = cellExitTypeDao.load(event.getFilters());
-        int deletedCount = cellExitTypeDao.delete(event.getFilters());
-        eventBus.post(new CellExitTypesDeletedEvent(deletedCount >= 0, deletedCount, cellExitTypesDeleted));
+    private void deleteCellExitTypes(Collection<DaoFilter> filters) {
+        Collection<CellExitType> cellExitTypesDeleted = cellExitTypeDao.load(filters);
+        int deletedCount = cellExitTypeDao.delete(filters);
+        eventBus.post(new CellExitTypeEvent.Deleted(deletedCount >= 0, deletedCount, cellExitTypesDeleted));
     }
 
-    private void loadCells(CellExitTypePersistenceEvent event) {
+    private void loadCellExitTypes(Collection<DaoFilter> filters) {
         Collection<CellExitType> cellExitTypes = null;
         boolean success = true;
         try {
-            cellExitTypes = cellExitTypeDao.load(event.getFilters());
+            cellExitTypes = cellExitTypeDao.load(filters);
         }
         catch(DaoException ex) {
             Log.e("CellExitTypeEventHandle", ex.getMessage(), ex);
             success = false;
         }
-        eventBus.post(new CellExitTypesLoadedEvent(success, cellExitTypes));
+        eventBus.post(new CellExitTypeEvent.Loaded(success, cellExitTypes));
     }
 }

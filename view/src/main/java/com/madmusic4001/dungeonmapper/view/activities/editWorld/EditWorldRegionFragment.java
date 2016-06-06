@@ -36,9 +36,9 @@ import android.widget.Toast;
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellExitTypeEventHandler;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandler;
-import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypesLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypeEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
-import com.madmusic4001.dungeonmapper.controller.events.terrain.TerrainsLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.terrain.TerrainEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
@@ -439,7 +439,7 @@ public class EditWorldRegionFragment extends Fragment {
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onLoadCellExitTypesComplete(CellExitTypesLoadedEvent event) {
+	public void onLoadCellExitTypesComplete(CellExitTypeEvent.Loaded event) {
 		String toastString;
 		if(event.isSuccessful()) {
 			toastString = String.format(getString(R.string.toast_cell_exit_types_loaded), event.getItems().size());
@@ -471,7 +471,7 @@ public class EditWorldRegionFragment extends Fragment {
 	}
 
 	@Subscribe
-	public void onLoadTerrainsComplete(TerrainsLoadedEvent event) {
+	public void onLoadTerrainsComplete(TerrainEvent.Loaded event) {
 		String toastString;
 
 		if(event.isSuccessful()) {

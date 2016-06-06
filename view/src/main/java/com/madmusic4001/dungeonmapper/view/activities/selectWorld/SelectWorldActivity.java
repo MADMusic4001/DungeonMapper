@@ -36,8 +36,7 @@ import com.madmusic4001.dungeonmapper.controller.events.DatabaseExportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.DatabaseImportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ExportDatabaseEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ImportDatabaseEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceRequest;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceResult;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
@@ -116,7 +115,7 @@ public class SelectWorldActivity extends Activity implements
 		setContentView(R.layout.select_world_layout);
 		initListView();
 
-		eventBus.post(new WorldPersistenceRequest.Load(null));
+		eventBus.post(new WorldEvent.Load(null));
 	}
 
 	@Override
@@ -139,7 +138,7 @@ public class SelectWorldActivity extends Activity implements
 				newWorld.setRegionHeight(16);
 				newWorld.setOriginLocation(DataConstants.SOUTHWEST);
 				newWorld.setOriginOffset(0);
-				eventBus.post(new WorldPersistenceRequest.Save(newWorld));
+				eventBus.post(new WorldEvent.Save(newWorld));
 				return true;
 			case R.id.action_manage_terrains:
 				Intent intent = new Intent(this, EditTerrainActivity.class);
@@ -193,7 +192,7 @@ public class SelectWorldActivity extends Activity implements
 				filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 														  WorldDaoSqlImpl.WorldsContract._ID,
 														  String.valueOf(world.getId())));
-				eventBus.post(new WorldPersistenceRequest.Delete(filters));
+				eventBus.post(new WorldEvent.Delete(filters));
 				return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -209,7 +208,7 @@ public class SelectWorldActivity extends Activity implements
 	 * @param event  a WorldSavedEvent instance
 	 */
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldSavedEvent(WorldPersistenceResult.Saved event) {
+	public void onWorldSavedEvent(WorldEvent.Saved event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
@@ -230,7 +229,7 @@ public class SelectWorldActivity extends Activity implements
 	 * @param event  a LoadedEvent<World> instance
 	 */
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldsLoadedEvent(WorldPersistenceResult.Loaded event) {
+	public void onWorldsLoadedEvent(WorldEvent.Loaded event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
@@ -246,7 +245,7 @@ public class SelectWorldActivity extends Activity implements
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldDeletedEvent(WorldPersistenceResult.Deleted event) {
+	public void onWorldDeletedEvent(WorldEvent.Deleted event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
