@@ -37,10 +37,7 @@ import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellExitTypeEventHandler;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypesLoadedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionSavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionsLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.events.terrain.TerrainsLoadedEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
@@ -400,7 +397,7 @@ public class EditWorldRegionFragment extends Fragment {
 
 	// <editor-fold desc="Eventbus subscription handler methods">
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionsLoaded(RegionsLoadedEvent event) {
+	public void onRegionsLoaded(RegionEvent.Loaded event) {
 		if(event.isSuccessful()) {
 			for(Region aRegion : event.getItems()) {
 				Log.e("EditWorldRegionFrag", "Region loaded: " + aRegion);
@@ -413,7 +410,7 @@ public class EditWorldRegionFragment extends Fragment {
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionSelected(RegionSelectedEvent event) {
+	public void onRegionSelected(RegionEvent.Selected event) {
 		this.region = event.getRegion();
 		if(region != null) {
 			this.regionId = region.getId();
@@ -428,7 +425,7 @@ public class EditWorldRegionFragment extends Fragment {
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionSaved(RegionSavedEvent event) {
+	public void onRegionSaved(RegionEvent.Saved event) {
 		String toastString;
 		Region region = event.getItem();
 
@@ -652,7 +649,7 @@ public class EditWorldRegionFragment extends Fragment {
 			filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 					RegionDaoSqlImpl.RegionsContract._ID,
 					String.valueOf(regionId)));
-			eventBus.post(new RegionPersistenceEvent(RegionPersistenceEvent.Operation.LOAD, null, filters));
+			eventBus.post(new RegionEvent.Load(filters));
 		}
 	}
 	// </editor-fold>

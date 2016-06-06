@@ -17,11 +17,9 @@ package com.madmusic4001.dungeonmapper.controller.eventhandlers;
 
 import android.util.Log;
 
-import com.madmusic4001.dungeonmapper.controller.events.DeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionSavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionsDeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionsLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionEventPosting;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.RegionDao;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
@@ -57,64 +55,58 @@ public class RegionEventHandler {
 	 * Responds to requests to perform a persistent storage operation for a Region instance or instances. The work will be
 	 * performed a separate thread from the poster.
 	 *
-	 * @param event  a {@link RegionPersistenceEvent} instance containing the information need to complete the request
+	 * @param event  a {@link RegionEvent} instance containing the information need to complete the request
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
-	public void onRegionPersistenceEvent(RegionPersistenceEvent event) {
-		switch (event.getOperation()) {
-			case SAVE:
-				saveRegion(event);
-				break;
-			case DELETE:
-				deleteRegions(event);
-				break;
-			case LOAD:
-				loadRegions(event);
-				break;
-		}
+	public void onRegionSaveRequest(RegionEvent.Save event) {
+		saveRegion(event.getRegion());
 	}
 
-//	/**
-//	 * Responds to requests to perform a persistent storage operation for a Region instance or instances. The work will be
-//	 * performed in the same thread as the poster.
-//	 *
-//	 * @param event  a {@link RegionPersistenceEventPosting} instance containing the information need to complete the request
-//	 */
-//	@Subscribe(threadMode = ThreadMode.POSTING)
-//	public void onRegionPersistenceEvent(RegionPersistenceEventPosting event) {
-//		switch (event.getOperation()) {
-//			case SAVE:
-//				saveRegion(event);
-//				break;
-//			case DELETE:
-//				deleteRegions(event);
-//				break;
-//			case LOAD:
-//				loadRegions(event);
-//				break;
-//		}
-//	}
-
-	private void saveRegion(RegionPersistenceEvent event) {
-		eventBus.post(new RegionSavedEvent(regionDao.save(event.getRegion()), event.getRegion()));
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onRegionDeleteRequest(RegionEvent.Delete event) {
+		deleteRegions(event.getFilters());
 	}
 
-	private void deleteRegions(RegionPersistenceEvent event) {
-		Collection<Region> regionsDeleted = regionDao.load(event.getFilters());
-		int deletedCount = regionDao.delete(event.getFilters());
-		eventBus.post(new RegionsDeletedEvent(deletedCount >= 0, deletedCount, regionsDeleted));
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onRegionsLoadRequest(RegionEvent.Load event) {
+		loadRegions(event.getFilters());
 	}
 
-	private void loadRegions(RegionPersistenceEvent event) {
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onRegionSaveRequest(RegionEventPosting.Save event) {
+		saveRegion(event.getRegion());
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onRegionDeleteRequest(RegionEventPosting.Delete event) {
+		deleteRegions(event.getFilters());
+	}
+
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onRegionsLoadRequest(RegionEventPosting.Load event) {
+		loadRegions(event.getFilters());
+	}
+
+	private void saveRegion(Region region) {
+		eventBus.post(new RegionEvent.Saved(regionDao.save(region), region));
+	}
+
+	private void deleteRegions(Collection<DaoFilter> filters) {
+		Collection<Region> regionsDeleted = regionDao.load(filters);
+		int deletedCount = regionDao.delete(filters);
+		eventBus.post(new RegionEvent.Deleted(deletedCount >= 0, deletedCount, regionsDeleted));
+	}
+
+	private void loadRegions(Collection<DaoFilter> filters) {
 		Collection<Region> regions = null;
 		boolean success = true;
 		try {
-			regions = regionDao.load(event.getFilters());
+			regions = regionDao.load(filters);
 		}
 		catch(DaoException ex) {
 			Log.e("RegionEventHandler", ex.getMessage(), ex);
 			success = false;
 		}
-		eventBus.post(new RegionsLoadedEvent(success, regions));
+		eventBus.post(new RegionEvent.Loaded(success, regions));
 	}
 }

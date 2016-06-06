@@ -42,15 +42,9 @@ import android.widget.Toast;
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.RegionEventHandler;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionSavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionSizeChangedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionsDeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionsLoadedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldSavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldsLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceRequest;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceResult;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
@@ -181,7 +175,7 @@ public class EditWorldPropsFragment extends Fragment {
 		if (id == R.id.actionNewRegion) {
 			if(world != null) {
 				Region region = new Region(getString(R.string.defaultRegionName), world);
-				eventBus.post(new RegionPersistenceEvent(RegionPersistenceEvent.Operation.SAVE, region, null));
+				eventBus.post(new RegionEvent.Save(region));
 			}
 			result = true;
 		}
@@ -213,7 +207,7 @@ public class EditWorldPropsFragment extends Fragment {
 			case R.id.region_item_edit:
 				region = (Region)regionsListView.getItemAtPosition(info.position);
 				if(region != null) {
-					eventBus.post(new RegionSelectedEvent(region, true));
+					eventBus.post(new RegionEvent.Selected(region, true));
 					return true;
 				}
 				else {
@@ -222,7 +216,11 @@ public class EditWorldPropsFragment extends Fragment {
 			case R.id.region_item_delete:
 				region = (Region)regionsListView.getItemAtPosition(info.position);
 				if(region != null) {
-					eventBus.post(new RegionPersistenceEvent(RegionPersistenceEvent.Operation.DELETE, region, null));
+					Collection<DaoFilter> filters = new ArrayList<>(1);
+					filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+							RegionDaoSqlImpl.RegionsContract._ID,
+							String.valueOf(region.getId())));
+					eventBus.post(new RegionEvent.Delete(filters));
 					return true;
 				}
 				else {
@@ -240,13 +238,13 @@ public class EditWorldPropsFragment extends Fragment {
 		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 												  WorldDaoSqlImpl.WorldsContract._ID,
 												  String.valueOf(worldId)));
-		eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.LOAD, null, filters));
+		eventBus.post(new WorldPersistenceRequest.Load(filters));
 	}
 	// </editor-fold>
 
 	// <editor-fold desc="EventBus subscriber methods">
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldsLoaded(WorldsLoadedEvent event) {
+	public void onWorldsLoaded(WorldPersistenceResult.Loaded event) {
 		this.world = event.getItems().iterator().next();
 
 		if(worldNameView != null) {
@@ -270,11 +268,11 @@ public class EditWorldPropsFragment extends Fragment {
 		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 												  RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
 												  String.valueOf(world.getId())));
-		eventBus.post(new RegionPersistenceEvent(RegionPersistenceEvent.Operation.LOAD, null, filters));
+		eventBus.post(new RegionEvent.Load(filters));
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldSaved(WorldSavedEvent event) {
+	public void onWorldSaved(WorldPersistenceResult.Saved event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
@@ -287,7 +285,7 @@ public class EditWorldPropsFragment extends Fragment {
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionsLoaded(RegionsLoadedEvent event) {
+	public void onRegionsLoaded(RegionEvent.Loaded event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
@@ -306,12 +304,12 @@ public class EditWorldPropsFragment extends Fragment {
 		}
 		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
 		if(event.getItems().size() > 0) {
-			eventBus.post(new RegionSelectedEvent((Region) event.getItems().toArray()[0], false));
+			eventBus.post(new RegionEvent.Selected((Region) event.getItems().toArray()[0], false));
 		}
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionSaved(RegionSavedEvent event) {
+	public void onRegionSaved(RegionEvent.Saved event) {
 		if(event.isSuccessful()) {
 			regionListAdapter.add(event.getItem());
 			regionListAdapter.notifyDataSetChanged();
@@ -319,7 +317,7 @@ public class EditWorldPropsFragment extends Fragment {
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionsDeleted(RegionsDeletedEvent event) {
+	public void onRegionsDeleted(RegionEvent.Deleted event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
@@ -372,7 +370,7 @@ public class EditWorldPropsFragment extends Fragment {
 					String newName = worldNameView.getText().toString();
 					if (world != null && !world.getName().equals(newName)) {
 						world.setName(newName);
-						eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
+						eventBus.post(new WorldPersistenceRequest.Save(world));
 					}
 				}
 			}
@@ -391,7 +389,7 @@ public class EditWorldPropsFragment extends Fragment {
 						int newOffset = buttonView.isChecked() ? 0 : 1;
 						if (world != null && world.getOriginOffset() != newOffset) {
 							world.setOriginOffset(newOffset);
-							eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
+							eventBus.post(new WorldPersistenceRequest.Save(world));
 							Log.d(((Object) this).getClass().getName(), "Executed "
 									+ "EditWorldPropsController#saveWorld(World world)");
 						}
@@ -417,7 +415,7 @@ public class EditWorldPropsFragment extends Fragment {
 				@OriginLocation int newPosition = (int) parent.getSelectedItemId();
 				if (world != null && world.getOriginLocation() != newPosition) {
 					world.setOriginLocation(newPosition);
-					eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
+					eventBus.post(new WorldPersistenceRequest.Save(world));
 					Log.d(((Object) this).getClass().getName(), "Executed "
 							+ "EditWorldPropsController#saveWorld(World world)");
 				}
@@ -467,7 +465,7 @@ public class EditWorldPropsFragment extends Fragment {
 				int newWidth = Integer.valueOf(v.getText().toString());
 				if (world != null && world.getRegionWidth() != newWidth) {
 					world.setRegionWidth(newWidth);
-					eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
+					eventBus.post(new WorldPersistenceRequest.Save(world));
 					Log.d(((Object) this).getClass().getName(), "Executed "
 							+ "EditWorldPropsController#saveWorld(World world)");
 					//TODO: Update region fragment with new width
@@ -482,11 +480,11 @@ public class EditWorldPropsFragment extends Fragment {
 					int newWidth = Integer.valueOf(regionWidthView.getText().toString());
 					if (world != null && world.getRegionWidth() != newWidth) {
 						world.setRegionWidth(newWidth);
-						eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
+						eventBus.post(new WorldPersistenceRequest.Save(world));
 						for(Region aRegion : world.getRegionNameMap().values()) {
-							aRegion.setHeight(newWidth);
+							aRegion.setWidth(newWidth);
 						}
-						eventBus.post(new RegionSizeChangedEvent(world.getRegionHeight(), newWidth));
+						eventBus.post(new RegionEvent.SizeChanged(world.getRegionHeight(), newWidth));
 						Log.d(((Object) this).getClass().getName(), "Executed "
 								+ "EditWorldPropsController#saveWorld(World world)");
 					}
@@ -530,7 +528,7 @@ public class EditWorldPropsFragment extends Fragment {
 				int newHeight = Integer.valueOf(v.getText().toString());
 				if (world != null && world.getRegionHeight() != newHeight) {
 					world.setRegionHeight(newHeight);
-					eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
+					eventBus.post(new WorldPersistenceRequest.Save(world));
 					Log.d(((Object) this).getClass().getName(), "Executed "
 							+ "EditWorldPropsController#saveWorld(World world)");
 					//TODO: Update region fragment with new height
@@ -545,11 +543,11 @@ public class EditWorldPropsFragment extends Fragment {
 					int newHeight = Integer.valueOf(regionHeightView.getText().toString());
 					if (world != null && world.getRegionHeight() != newHeight) {
 						world.setRegionHeight(newHeight);
-						eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, world, null));
+						eventBus.post(new WorldPersistenceRequest.Save(world));
 						for(Region aRegion : world.getRegionNameMap().values()) {
 							aRegion.setHeight(newHeight);
 						}
-						eventBus.post(new RegionSizeChangedEvent(newHeight, world.getRegionWidth()));
+						eventBus.post(new RegionEvent.SizeChanged(newHeight, world.getRegionWidth()));
 						Log.d(((Object) this).getClass().getName(), "Executed "
 								+ "EditWorldPropsController#saveWorld(World world)");
 					}
@@ -597,7 +595,7 @@ public class EditWorldPropsFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Region region = (Region) regionsListView.getItemAtPosition(position);
-				eventBus.post(new RegionSelectedEvent(region, true));
+				eventBus.post(new RegionEvent.Selected(region, true));
 			}
 		});
 		registerForContextMenu(regionsListView);

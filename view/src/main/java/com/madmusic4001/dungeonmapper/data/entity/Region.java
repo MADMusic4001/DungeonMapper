@@ -18,10 +18,8 @@ package com.madmusic4001.dungeonmapper.data.entity;
 
 import android.support.annotation.NonNull;
 
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
-
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -106,16 +104,17 @@ public class Region {
 
 	@Override
 	public String toString() {
-		return "Region{" +
-				"id=" + id +
-				", name='" + name + '\'' +
-				", parent=" + parent +
-				", createTs=" + createTs +
-				", modifiedTs=" + modifiedTs +
-				", width=" + width +
-				", height=" + height +
-				", cells=" + cells +
-				'}';
+		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+				.append("id", id)
+				.append("name", name)
+				.append("parent.id", parent.getId())
+				.append("parent.name", parent.getName())
+				.append("createTs", createTs)
+				.append("modifiedTs", modifiedTs)
+				.append("width", width)
+				.append("height", height)
+				.append("cells", cells)
+				.toString();
 	}
 
 	public int getId() {

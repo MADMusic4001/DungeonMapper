@@ -17,12 +17,10 @@ package com.madmusic4001.dungeonmapper.controller.eventhandlers;
 
 import android.util.Log;
 
-import com.madmusic4001.dungeonmapper.controller.events.DeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEventPosting;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldSavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldsDeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldsLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceRequest;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceRequestPosting;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceResult;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
@@ -58,64 +56,79 @@ public class WorldEventHandler {
 	 * Responds to requests to perform a persistent storage operation for a World instance or instances. The work will be
 	 * performed a separate thread from the poster.
 	 *
-	 * @param event  a {@link WorldPersistenceEvent} instance containing the information need to complete the request
+	 * @param event  a {@link WorldPersistenceRequest} instance containing the information need to complete the request
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
-	public void onWorldPersistenceEvent(WorldPersistenceEvent event) {
-		switch (event.getOperation()) {
-			case SAVE:
-				saveWorld(event);
-				break;
-			case DELETE:
-				deleteWorld(event);
-				break;
-			case LOAD:
-				loadWorlds(event);
-				break;
-		}
+	public void onWorldSaveEvent(WorldPersistenceRequest.Save event) {
+		saveWorld(event.getWorld());
 	}
 
-	/**
-	 * Responds to requests to perform a persistent storage operation for a World instance or instances. The work will be
-	 * performed in the same thread as the poster.
-	 *
-	 * @param event  a {@link WorldPersistenceEventPosting} instance containing the information need to complete the request
-	 */
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onWorldDeleteEvent(WorldPersistenceRequest.Delete event) {
+		deleteWorld(event.getFilters());
+	}
+
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onWorldsLoadEvent(WorldPersistenceRequest.Load event) {
+		loadWorlds(event.getFilters());
+	}
+
 	@Subscribe(threadMode = ThreadMode.POSTING)
-	public void onWorldPersistenceEvent(WorldPersistenceEventPosting event) {
-		switch (event.getOperation()) {
-			case SAVE:
-				saveWorld(event);
-				break;
-			case DELETE:
-				deleteWorld(event);
-				break;
-			case LOAD:
-				loadWorlds(event);
-				break;
-		}
+	public void onWorldSaveEvent(WorldPersistenceRequestPosting.Save event) {
+		saveWorld(event.getWorld());
 	}
 
-	private void saveWorld(WorldPersistenceEvent event) {
-		eventBus.post(new WorldSavedEvent(worldDao.save(event.getWorld()), event.getWorld()));
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onWorldDeleteEvent(WorldPersistenceRequestPosting.Delete event) {
+		deleteWorld(event.getFilters());
 	}
 
-	private void deleteWorld(WorldPersistenceEvent event) {
-		Collection<World> worldsDeleted = worldDao.load(event.getFilters());
-		int deletedCount = worldDao.delete(event.getFilters());
-		eventBus.post(new WorldsDeletedEvent(deletedCount >= 0, deletedCount, worldsDeleted));
+	@Subscribe(threadMode = ThreadMode.POSTING)
+	public void onWorldsLoadEvent(WorldPersistenceRequestPosting.Load event) {
+		loadWorlds(event.getFilters());
 	}
 
-	private void loadWorlds(WorldPersistenceEvent event) {
+//	/**
+//	 * Responds to requests to perform a persistent storage operation for a World instance or instances. The work will be
+//	 * performed in the same thread as the poster.
+//	 *
+//	 * @param event  a {@link WorldPersistenceEventPosting} instance containing the information need to complete the request
+//	 */
+//	@Subscribe(threadMode = ThreadMode.POSTING)
+//	public void onWorldPersistenceEvent(WorldPersistenceEventPosting event) {
+//		switch (event.getOperation()) {
+//			case SAVE:
+//				saveWorld(event);
+//				break;
+//			case DELETE:
+//				deleteWorld(event);
+//				break;
+//			case LOAD:
+//				loadWorlds(event);
+//				break;
+//		}
+//	}
+
+	private void saveWorld(World world) {
+		eventBus.post(new WorldPersistenceResult.Saved(worldDao.save(world), world));
+	}
+
+	private void deleteWorld(Collection<DaoFilter> filters) {
+		Collection<World> worldsDeleted = worldDao.load(filters);
+		int deletedCount = worldDao.delete(filters);
+		eventBus.post(new WorldPersistenceResult.Deleted(deletedCount >= 0, deletedCount, worldsDeleted));
+	}
+
+	private void loadWorlds(Collection<DaoFilter> filters) {
 		Collection<World> worlds = null;
 		boolean success = true;
 		try {
-			worlds = worldDao.load(event.getFilters());
+			worlds = worldDao.load(filters);
 		}
 		catch(DaoException ex) {
 			Log.e("WorldEventHandler", ex.getMessage(), ex);
 			success = false;
 		}
-		eventBus.post(new WorldsLoadedEvent(success, worlds));
+		eventBus.post(new WorldPersistenceResult.Loaded(success, worlds));
 	}
 }

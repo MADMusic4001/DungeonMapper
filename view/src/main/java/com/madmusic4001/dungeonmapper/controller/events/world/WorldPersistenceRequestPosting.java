@@ -24,11 +24,28 @@ import java.util.Collection;
  * Event representing a request to take some action on one or more {@link World} instances and that needs to
  * execute in the same thread as the posting thread.
  */
-public class WorldPersistenceEventPosting extends WorldPersistenceEvent{
-	/**
-	 * @see WorldPersistenceEvent#WorldPersistenceEvent(Operation, World, Collection)
-     */
-	public WorldPersistenceEventPosting(Operation operation, World world, Collection<DaoFilter> filters) {
-		super(operation, world, filters);
+public class WorldPersistenceRequestPosting extends WorldPersistenceRequest {
+	public static class Save extends WorldPersistenceRequest.Save {
+		public Save(World world) {
+			super(world);
+		}
 	}
+
+	public static class Delete extends WorldPersistenceRequest.Delete {
+		public Delete(Collection<DaoFilter> filters) {
+			super(filters);
+		}
+	}
+
+	public static class Load extends WorldPersistenceRequest.Load {
+		public Load(Collection<DaoFilter> filters) {
+			super(filters);
+		}
+	}
+//	/**
+//	 * @see WorldPersistenceEvent#WorldPersistenceEvent(Operation, World, Collection)
+//     */
+//	public WorldPersistenceEventPosting(Operation operation, World world, Collection<DaoFilter> filters) {
+//		super(operation, world, filters);
+//	}
 }

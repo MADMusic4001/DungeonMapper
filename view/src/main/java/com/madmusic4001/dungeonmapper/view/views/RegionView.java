@@ -50,7 +50,7 @@ import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.events.cell.CellPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
 import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
@@ -1213,7 +1213,7 @@ public class RegionView extends GLSurfaceView {
 	// </editor-fold>
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionSelected(RegionSelectedEvent event) {
+	public void onRegionSelected(RegionEvent.Selected event) {
 		setRegion(event.getRegion());
 		Log.e("RegionView", "Selected region: " + region);
 	}

@@ -20,13 +20,12 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.RegionEventHandler;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionSelectedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 import com.madmusic4001.dungeonmapper.view.di.components.ActivityComponent;
@@ -155,7 +154,7 @@ public class EditWorldActivity extends Activity {
 
 	// <editor-fold> desc="EventBus event handler methods">
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionSelected(RegionSelectedEvent event) {
+	public void onRegionSelected(RegionEvent.Selected event) {
 		selectedRegionId = event.getRegion().getId();
 		if(event.isSwitchFragments()) {
 			if (!getResources().getBoolean(R.bool.has_two_panes)) {

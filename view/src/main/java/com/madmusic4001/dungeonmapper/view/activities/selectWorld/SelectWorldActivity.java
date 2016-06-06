@@ -36,10 +36,8 @@ import com.madmusic4001.dungeonmapper.controller.events.DatabaseExportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.DatabaseImportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ExportDatabaseEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ImportDatabaseEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldSavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldsDeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldsLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceRequest;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldPersistenceResult;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
@@ -118,7 +116,7 @@ public class SelectWorldActivity extends Activity implements
 		setContentView(R.layout.select_world_layout);
 		initListView();
 
-		eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.LOAD, null, null));
+		eventBus.post(new WorldPersistenceRequest.Load(null));
 	}
 
 	@Override
@@ -141,7 +139,7 @@ public class SelectWorldActivity extends Activity implements
 				newWorld.setRegionHeight(16);
 				newWorld.setOriginLocation(DataConstants.SOUTHWEST);
 				newWorld.setOriginOffset(0);
-				eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.SAVE, newWorld, null));
+				eventBus.post(new WorldPersistenceRequest.Save(newWorld));
 				return true;
 			case R.id.action_manage_terrains:
 				Intent intent = new Intent(this, EditTerrainActivity.class);
@@ -191,17 +189,12 @@ public class SelectWorldActivity extends Activity implements
 			case R.id.select_world_item_delete:
 				world = (World)listView.getItemAtPosition(info.position);
 				Log.e("SelectWorldActivity", "Deleting world id " + world.getId());
-				if(world != null) {
-					Collection<DaoFilter> filters = new ArrayList<>();
-					filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-															  WorldDaoSqlImpl.WorldsContract._ID,
-															  String.valueOf(world.getId())));
-					eventBus.post(new WorldPersistenceEvent(WorldPersistenceEvent.Operation.DELETE, null, filters));
-					return true;
-				}
-				else {
-					return false;
-				}
+				Collection<DaoFilter> filters = new ArrayList<>();
+				filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+														  WorldDaoSqlImpl.WorldsContract._ID,
+														  String.valueOf(world.getId())));
+				eventBus.post(new WorldPersistenceRequest.Delete(filters));
+				return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -216,7 +209,7 @@ public class SelectWorldActivity extends Activity implements
 	 * @param event  a WorldSavedEvent instance
 	 */
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldSavedEvent(WorldSavedEvent event) {
+	public void onWorldSavedEvent(WorldPersistenceResult.Saved event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
@@ -237,7 +230,7 @@ public class SelectWorldActivity extends Activity implements
 	 * @param event  a LoadedEvent<World> instance
 	 */
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldsLoadedEvent(WorldsLoadedEvent event) {
+	public void onWorldsLoadedEvent(WorldPersistenceResult.Loaded event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
@@ -253,7 +246,7 @@ public class SelectWorldActivity extends Activity implements
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldDeletedEvent(WorldsDeletedEvent event) {
+	public void onWorldDeletedEvent(WorldPersistenceResult.Deleted event) {
 		String toastString;
 
 		if(event.isSuccessful()) {
