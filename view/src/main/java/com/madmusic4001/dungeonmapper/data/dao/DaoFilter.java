@@ -50,4 +50,13 @@ public abstract class DaoFilter {
 	}
 
 	public abstract String getFilterString();
+
+	@Override
+	public String toString() {
+		return "DaoFilter{" +
+				"operator=" + operator +
+				", fieldName='" + fieldName + '\'' +
+				", value='" + value + '\'' +
+				'}';
+	}
 }

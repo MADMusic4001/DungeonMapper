@@ -127,8 +127,36 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 
 	@Override
 	public Region load(int id) {
-		throw new UnsupportedOperationException("load(String id) is not implemented in "
-														+ "RegionDaoSqlImpl.");
+		Region theRegion = null;
+
+		SQLiteDatabase db = sqlHelper.getReadableDatabase();
+		boolean newTransaction = !db.inTransaction();
+		if(newTransaction) {
+			db.beginTransaction();
+		}
+		try {
+			Cursor cursor = db.query(RegionsContract.TABLE_NAME,
+									 regionColumns,
+									 RegionsContract._ID + "=?",
+									 new String[]{String.valueOf(id)},
+									 null,
+									 null,
+									 null);
+			if (cursor.moveToFirst()) {
+				theRegion = createRegionInstance(cursor);
+			}
+			cursor.close();
+			if(newTransaction) {
+				db.setTransactionSuccessful();
+			}
+		}
+		finally {
+			if(newTransaction) {
+				db.endTransaction();
+			}
+		}
+
+		return theRegion;
 	}
 
 	@Override
@@ -194,7 +222,6 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 			db.beginTransactionNonExclusive();
 		}
 		try {
-			Log.e("RegionDaoSqlImpl", "Saving region " + aRegion);
 			if (aRegion.getId() == -1L) {
 				aRegion.setId((int) db.insert(RegionsContract.TABLE_NAME, null, values));
 				result = (aRegion.getId() != DataConstants.UNINITIALIZED);
@@ -208,8 +235,7 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 										   RegionsContract._ID + "=?",
 										   new String[] {Long.toString(aRegion.getId())},
 										   SQLiteDatabase.CONFLICT_IGNORE);
-				result = (updateCount != 1);
-				Log.e("RegionDaoSqlImpl", "Update count = " + updateCount);
+				result = (updateCount == 1);
         	}
 			if(result && newTransaction) {
 				db.setTransactionSuccessful();

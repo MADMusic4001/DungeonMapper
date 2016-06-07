@@ -32,10 +32,8 @@ import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
-import com.madmusic4001.dungeonmapper.controller.events.DatabaseExportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.DatabaseImportedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.ExportDatabaseEvent;
-import com.madmusic4001.dungeonmapper.controller.events.ImportDatabaseEvent;
+import com.madmusic4001.dungeonmapper.controller.events.ImportExportEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
@@ -154,7 +152,7 @@ public class SelectWorldActivity extends Activity implements
 				dialog.show(getFragmentManager(), "");
 				return true;
 			case R.id.action_export:
-				eventBus.post(new ExportDatabaseEvent("temp_export_file_name"));
+				eventBus.post(new ImportExportEvent.ExportDatabase("temp_export_file_name"));
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -263,7 +261,7 @@ public class SelectWorldActivity extends Activity implements
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onDatabaseExported(DatabaseExportedEvent event) {
+	public void onDatabaseExported(ImportExportEvent.DatabaseExported event) {
 		DialogFragment dialog = new DbExportedDialogFragment();
 		Bundle bundle = new Bundle();
 		bundle.putString(BundleConstants.EXPORT_DIALOG_FILEPATH,
@@ -286,12 +284,12 @@ public class SelectWorldActivity extends Activity implements
 
 	@Override
 	public void onDialogOverwriteClick(DialogFragment dialog) {
-		eventBus.post(new ImportDatabaseEvent(fileName, true));
+		eventBus.post(new ImportExportEvent.ImportDatabase(fileName, true));
 	}
 
 	@Override
 	public void onDialogKeepClick(DialogFragment dialog) {
-		eventBus.post(new ImportDatabaseEvent(fileName, false));
+		eventBus.post(new ImportExportEvent.ImportDatabase(fileName, false));
 	}
 	// </editor-fold>
 

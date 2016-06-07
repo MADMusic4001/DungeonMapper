@@ -24,12 +24,31 @@ import java.util.Collection;
  * Event representing a request to take some action on one or more {@link Cell} instances and that needs to
  * execute in the same thread as the posting thread.
  */
-public class CellPersistenceEventPosting extends CellPersistenceEvent {
-	/**
-	 * @see CellPersistenceEvent#CellPersistenceEvent(Operation, Cell, Collection)
-	 */
-	public CellPersistenceEventPosting(Operation operation, Cell cell,
-									   Collection<DaoFilter> filters) {
-		super(operation, cell, filters);
+public class CellEventPosting extends CellEvent {
+	public static class Save extends CellEvent.Save {
+		/**
+		 * @see CellEvent.Save#Save(Cell)
+		 */
+		public Save(Cell cell) {
+			super(cell);
+		}
+	}
+
+	public static class Delete extends CellEvent.Delete {
+		/**
+		 * @see CellEvent.Delete#Delete(Collection)
+		 */
+		public Delete(Collection<DaoFilter> filters) {
+			super(filters);
+		}
+	}
+
+	public static class Load extends CellEvent.Load {
+		/**
+		 * @see CellEvent.Load#Load(Collection)
+		 */
+		public Load(Collection<DaoFilter> filters) {
+			super(filters);
+		}
 	}
 }

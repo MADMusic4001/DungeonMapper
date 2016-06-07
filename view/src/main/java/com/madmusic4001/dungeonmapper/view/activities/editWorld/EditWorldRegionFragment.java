@@ -39,9 +39,7 @@ import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandl
 import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypeEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.events.terrain.TerrainEvent;
-import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
@@ -54,9 +52,6 @@ import com.madmusic4001.dungeonmapper.view.views.RegionView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -397,14 +392,13 @@ public class EditWorldRegionFragment extends Fragment {
 
 	// <editor-fold desc="Eventbus subscription handler methods">
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionsLoaded(RegionEvent.Loaded event) {
+	public void onRegionLoaded(RegionEvent.SingleLoaded event) {
 		if(event.isSuccessful()) {
-			for(Region aRegion : event.getItems()) {
-				Log.e("EditWorldRegionFrag", "Region loaded: " + aRegion);
-				if(aRegion.getId() == this.regionId && aRegion.getParent().getId() == this.worldId) {
-					this.region = aRegion;
-					regionNameView.setText(aRegion.getName());
-				}
+			Region aRegion = event.getRegion();
+			Log.e("EditWorldRegionFrag", "Region loaded: " + aRegion);
+			if(aRegion.getId() == this.regionId && aRegion.getParent().getId() == this.worldId) {
+				this.region = aRegion;
+				regionNameView.setText(aRegion.getName());
 			}
 		}
 	}
@@ -513,7 +507,7 @@ public class EditWorldRegionFragment extends Fragment {
 					}
 					else {
 						region.setName(newName);
-//						controller.saveRegion(region, oldName);
+						eventBus.post(new RegionEvent.Save(region));
 					}
 				}
 			}
@@ -641,15 +635,8 @@ public class EditWorldRegionFragment extends Fragment {
 	}
 
 	private void loadRegion() {
-		Collection<DaoFilter> filters = new ArrayList<>(1);
-		if(filterCreator != null) {
-			filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-					RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
-					String.valueOf(worldId)));
-			filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-					RegionDaoSqlImpl.RegionsContract._ID,
-					String.valueOf(regionId)));
-			eventBus.post(new RegionEvent.Load(filters));
+		if(regionId != DataConstants.UNINITIALIZED) {
+			eventBus.post(new RegionEvent.LoadById(regionId));
 		}
 	}
 	// </editor-fold>

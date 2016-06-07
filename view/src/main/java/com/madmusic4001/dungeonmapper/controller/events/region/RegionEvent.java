@@ -81,6 +81,24 @@ public class RegionEvent {
 		}
 	}
 
+	public static class LoadById {
+		private int id;
+
+		/**
+		 * Creates a new RegionPersistenceRequest.Load instance with the given parameters.
+		 *
+		 * @param id  the id of the Region instance to load
+		 */
+		public LoadById(int id) {
+			this.id = id;
+		}
+
+		// Getters
+		public int getId() {
+			return id;
+		}
+	}
+
 	public static class Saved extends SavedEvent<Region> {
 		public Saved(boolean successful, Region item) {
 			super(successful, item);
@@ -96,6 +114,24 @@ public class RegionEvent {
 	public static class Loaded extends LoadedEvent<Region> {
 		public Loaded(boolean successful, Collection<Region> items) {
 			super(successful, items);
+		}
+	}
+
+	public static class SingleLoaded {
+		private boolean successful;
+		private Region region;
+
+		public SingleLoaded(boolean successful, Region region) {
+			this.successful = successful;
+			this.region = region;
+		}
+
+		// Getters
+		public boolean isSuccessful() {
+			return successful;
+		}
+		public Region getRegion() {
+			return region;
 		}
 	}
 

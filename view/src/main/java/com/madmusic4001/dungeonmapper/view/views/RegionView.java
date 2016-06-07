@@ -49,7 +49,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.events.cell.CellPersistenceEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cell.CellEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
 import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
@@ -269,7 +269,7 @@ public class RegionView extends GLSurfaceView {
 		queueEvent(new Runnable() {
 			@Override
 			public void run() {
-				eventBus.post(new CellPersistenceEvent(CellPersistenceEvent.Operation.SAVE, cell, null));
+				eventBus.post(new CellEvent.Save(cell));
 				mapRenderer.createSpritesForCell(cell, true);
 				requestRender();
 			}
@@ -365,7 +365,7 @@ public class RegionView extends GLSurfaceView {
 					queueEvent(new Runnable() {
 						@Override
 						public void run() {
-							eventBus.post(new CellPersistenceEvent(CellPersistenceEvent.Operation.SAVE, finalCell, null));
+							eventBus.post(new CellEvent.Save(finalCell));
 							mapRenderer.createSpritesForCell(finalCell, true);
 						}
 					});

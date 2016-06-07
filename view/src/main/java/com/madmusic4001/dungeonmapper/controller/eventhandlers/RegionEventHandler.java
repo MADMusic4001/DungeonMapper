@@ -61,27 +61,27 @@ public class RegionEventHandler {
 	public void onRegionSaveRequest(RegionEvent.Save event) {
 		saveRegion(event.getRegion());
 	}
-
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void onRegionDeleteRequest(RegionEvent.Delete event) {
 		deleteRegions(event.getFilters());
 	}
-
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void onRegionsLoadRequest(RegionEvent.Load event) {
 		loadRegions(event.getFilters());
+	}
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onLoadByIdRequest(RegionEvent.LoadById event) {
+		loadRegion(event.getId());
 	}
 
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onRegionSaveRequest(RegionEventPosting.Save event) {
 		saveRegion(event.getRegion());
 	}
-
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onRegionDeleteRequest(RegionEventPosting.Delete event) {
 		deleteRegions(event.getFilters());
 	}
-
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onRegionsLoadRequest(RegionEventPosting.Load event) {
 		loadRegions(event.getFilters());
@@ -102,11 +102,27 @@ public class RegionEventHandler {
 		boolean success = true;
 		try {
 			regions = regionDao.load(filters);
+			if(regions.size() == 0) {
+				Log.e("RegionEventHandler", "filters = " + filters);
+			}
 		}
 		catch(DaoException ex) {
 			Log.e("RegionEventHandler", ex.getMessage(), ex);
 			success = false;
 		}
 		eventBus.post(new RegionEvent.Loaded(success, regions));
+	}
+
+	private void loadRegion(int id) {
+		Region region = null;
+		boolean success = true;
+		try {
+			region = regionDao.load(id);
+		}
+		catch(DaoException ex) {
+			Log.e("RegionEventHandler", ex.getMessage(), ex);
+			success = false;
+		}
+		eventBus.post(new RegionEvent.SingleLoaded(success, region));
 	}
 }

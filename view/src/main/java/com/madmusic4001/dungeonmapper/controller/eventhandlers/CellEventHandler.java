@@ -17,13 +17,10 @@ package com.madmusic4001.dungeonmapper.controller.eventhandlers;
 
 import android.util.Log;
 
-import com.madmusic4001.dungeonmapper.controller.events.DeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.cell.CellPersistenceEvent;
-import com.madmusic4001.dungeonmapper.controller.events.cell.CellPersistenceEventPosting;
-import com.madmusic4001.dungeonmapper.controller.events.cell.CellSavedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.cell.CellsDeletedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.cell.CellsLoadedEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cell.CellEvent;
+import com.madmusic4001.dungeonmapper.controller.events.cell.CellEventPosting;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
 
@@ -60,64 +57,60 @@ public class CellEventHandler {
 	 * Responds to requests to perform a persistent storage operation for a Cell instance or instances. The work will be
 	 * performed a separate thread from the poster.
 	 *
-	 * @param event  a {@link CellPersistenceEvent} instance containing the information need to complete the request
+	 * @param event  a {@link CellEvent} instance containing the information need to complete the request
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
-	public void onCellPersistenceEvent(CellPersistenceEvent event) {
-		switch (event.getOperation()) {
-			case SAVE:
-				saveCell(event);
-				break;
-			case DELETE:
-				deleteCells(event);
-				break;
-			case LOAD:
-				loadCells(event);
-				break;
-		}
+	public void onSaveCellEvent(CellEvent.Save event) {
+		saveCell(event.getCell());
+	}
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onDeleteCellsEvent(CellEvent.Delete event) {
+		deleteCells(event.getFilters());
+	}
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onLoadCellsEvent(CellEvent.Load event) {
+		loadCells(event.getFilters());
 	}
 
 	/**
 	 * Responds to requests to perform a persistent storage operation for a Cell instance or instances. The work will be
 	 * performed in the same thread as the poster.
 	 *
-	 * @param event  a {@link CellPersistenceEventPosting} instance containing the information need to complete the request
+	 * @param event  a {@link CellEventPosting} instance containing the information need to complete the request
 	 */
-	@Subscribe(threadMode = ThreadMode.POSTING)
-	public void onCellPersistenceEvent(CellPersistenceEventPosting event) {
-		switch (event.getOperation()) {
-			case SAVE:
-				saveCell(event);
-				break;
-			case DELETE:
-				deleteCells(event);
-				break;
-			case LOAD:
-				loadCells(event);
-				break;
-		}
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onSaveCellEvent(CellEventPosting.Save event) {
+		saveCell(event.getCell());
+	}
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onDeleteCellsEvent(CellEventPosting.Delete event) {
+		deleteCells(event.getFilters());
+	}
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onLoadCellsEvent(CellEventPosting.Load event) {
+		loadCells(event.getFilters());
 	}
 
-	private void saveCell(CellPersistenceEvent event) {
-		eventBus.post(new CellSavedEvent(cellDao.save(event.getCell()), event.getCell()));
+	private void saveCell(Cell cell) {
+		eventBus.post(new CellEvent.Saved(cellDao.save(cell), cell));
 	}
 
-	private void deleteCells(CellPersistenceEvent event) {
-		Collection<Cell> cellsDeleted = cellDao.load(event.getFilters());
-		int deletedCount = cellDao.delete(event.getFilters());
-		eventBus.post(new CellsDeletedEvent(deletedCount >= 0, deletedCount, cellsDeleted));
+	private void deleteCells(Collection<DaoFilter> filters) {
+		Collection<Cell> cellsDeleted = cellDao.load(filters);
+		int deletedCount = cellDao.delete(filters);
+		eventBus.post(new CellEvent.Deleted(deletedCount >= 0, deletedCount, cellsDeleted));
 	}
 
-	private void loadCells(CellPersistenceEvent event) {
+	private void loadCells(Collection<DaoFilter> filters) {
 		Collection<Cell> cells = null;
 		boolean success = true;
 		try {
-			cells = cellDao.load(event.getFilters());
+			cells = cellDao.load(filters);
 		}
 		catch(DaoException ex) {
 			Log.e("CellEventHandler", ex.getMessage(), ex);
 			success = false;
 		}
-		eventBus.post(new CellsLoadedEvent(success, cells));
+		eventBus.post(new CellEvent.Loaded(success, cells));
 	}
 }

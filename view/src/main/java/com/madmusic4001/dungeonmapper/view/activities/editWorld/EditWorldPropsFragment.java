@@ -51,6 +51,7 @@ import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
+import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.adapters.RegionListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 
@@ -263,11 +264,13 @@ public class EditWorldPropsFragment extends Fragment {
 		}
 
 		Toast.makeText(getActivity(), getString(R.string.toast_loading_regions), Toast.LENGTH_LONG).show();
-		Collection<DaoFilter> filters = new ArrayList<>(1);
-		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-												  RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
-												  String.valueOf(world.getId())));
-		eventBus.post(new RegionEvent.Load(filters));
+		if(world != null && world.getId() != DataConstants.UNINITIALIZED) {
+			Collection<DaoFilter> filters = new ArrayList<>(1);
+			filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+													  RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
+													  String.valueOf(world.getId())));
+			eventBus.post(new RegionEvent.Load(filters));
+		}
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
@@ -310,7 +313,9 @@ public class EditWorldPropsFragment extends Fragment {
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onRegionSaved(RegionEvent.Saved event) {
 		if(event.isSuccessful()) {
-			regionListAdapter.add(event.getItem());
+			if(regionListAdapter.getPosition(event.getItem()) <= 0) {
+				regionListAdapter.add(event.getItem());
+			}
 			regionListAdapter.notifyDataSetChanged();
 		}
 	}

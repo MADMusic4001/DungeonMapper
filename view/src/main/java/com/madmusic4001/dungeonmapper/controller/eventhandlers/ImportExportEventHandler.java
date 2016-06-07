@@ -15,8 +15,7 @@
  */
 package com.madmusic4001.dungeonmapper.controller.eventhandlers;
 
-import com.madmusic4001.dungeonmapper.controller.events.DatabaseExportedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.ExportDatabaseEvent;
+import com.madmusic4001.dungeonmapper.controller.events.ImportExportEvent;
 import com.madmusic4001.dungeonmapper.data.dao.impl.json.WorldDaoJsonImpl;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.World;
@@ -30,7 +29,7 @@ import java.util.Collection;
 /**
  * Handles requests to export the database to files.
  */
-public class ExportEventHandler {
+public class ImportExportEventHandler {
 	private EventBus        eventBus;
 	private WorldDaoSqlImpl worldDaoSql;
 	private WorldDaoJsonImpl worldDaoJson;
@@ -42,7 +41,7 @@ public class ExportEventHandler {
 	 * @param worldDaoSql  a {@link WorldDaoJsonImpl} instance
 	 * @param worldDaoJson  a {@link WorldDaoJsonImpl} instance
 	 */
-	public ExportEventHandler(EventBus eventBus, WorldDaoSqlImpl worldDaoSql, WorldDaoJsonImpl worldDaoJson) {
+	public ImportExportEventHandler(EventBus eventBus, WorldDaoSqlImpl worldDaoSql, WorldDaoJsonImpl worldDaoJson) {
 		this.eventBus = eventBus;
 		this.worldDaoSql = worldDaoSql;
 		this.worldDaoJson = worldDaoJson;
@@ -54,7 +53,7 @@ public class ExportEventHandler {
 	 * @param event  an ExportDatabaseEvent
 	 */
 	@Subscribe(threadMode = ThreadMode.ASYNC)
-	public void onExportDatabaseEvent(ExportDatabaseEvent event) {
+	public void onExportDatabaseEvent(ImportExportEvent.ExportDatabase event) {
 		Collection<World> worlds = worldDaoSql.load(null);
 		boolean result = true;
 		int worldCount = 0;
@@ -65,6 +64,6 @@ public class ExportEventHandler {
 			}
 			worldCount++;
 		}
-		eventBus.post(new DatabaseExportedEvent(result, worldDaoJson.getSaveFileName(), worldCount, 0, 0, 0, 0));
+		eventBus.post(new ImportExportEvent.DatabaseExported(result, worldDaoJson.getSaveFileName(), worldCount, 0, 0, 0, 0));
 	}
 }

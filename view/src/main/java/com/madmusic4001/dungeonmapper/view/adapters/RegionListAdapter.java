@@ -16,6 +16,7 @@
 package com.madmusic4001.dungeonmapper.view.adapters;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -79,8 +80,7 @@ public class RegionListAdapter extends ArrayAdapter<Region> {
 			holder = (ViewHolder) convertView.getTag();
 		}
 
-		rowView.setBackgroundColor(getContext().getResources().getColor(
-				colors[position % colors.length]));
+		rowView.setBackgroundColor(ContextCompat.getColor(getContext(), colors[position % colors.length]));
 		Region region = getItem(position);
 		if(region != null) {
 			holder.nameView.setText(region.getName());

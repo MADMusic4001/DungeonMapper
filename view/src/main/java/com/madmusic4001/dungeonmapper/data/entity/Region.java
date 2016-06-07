@@ -117,6 +117,26 @@ public class Region {
 				.toString();
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		Region region = (Region) o;
+
+		return getId() == region.getId();
+
+	}
+
+	@Override
+	public int hashCode() {
+		return getId();
+	}
+
 	public int getId() {
 		return id;
 	}
