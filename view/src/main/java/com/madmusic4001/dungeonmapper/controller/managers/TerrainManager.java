@@ -16,7 +16,6 @@
 
 package com.madmusic4001.dungeonmapper.controller.managers;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
@@ -38,9 +37,8 @@ import javax.inject.Singleton;
 public class TerrainManager {
     private static final int BITMAP_SIZE  = 144;
     private static final int PADDING_SIZE = 6;
-    private final Context    context;
     private final TerrainDao dao;
-    private Map<String, Terrain> terrainNameMap = new HashMap<String, Terrain>();
+    private Map<String, Terrain> terrainNameMap = new HashMap<>();
     private PackedBitmap packedBitmap;
     private BitmapPacker packer;
 	private int bitmapSize = BITMAP_SIZE;
@@ -49,12 +47,10 @@ public class TerrainManager {
      * Creates a new {@code TerrainManager} instance. This should only be called by Dagger DI
      * framework.
      *
-     * @param context the application {@link android.content.Context} instance.
      * @param dao a {@link TerrainDao} instance.
      */
     @Inject
-    public TerrainManager(final Context context, final TerrainDao dao) {
-        this.context = context;
+    public TerrainManager(final TerrainDao dao) {
         this.dao = dao;
     }
 

@@ -55,11 +55,10 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
+import static com.madmusic4001.dungeonmapper.data.util.DataConstants.CURRENT_REGION_ID;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.DOWN;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.EAST;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.NORTH;
-import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SAVED_REGION_NAME;
-import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SELECTED_WORLD_NAME;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SOUTH;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.UP;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WEST;
@@ -118,6 +117,9 @@ public class EditWorldRegionFragment extends Fragment {
 			eventBus.register(this);
 		}
 
+		if(savedInstanceState != null) {
+			regionId = savedInstanceState.getInt(CURRENT_REGION_ID, DataConstants.UNINITIALIZED);
+		}
 		loadRegion();
 		initRegionNameView(layout);
 
@@ -147,17 +149,10 @@ public class EditWorldRegionFragment extends Fragment {
 		regionView = (RegionView) layout.findViewById(R.id.mapView);
 		initMapView(regionView);
 
-//		controller.loadCellExits();
-//		controller.loadTerrains();
+		eventBus.post(new CellExitTypeEvent.Load(null));
+		eventBus.post(new TerrainEvent.Load(null));
 
 		return layout;
-	}
-
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
-
-//		controller.setRegion(callbackListener.getWorldId(), callbackListener.getRegionName());
 	}
 
 	/**
@@ -217,8 +212,7 @@ public class EditWorldRegionFragment extends Fragment {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		if (region != null) {
-			outState.putString(SELECTED_WORLD_NAME, region.getParent().getName());
-			outState.putString(SAVED_REGION_NAME, region.getName());
+			outState.putInt(CURRENT_REGION_ID, regionId);
 		}
 	}
 
