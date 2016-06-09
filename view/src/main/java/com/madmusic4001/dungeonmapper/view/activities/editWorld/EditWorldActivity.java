@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellExitTypeEventHandler;
@@ -30,6 +31,9 @@ import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandl
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
+import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
+import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 import com.madmusic4001.dungeonmapper.view.di.components.ActivityComponent;
@@ -38,6 +42,9 @@ import com.madmusic4001.dungeonmapper.view.di.modules.ActivityModule;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -48,18 +55,20 @@ import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WOR
  */
 public class EditWorldActivity extends Activity {
 	@Inject
-	protected EventBus              	eventBus;
+	protected EventBus                 eventBus;
 	@Inject
-	protected WorldEventHandler			worldEventHandler;
+	protected FilterCreator            filterCreator;
 	@Inject
-	protected RegionEventHandler    	regionEventHandler;
+	protected WorldEventHandler        worldEventHandler;
 	@Inject
-	protected CellExitTypeEventHandler	cellExitTypeEventHandler;
+	protected RegionEventHandler       regionEventHandler;
 	@Inject
-	protected TerrainEventHandler		terrainEventHandler;
-	private ActivityComponent			activityComponent;
-	private EditWorldPropsFragment		propsFragment;
-	private EditWorldRegionFragment 	regionFragment;
+	protected CellExitTypeEventHandler cellExitTypeEventHandler;
+	@Inject
+	protected TerrainEventHandler      terrainEventHandler;
+	private   ActivityComponent        activityComponent;
+	private   EditWorldPropsFragment   propsFragment;
+	private   EditWorldRegionFragment  regionFragment;
 	private int                     	worldId = DataConstants.UNINITIALIZED;
 	private int  						selectedRegionId = DataConstants.UNINITIALIZED;
 
@@ -81,6 +90,7 @@ public class EditWorldActivity extends Activity {
 		}
 		else {
 			worldId = getIntent().getExtras().getInt(EDIT_WORLD_INTENT_WORLD_ID);
+			selectedRegionId = DataConstants.UNINITIALIZED;
 		}
 
 		setContentView(R.layout.edit_world);
@@ -105,12 +115,13 @@ public class EditWorldActivity extends Activity {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
 
-		if(worldId != DataConstants.UNINITIALIZED) {
+		if(propsFragment != null && worldId != DataConstants.UNINITIALIZED) {
 			eventBus.post(new WorldEvent.LoadById(worldId));
 		}
-		if(selectedRegionId != DataConstants.UNINITIALIZED) {
-			eventBus.post(new RegionEvent.LoadById(selectedRegionId));
+		if(regionFragment != null && selectedRegionId != DataConstants.UNINITIALIZED) {
+			regionFragment.loadRegion(selectedRegionId);
 		}
+		Toast.makeText(this, getString(R.string.toast_loading_regions), Toast.LENGTH_LONG).show();
 	}
 
 //	@Override
@@ -180,6 +191,13 @@ public class EditWorldActivity extends Activity {
 				propsFragment = null;
 			}
 			regionFragment.setRegion(event.getRegion());
+		}
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onWorldLoaded(WorldEvent.SingleLoaded event) {
+		if(event.isSuccessful() && propsFragment != null) {
+			propsFragment.setWorld(event.getWorld());
 		}
 	}
 	// </editor-fold>

@@ -45,7 +45,6 @@ import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
@@ -121,12 +120,6 @@ public class EditWorldPropsFragment extends Fragment {
 			eventBus.register(this);
 		}
 
-		if(savedInstanceState != null) {
-			int worldId = savedInstanceState.getInt(DataConstants.CURRENT_WORLD_ID, DataConstants.UNINITIALIZED);
-			if(worldId != DataConstants.UNINITIALIZED) {
-				eventBus.post(new WorldEvent.LoadById(worldId));
-			}
-		}
 		View layout = inflater.inflate(R.layout.edit_world_fragment, container, false);
 
 		worldNameView = (TextView)layout.findViewById(R.id.worldNameEdit);
@@ -231,49 +224,36 @@ public class EditWorldPropsFragment extends Fragment {
 		}
 	}
 
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		if(world != null) {
-			outState.putInt(DataConstants.CURRENT_WORLD_ID, world.getId());
-		}
-	}
+//	@Override
+//	public void onSaveInstanceState(Bundle outState) {
+//		super.onSaveInstanceState(outState);
+//		if(world != null) {
+//			outState.putInt(DataConstants.CURRENT_WORLD_ID, world.getId());
+//		}
+//	}
 
 	// </editor-fold>
 
 	// <editor-fold desc="Public action methods">
-	public void loadWorld(int worldId) {
-		Collection<DaoFilter> filters = new ArrayList<>(1);
-		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-												  WorldDaoSqlImpl.WorldsContract._ID,
-												  String.valueOf(worldId)));
-		eventBus.post(new WorldEvent.Load(filters));
-	}
-	// </editor-fold>
-
-	// <editor-fold desc="EventBus subscriber methods">
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldsLoaded(WorldEvent.Loaded event) {
-		this.world = event.getItems().iterator().next();
-
-		if(worldNameView != null) {
+	public void setWorld(World world) {
+		this.world = world;
+		if (worldNameView != null) {
 			worldNameView.setText(world.getName());
 		}
-		if(zeroBasedCoordinatesView != null) {
+		if (zeroBasedCoordinatesView != null) {
 			zeroBasedCoordinatesView.setChecked(world.getOriginOffset() == 0);
 		}
-		if(originView != null) {
+		if (originView != null) {
 			originView.setSelection(world.getOriginLocation());
 		}
-		if(regionWidthView != null) {
+		if (regionWidthView != null) {
 			regionWidthView.setText(String.valueOf(world.getRegionWidth()));
 		}
-		if(regionHeightView != null) {
+		if (regionHeightView != null) {
 			regionHeightView.setText(String.valueOf(world.getRegionHeight()));
 		}
 
-		Toast.makeText(getActivity(), getString(R.string.toast_loading_regions), Toast.LENGTH_LONG).show();
-		if(world != null && world.getId() != DataConstants.UNINITIALIZED) {
+		if(eventBus != null) {
 			Collection<DaoFilter> filters = new ArrayList<>(1);
 			filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 													  RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
@@ -281,7 +261,9 @@ public class EditWorldPropsFragment extends Fragment {
 			eventBus.post(new RegionEvent.Load(filters));
 		}
 	}
+	// </editor-fold>
 
+	// <editor-fold desc="EventBus subscriber methods">
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onWorldSaved(WorldEvent.Saved event) {
 		String toastString;

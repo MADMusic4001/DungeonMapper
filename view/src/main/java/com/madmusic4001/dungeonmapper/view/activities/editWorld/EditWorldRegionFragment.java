@@ -34,8 +34,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellExitTypeEventHandler;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypeEvent;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.events.terrain.TerrainEvent;
@@ -419,9 +417,7 @@ public class EditWorldRegionFragment extends Fragment {
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onLoadCellExitTypesComplete(CellExitTypeEvent.Loaded event) {
-		String toastString;
 		if(event.isSuccessful()) {
-			toastString = String.format(getString(R.string.toast_cell_exit_types_loaded), event.getItems().size());
 			for (CellExitType exit : event.getItems()) {
 				upExitAdapter.add(exit);
 				northExitAdapter.add(exit);
@@ -444,29 +440,28 @@ public class EditWorldRegionFragment extends Fragment {
 			regionView.setCurrentCellExit(DOWN, (CellExitType) downExitSpinner.getSelectedItem());
 		}
 		else {
-			toastString = getString(R.string.toast_cell_exit_types_load_error);
+			Toast.makeText(getActivity(), getString(R.string.toast_cell_exit_types_load_error), Toast.LENGTH_SHORT).show();
 		}
-		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
 	}
 
-	@Subscribe
-	public void onLoadTerrainsComplete(TerrainEvent.Loaded event) {
-		String toastString;
-
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onTerrainsLoadedEvent(TerrainEvent.Loaded event) {
 		if(event.isSuccessful()) {
-			toastString = String.format(getString(R.string.toast_terrains_loaded), event.getItems().size());
 			terrainAdapter.addAll(event.getItems());
 			terrainAdapter.notifyDataSetChanged();
 		}
 		else {
-			toastString = getString(R.string.toast_terrains_load_error);
+			Toast.makeText(getActivity(), getString(R.string.toast_terrains_load_error), Toast.LENGTH_SHORT).show();
 		}
-		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
 	}
 
 	// </editor-fold>
 
 	// <editor-fold desc="Public action methods">
+	public void loadRegion(int regionId) {
+		eventBus.post(new RegionEvent.LoadById(regionId));
+	}
+
 	public void setRegion(Region region) {
 		this.region = region;
 		if(region != null) {
