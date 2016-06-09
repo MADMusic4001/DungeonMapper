@@ -28,8 +28,8 @@ import dagger.Provides;
  */
 @Module
 public class FragmentModule {
-	EditWorldPropsFragment  editWorldPropsFragment;
-	EditWorldRegionFragment editWorldRegionFragment;
+	private EditWorldPropsFragment  editWorldPropsFragment;
+	private EditWorldRegionFragment editWorldRegionFragment;
 
 	public FragmentModule(EditWorldPropsFragment editWorldPropsFragment) {
 		this.editWorldPropsFragment = editWorldPropsFragment;

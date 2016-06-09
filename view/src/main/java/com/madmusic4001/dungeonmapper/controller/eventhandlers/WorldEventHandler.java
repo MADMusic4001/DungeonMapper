@@ -61,27 +61,33 @@ public class WorldEventHandler {
 	public void onWorldSaveEvent(WorldEvent.Save event) {
 		saveWorld(event.getWorld());
 	}
-
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void onWorldDeleteEvent(WorldEvent.Delete event) {
 		deleteWorld(event.getFilters());
 	}
-
 	@Subscribe(threadMode = ThreadMode.ASYNC)
 	public void onWorldsLoadEvent(WorldEvent.Load event) {
 		loadWorlds(event.getFilters());
 	}
+	@Subscribe(threadMode = ThreadMode.ASYNC)
+	public void onLoadWorldByIdEvent(WorldEvent.LoadById event) {
+		loadWorld(event.getWorldId());
+	}
 
+	/**
+	 * Responds to requests to perform a persistent storage operation for a World instance or instances. The work will be
+	 * performed in the posters thread.
+	 *
+	 * @param event  a {@link WorldEvent} instance containing the information need to complete the request
+     */
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onWorldSaveEvent(WorldEventPosting.Save event) {
 		saveWorld(event.getWorld());
 	}
-
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onWorldDeleteEvent(WorldEventPosting.Delete event) {
 		deleteWorld(event.getFilters());
 	}
-
 	@Subscribe(threadMode = ThreadMode.POSTING)
 	public void onWorldsLoadEvent(WorldEventPosting.Load event) {
 		loadWorlds(event.getFilters());
@@ -108,5 +114,18 @@ public class WorldEventHandler {
 			success = false;
 		}
 		eventBus.post(new WorldEvent.Loaded(success, worlds));
+	}
+
+	private void loadWorld(int id) {
+		World world = null;
+		boolean success = true;
+		try {
+			world = worldDao.load(id);
+		}
+		catch(DaoException ex) {
+			Log.e("WorldEventHandler", ex.getMessage(), ex);
+			success = false;
+		}
+		eventBus.post(new WorldEvent.SingleLoaded(success, world));
 	}
 }

@@ -40,8 +40,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.RegionEventHandler;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
@@ -78,10 +76,6 @@ public class EditWorldPropsFragment extends Fragment {
 	protected FilterCreator                 filterCreator;
 	@Inject
 	protected ComparatorUtils               comparatorUtils;
-	@Inject
-	protected WorldEventHandler             worldEventHandler;
-	@Inject
-	protected RegionEventHandler            regionEventHandler;
 	private TextView						worldNameView;
 	private CheckBox						zeroBasedCoordinatesView;
 	private Spinner							originView;
@@ -127,6 +121,12 @@ public class EditWorldPropsFragment extends Fragment {
 			eventBus.register(this);
 		}
 
+		if(savedInstanceState != null) {
+			int worldId = savedInstanceState.getInt(DataConstants.CURRENT_WORLD_ID, DataConstants.UNINITIALIZED);
+			if(worldId != DataConstants.UNINITIALIZED) {
+				eventBus.post(new WorldEvent.LoadById(worldId));
+			}
+		}
 		View layout = inflater.inflate(R.layout.edit_world_fragment, container, false);
 
 		worldNameView = (TextView)layout.findViewById(R.id.worldNameEdit);
@@ -230,6 +230,15 @@ public class EditWorldPropsFragment extends Fragment {
 				return super.onContextItemSelected(item);
 		}
 	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		if(world != null) {
+			outState.putInt(DataConstants.CURRENT_WORLD_ID, world.getId());
+		}
+	}
+
 	// </editor-fold>
 
 	// <editor-fold desc="Public action methods">

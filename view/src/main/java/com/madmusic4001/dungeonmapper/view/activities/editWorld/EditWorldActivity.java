@@ -24,8 +24,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellExitTypeEventHandler;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.RegionEventHandler;
+import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandler;
+import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
+import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 import com.madmusic4001.dungeonmapper.view.di.components.ActivityComponent;
@@ -43,18 +47,21 @@ import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WOR
  *
  */
 public class EditWorldActivity extends Activity {
-	private static final String ACTIVE_WORLD_ID_KEY = "saved_world_id";
-	private static final String ACTIVE_REGION_ID_KEY = "saved_region_id";
-
 	@Inject
-	protected EventBus              eventBus;
+	protected EventBus              	eventBus;
 	@Inject
-	protected RegionEventHandler    regionEventHandler;
-	private ActivityComponent		activityComponent;
-	private EditWorldPropsFragment	propsFragment;
-	private EditWorldRegionFragment regionFragment;
-	private int                     worldId = DataConstants.UNINITIALIZED;
-	private int  					selectedRegionId = DataConstants.UNINITIALIZED;
+	protected WorldEventHandler			worldEventHandler;
+	@Inject
+	protected RegionEventHandler    	regionEventHandler;
+	@Inject
+	protected CellExitTypeEventHandler	cellExitTypeEventHandler;
+	@Inject
+	protected TerrainEventHandler		terrainEventHandler;
+	private ActivityComponent			activityComponent;
+	private EditWorldPropsFragment		propsFragment;
+	private EditWorldRegionFragment 	regionFragment;
+	private int                     	worldId = DataConstants.UNINITIALIZED;
+	private int  						selectedRegionId = DataConstants.UNINITIALIZED;
 
 	// <editor-fold desc="Activity lifecycle event handlers">
 	@Override
@@ -69,8 +76,8 @@ public class EditWorldActivity extends Activity {
 		}
 
 		if (savedInstanceState != null) {
-			worldId = savedInstanceState.getInt(ACTIVE_WORLD_ID_KEY);
-			selectedRegionId = savedInstanceState.getInt(ACTIVE_REGION_ID_KEY);
+			worldId = savedInstanceState.getInt(DataConstants.CURRENT_WORLD_ID);
+			selectedRegionId = savedInstanceState.getInt(DataConstants.CURRENT_REGION_ID);
 		}
 		else {
 			worldId = getIntent().getExtras().getInt(EDIT_WORLD_INTENT_WORLD_ID);
@@ -97,18 +104,25 @@ public class EditWorldActivity extends Activity {
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
 		}
+
+		if(worldId != DataConstants.UNINITIALIZED) {
+			eventBus.post(new WorldEvent.LoadById(worldId));
+		}
+		if(selectedRegionId != DataConstants.UNINITIALIZED) {
+			eventBus.post(new RegionEvent.LoadById(selectedRegionId));
+		}
 	}
 
-	@Override
-	protected void onStart() {
-		super.onStart();
-		if(propsFragment != null) {
-			propsFragment.loadWorld(worldId);
-		}
-		if(regionFragment != null) {
-			regionFragment.setRegion(worldId, selectedRegionId);
-		}
-	}
+//	@Override
+//	protected void onStart() {
+//		super.onStart();
+//		if(propsFragment != null) {
+//			propsFragment.loadWorld(worldId);
+//		}
+//		if(regionFragment != null) {
+//			regionFragment.setRegion(worldId, selectedRegionId);
+//		}
+//	}
 
 	@Override
 	protected void onResume() {
@@ -142,8 +156,8 @@ public class EditWorldActivity extends Activity {
 	protected void onSaveInstanceState(@NonNull Bundle outState) {
 		super.onSaveInstanceState(outState);
 
-		outState.putInt(ACTIVE_WORLD_ID_KEY, worldId);
-		outState.putInt(ACTIVE_REGION_ID_KEY, selectedRegionId);
+		outState.putInt(DataConstants.CURRENT_WORLD_ID, worldId);
+		outState.putInt(DataConstants.CURRENT_REGION_ID, selectedRegionId);
 	}
 
 	@Override
@@ -165,7 +179,7 @@ public class EditWorldActivity extends Activity {
 						.commit();
 				propsFragment = null;
 			}
-			regionFragment.setRegion(worldId, selectedRegionId);
+			regionFragment.setRegion(event.getRegion());
 		}
 	}
 	// </editor-fold>

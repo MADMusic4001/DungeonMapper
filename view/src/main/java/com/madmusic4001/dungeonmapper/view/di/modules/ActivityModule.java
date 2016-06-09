@@ -31,8 +31,8 @@ import dagger.Provides;
 @PerActivity
 @Module
 public class ActivityModule {
-	SelectWorldActivity selectWorldActivity;
-	EditWorldActivity editWorldActivity;
+	private SelectWorldActivity selectWorldActivity;
+	private EditWorldActivity editWorldActivity;
 
 	public ActivityModule(SelectWorldActivity selectWorldActivity) {
 		this.selectWorldActivity = selectWorldActivity;

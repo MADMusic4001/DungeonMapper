@@ -71,10 +71,6 @@ public class EditWorldRegionFragment extends Fragment {
 	protected EventBus                      eventBus;
 	@Inject
 	protected FilterCreator                 filterCreator;
-	@Inject
-	protected CellExitTypeEventHandler      cellExitTypeEventHandler;
-	@Inject
-	protected TerrainEventHandler           terrainEventHandler;
 	private   EditText                      regionNameView;
 	private   GridLayout					selectorsGrid;
 	private   RegionView                    regionView;
@@ -93,8 +89,6 @@ public class EditWorldRegionFragment extends Fragment {
 	private   Spinner                       downExitSpinner;
 	private   Spinner                       terrainSpinner;
 	private boolean isVisible = false;
-	private int regionId = DataConstants.UNINITIALIZED;
-	private int worldId = DataConstants.UNINITIALIZED;
 	private Region  region    = null;
 	private boolean showingPalette = true;
 
@@ -118,9 +112,11 @@ public class EditWorldRegionFragment extends Fragment {
 		}
 
 		if(savedInstanceState != null) {
-			regionId = savedInstanceState.getInt(CURRENT_REGION_ID, DataConstants.UNINITIALIZED);
+			int regionId = savedInstanceState.getInt(CURRENT_REGION_ID, DataConstants.UNINITIALIZED);
+			if(regionId != DataConstants.UNINITIALIZED) {
+				eventBus.post(new RegionEvent.LoadById(regionId));
+			}
 		}
-		loadRegion();
 		initRegionNameView(layout);
 
 		selectorsGrid = (GridLayout)layout.findViewById(R.id.selectorsGrid);
@@ -146,8 +142,8 @@ public class EditWorldRegionFragment extends Fragment {
 		terrainSpinner = (Spinner) layout.findViewById(R.id.selectTerrainSpinner);
 		initTerrainSpinner(terrainSpinner);
 
-		regionView = (RegionView) layout.findViewById(R.id.mapView);
-		initMapView(regionView);
+		regionView = (RegionView) layout.findViewById(R.id.regionView);
+		initRegionView(regionView);
 
 		eventBus.post(new CellExitTypeEvent.Load(null));
 		eventBus.post(new TerrainEvent.Load(null));
@@ -212,7 +208,7 @@ public class EditWorldRegionFragment extends Fragment {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		if (region != null) {
-			outState.putInt(CURRENT_REGION_ID, regionId);
+			outState.putInt(CURRENT_REGION_ID, region.getId());
 		}
 	}
 
@@ -388,26 +384,21 @@ public class EditWorldRegionFragment extends Fragment {
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onRegionLoaded(RegionEvent.SingleLoaded event) {
 		if(event.isSuccessful()) {
-			Region aRegion = event.getRegion();
-			Log.e("EditWorldRegionFrag", "Region loaded: " + aRegion);
-			if(aRegion.getId() == this.regionId && aRegion.getParent().getId() == this.worldId) {
-				this.region = aRegion;
-				regionNameView.setText(aRegion.getName());
-			}
+			this.region = event.getRegion();
+			Log.e("EditWorldRegionFrag", "Region loaded: " + this.region);
+			regionNameView.setText(this.region.getName());
 		}
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onRegionSelected(RegionEvent.Selected event) {
 		this.region = event.getRegion();
-		if(region != null) {
-			this.regionId = region.getId();
-			this.worldId = region.getParent().getId();
+		if(this.region != null) {
 			if (regionView != null) {
-				regionView.setRegion(region);
+				regionView.setRegion(this.region);
 			}
 			if (region.getName() != null) {
-				regionNameView.setText(region.getName());
+				regionNameView.setText(this.region.getName());
 			}
 		}
 	}
@@ -476,10 +467,16 @@ public class EditWorldRegionFragment extends Fragment {
 	// </editor-fold>
 
 	// <editor-fold desc="Public action methods">
-	public void setRegion(int worldId, int regionId) {
-		this.regionId = regionId;
-		this.worldId = worldId;
-		loadRegion();
+	public void setRegion(Region region) {
+		this.region = region;
+		if(region != null) {
+			if (regionView != null) {
+				regionView.setRegion(region);
+			}
+			if (region.getName() != null) {
+				regionNameView.setText(region.getName());
+			}
+		}
 	}
 	// </editor-fold>
 
@@ -539,7 +536,8 @@ public class EditWorldRegionFragment extends Fragment {
 										   (CellExitType) parent.getItemAtPosition(position));
 			}
 			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
+			public void onNothingSelected(AdapterView<
+					?> parent) {
 			}
 		});
 
@@ -578,7 +576,7 @@ public class EditWorldRegionFragment extends Fragment {
 		});
 	}
 
-	private void initMapView(RegionView regionView) {
+	private void initRegionView(RegionView regionView) {
 		regionView.setTerrainChangedListener(new RegionView.OnTerrainChangedListener() {
 			@Override
 			public void onTerrainChanged(Terrain terrain) {
@@ -626,11 +624,8 @@ public class EditWorldRegionFragment extends Fragment {
 		if(region != null) {
 			regionView.setRegion(region);
 		}
-	}
-
-	private void loadRegion() {
-		if(regionId != DataConstants.UNINITIALIZED) {
-			eventBus.post(new RegionEvent.LoadById(regionId));
+		else {
+			Log.e("RegionView", "region is null");
 		}
 	}
 	// </editor-fold>

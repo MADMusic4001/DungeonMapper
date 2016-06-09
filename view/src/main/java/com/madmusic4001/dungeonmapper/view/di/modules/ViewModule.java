@@ -27,7 +27,7 @@ import dagger.Provides;
 @PerActivity
 @Module
 public class ViewModule {
-	RegionView        regionView;
+	private RegionView        regionView;
 
 	public ViewModule(RegionView regionView) {
 		this.regionView = regionView;

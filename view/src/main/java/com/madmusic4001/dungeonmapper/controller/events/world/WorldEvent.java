@@ -31,7 +31,7 @@ public class WorldEvent {
 		private World                 world;
 
 		/**
-		 * Creates a new WorldPersistenceEvent.Save instance.
+		 * Creates a new WorldEvent.Save instance.
 		 *
 		 * @param world  the World instance to perform the operation on
 		 */
@@ -49,7 +49,7 @@ public class WorldEvent {
 		private Collection<DaoFilter> filters;
 
 		/**
-		 * Creates a new WorldPersistenceEvent.Delete instance.
+		 * Creates a new WorldEvent.Delete instance.
 		 *
 		 * @param filters  the filters to use in the operation
 		 */
@@ -67,7 +67,7 @@ public class WorldEvent {
 		private Collection<DaoFilter> filters;
 
 		/**
-		 * Creates a new WorldPersistenceEvent.Load instance.
+		 * Creates a new WorldEvent.Load instance.
 		 *
 		 * @param filters  the filters to use in the operation
 		 */
@@ -81,6 +81,23 @@ public class WorldEvent {
 		}
 	}
 
+	public static class LoadById {
+		int worldId;
+
+		/**
+		 * Creates a WorldEvent.LoadById instance.
+		 *
+		 * @param worldId  the id of the world to load.
+         */
+		public LoadById(int worldId) {
+			this.worldId = worldId;
+		}
+
+		// Getters
+		public int getWorldId() {
+			return worldId;
+		}
+	}
 	public static class Saved extends SavedEvent<World> {
 		public Saved(boolean successful, World item) {
 			super(successful, item);
@@ -96,6 +113,30 @@ public class WorldEvent {
 	public static class Loaded extends LoadedEvent<World> {
 		public Loaded(boolean successful, Collection<World> items) {
 			super(successful, items);
+		}
+	}
+
+	public static class SingleLoaded {
+		private boolean successful;
+		private World world;
+
+		/**
+		 * Creates a WorldEvent.SingleLoad instance.
+		 *
+		 * @param successful  true if a World instance was loaded successfully, otherwise false.
+         * @param world  the World instance that was loaded or null if not successful.
+         */
+		public SingleLoaded(boolean successful, World world) {
+			this.successful = successful;
+			this.world = world;
+		}
+
+		// Getters
+		public boolean isSuccessful() {
+			return successful;
+		}
+		public World getWorld() {
+			return world;
 		}
 	}
 }

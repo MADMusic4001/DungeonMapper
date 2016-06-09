@@ -37,6 +37,7 @@ public final class DataConstants {
 	public static final String PACKAGE_NAME         = "com.madmusic4001.rpgmaker";
 	public static final String WORLD_FILE_EXTENSION = ".wrl";
 	public static final String ALL_FILES_REGEX      = ".*";
+	public static final String CURRENT_WORLD_ID    = PACKAGE_NAME + ".current_world_id";
 	public static final String CURRENT_REGION_ID    = PACKAGE_NAME + ".current_region_id";
 	public static final int UNINITIALIZED             = -1;
 
