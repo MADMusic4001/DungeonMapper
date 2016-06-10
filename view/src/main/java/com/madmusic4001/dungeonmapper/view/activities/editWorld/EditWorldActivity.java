@@ -18,8 +18,10 @@ package com.madmusic4001.dungeonmapper.view.activities.editWorld;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -101,11 +103,10 @@ public class EditWorldActivity extends Activity {
 			regionFragment = (EditWorldRegionFragment) getFragmentManager().findFragmentById(
 					R.id.region_editor_fragment);
 		}
-		else {
+		else if(savedInstanceState == null){
 			propsFragment = new EditWorldPropsFragment();
 			getFragmentManager().beginTransaction()
-					.add(R.id.worldEditorFragmentContainer, propsFragment)
-					.addToBackStack(null)
+					.replace(R.id.worldEditorFragmentContainer, propsFragment)
 					.commit();
 			regionFragment = null;
 		}
@@ -167,6 +168,13 @@ public class EditWorldActivity extends Activity {
 	protected void onSaveInstanceState(@NonNull Bundle outState) {
 		super.onSaveInstanceState(outState);
 
+		FragmentManager fm = getFragmentManager();
+		if(fm.findFragmentById(R.id.region_editor_fragment) != null) {
+			Log.e("EditWorldActivity", "Region fragment found");
+		}
+		else {
+			Log.e("EditWorldActivity", "Region fragment not found");
+		}
 		outState.putInt(DataConstants.CURRENT_WORLD_ID, worldId);
 		outState.putInt(DataConstants.CURRENT_REGION_ID, selectedRegionId);
 	}
