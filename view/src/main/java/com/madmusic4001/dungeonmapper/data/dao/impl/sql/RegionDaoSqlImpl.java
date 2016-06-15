@@ -225,6 +225,7 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 			if (aRegion.getId() == -1L) {
 				aRegion.setId((int) db.insert(RegionsContract.TABLE_NAME, null, values));
 				result = (aRegion.getId() != DataConstants.UNINITIALIZED);
+				Log.e("RegionDaoSqlImpl", "db.insert() returned " + aRegion.getId());
 				if (aRegion.getId() == DataConstants.UNINITIALIZED) {
 					throw new DaoException(R.string.exception_regionNotSaved);
 				}
@@ -235,6 +236,7 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 										   RegionsContract._ID + "=?",
 										   new String[] {Long.toString(aRegion.getId())},
 										   SQLiteDatabase.CONFLICT_IGNORE);
+				Log.e("RegionDaoSqlImpl", "db.update() returned " + updateCount);
 				result = (updateCount == 1);
         	}
 			if(result && newTransaction) {

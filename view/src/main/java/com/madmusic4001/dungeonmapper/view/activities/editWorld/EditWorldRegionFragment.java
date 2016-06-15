@@ -340,7 +340,6 @@ public class EditWorldRegionFragment extends Fragment {
 	public void onRegionLoaded(RegionEvent.SingleLoaded event) {
 		if(event.isSuccessful()) {
 			this.region = event.getRegion();
-			Log.e("EditWorldRegionFrag", "Region loaded: " + this.region);
 			regionNameView.setText(this.region.getName());
 		}
 	}
@@ -414,7 +413,9 @@ public class EditWorldRegionFragment extends Fragment {
 
 	// <editor-fold desc="Public action methods">
 	public void loadRegion(int regionId) {
-		eventBus.post(new RegionEvent.LoadById(regionId));
+		if(eventBus != null) {
+			eventBus.post(new RegionEvent.LoadById(regionId));
+		}
 	}
 
 	public void setRegion(Region region) {
@@ -440,6 +441,10 @@ public class EditWorldRegionFragment extends Fragment {
 				String newName = ((TextView) v).getText().toString();
 				if (newName.length() == 0) {
 					regionNameView.setError(getString(R.string.validation_RegionNameRequired));
+				}
+				else if(!newName.equals(region.getName())) {
+					region.setName(newName);
+					eventBus.post(new RegionEvent.Save(region));
 				}
 			}
 		});

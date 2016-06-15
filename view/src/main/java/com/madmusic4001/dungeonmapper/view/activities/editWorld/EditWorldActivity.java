@@ -213,15 +213,15 @@ public class EditWorldActivity extends Activity {
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onRegionSaved(RegionEvent.Saved event) {
 		if(event.isSuccessful() ) {
-			if (!getResources().getBoolean(R.bool.has_two_panes)) {
+			if (!getResources().getBoolean(R.bool.has_two_panes) && regionFragment == null) {
 				regionFragment = new EditWorldRegionFragment();
 				getFragmentManager().beginTransaction()
 							.replace(R.id.worldEditorFragmentContainer, regionFragment, REGION_FRAGMENT_TAG)
 							.addToBackStack(null)
 							.commit();
 				propsFragment = null;
+				regionFragment.setRegion(event.getItem());
 			}
-			regionFragment.setRegion(event.getItem());
 		}
 	}
 	// </editor-fold>
