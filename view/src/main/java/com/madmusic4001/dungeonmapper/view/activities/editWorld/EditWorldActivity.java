@@ -18,6 +18,7 @@ package com.madmusic4001.dungeonmapper.view.activities.editWorld;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -56,23 +57,25 @@ import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WOR
  *
  */
 public class EditWorldActivity extends Activity {
+	private static final String PROPERTIES_FRAGMENT_TAG = "properties_fragment";
+	private static final String REGION_FRAGMENT_TAG = "region_fragment";
 	@Inject
-	protected EventBus                 eventBus;
+	protected EventBus					eventBus;
 	@Inject
-	protected FilterCreator            filterCreator;
+	protected FilterCreator				filterCreator;
 	@Inject
-	protected WorldEventHandler        worldEventHandler;
+	protected WorldEventHandler			worldEventHandler;
 	@Inject
-	protected RegionEventHandler       regionEventHandler;
+	protected RegionEventHandler		regionEventHandler;
 	@Inject
-	protected CellExitTypeEventHandler cellExitTypeEventHandler;
+	protected CellExitTypeEventHandler	cellExitTypeEventHandler;
 	@Inject
-	protected TerrainEventHandler      terrainEventHandler;
-	private   ActivityComponent        activityComponent;
-	private   EditWorldPropsFragment   propsFragment;
-	private   EditWorldRegionFragment  regionFragment;
-	private int                     	worldId = DataConstants.UNINITIALIZED;
-	private int  						selectedRegionId = DataConstants.UNINITIALIZED;
+	protected TerrainEventHandler		terrainEventHandler;
+	private ActivityComponent			activityComponent;
+	private EditWorldPropsFragment		propsFragment;
+	private EditWorldRegionFragment		regionFragment;
+	private int							worldId = DataConstants.UNINITIALIZED;
+	private int							selectedRegionId = DataConstants.UNINITIALIZED;
 
 	// <editor-fold desc="Activity lifecycle event handlers">
 	@Override
@@ -86,29 +89,33 @@ public class EditWorldActivity extends Activity {
 			eventBus.register(this);
 		}
 
+		setContentView(R.layout.edit_world);
+
+		FragmentManager fragmentManager = getFragmentManager();
+
 		if (savedInstanceState != null) {
 			worldId = savedInstanceState.getInt(DataConstants.CURRENT_WORLD_ID);
 			selectedRegionId = savedInstanceState.getInt(DataConstants.CURRENT_REGION_ID);
+			if(!getResources().getBoolean(R.bool.has_two_panes)) {
+				propsFragment = (EditWorldPropsFragment) fragmentManager.findFragmentByTag(PROPERTIES_FRAGMENT_TAG);
+				regionFragment = (EditWorldRegionFragment) fragmentManager.findFragmentByTag(REGION_FRAGMENT_TAG);
+			}
 		}
 		else {
+			if(!getResources().getBoolean(R.bool.has_two_panes)) {
+				propsFragment = new EditWorldPropsFragment();
+				getFragmentManager().beginTransaction()
+						.replace(R.id.worldEditorFragmentContainer, propsFragment, PROPERTIES_FRAGMENT_TAG)
+						.commit();
+				regionFragment = null;
+			}
 			worldId = getIntent().getExtras().getInt(EDIT_WORLD_INTENT_WORLD_ID);
 			selectedRegionId = DataConstants.UNINITIALIZED;
 		}
 
-		setContentView(R.layout.edit_world);
-
 		if(getResources().getBoolean(R.bool.has_two_panes)) {
-			propsFragment = (EditWorldPropsFragment) getFragmentManager().findFragmentById(
-					R.id.props_fragment);
-			regionFragment = (EditWorldRegionFragment) getFragmentManager().findFragmentById(
-					R.id.region_editor_fragment);
-		}
-		else if(savedInstanceState == null){
-			propsFragment = new EditWorldPropsFragment();
-			getFragmentManager().beginTransaction()
-					.replace(R.id.worldEditorFragmentContainer, propsFragment)
-					.commit();
-			regionFragment = null;
+			propsFragment = (EditWorldPropsFragment)fragmentManager.findFragmentById(R.id.props_fragment);
+			regionFragment = (EditWorldRegionFragment)fragmentManager.findFragmentById(R.id.region_editor_fragment);
 		}
 
 		ActionBar actionBar = getActionBar();
@@ -169,12 +176,6 @@ public class EditWorldActivity extends Activity {
 		super.onSaveInstanceState(outState);
 
 		FragmentManager fm = getFragmentManager();
-		if(fm.findFragmentById(R.id.region_editor_fragment) != null) {
-			Log.e("EditWorldActivity", "Region fragment found");
-		}
-		else {
-			Log.e("EditWorldActivity", "Region fragment not found");
-		}
 		outState.putInt(DataConstants.CURRENT_WORLD_ID, worldId);
 		outState.putInt(DataConstants.CURRENT_REGION_ID, selectedRegionId);
 	}
@@ -193,7 +194,7 @@ public class EditWorldActivity extends Activity {
 			if (!getResources().getBoolean(R.bool.has_two_panes)) {
 				regionFragment = new EditWorldRegionFragment();
 				getFragmentManager().beginTransaction()
-						.replace(R.id.worldEditorFragmentContainer, regionFragment)
+						.replace(R.id.worldEditorFragmentContainer, regionFragment, REGION_FRAGMENT_TAG)
 						.addToBackStack(null)
 						.commit();
 				propsFragment = null;
@@ -206,6 +207,21 @@ public class EditWorldActivity extends Activity {
 	public void onWorldLoaded(WorldEvent.SingleLoaded event) {
 		if(event.isSuccessful() && propsFragment != null) {
 			propsFragment.setWorld(event.getWorld());
+		}
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onRegionSaved(RegionEvent.Saved event) {
+		if(event.isSuccessful() ) {
+			if (!getResources().getBoolean(R.bool.has_two_panes)) {
+				regionFragment = new EditWorldRegionFragment();
+				getFragmentManager().beginTransaction()
+							.replace(R.id.worldEditorFragmentContainer, regionFragment, REGION_FRAGMENT_TAG)
+							.addToBackStack(null)
+							.commit();
+				propsFragment = null;
+			}
+			regionFragment.setRegion(event.getItem());
 		}
 	}
 	// </editor-fold>

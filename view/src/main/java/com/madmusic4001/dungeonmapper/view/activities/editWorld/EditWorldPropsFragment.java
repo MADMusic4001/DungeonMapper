@@ -48,7 +48,6 @@ import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
-import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.adapters.RegionListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 
@@ -57,6 +56,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -168,7 +168,13 @@ public class EditWorldPropsFragment extends Fragment {
 		if (id == R.id.actionNewRegion) {
 			if(world != null) {
 				Region region = new Region(getString(R.string.defaultRegionName), world);
+				Calendar currentTime = Calendar.getInstance();
+				region.setCreateTs(currentTime);
+				region.setModifiedTs(currentTime);
+				region.setHeight(world.getRegionHeight());
+				region.setWidth(world.getRegionWidth());
 				eventBus.post(new RegionEvent.Save(region));
+				Log.e("EditWorldPropsFrag", "Posted RegionEvent.Save event");
 			}
 			result = true;
 		}

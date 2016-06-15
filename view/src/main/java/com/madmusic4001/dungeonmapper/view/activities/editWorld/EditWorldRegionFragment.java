@@ -86,7 +86,6 @@ public class EditWorldRegionFragment extends Fragment {
 	private   Spinner                       southExitSpinner;
 	private   Spinner                       downExitSpinner;
 	private   Spinner                       terrainSpinner;
-	private boolean isVisible = false;
 	private Region  region    = null;
 	private boolean showingPalette = true;
 
@@ -163,6 +162,7 @@ public class EditWorldRegionFragment extends Fragment {
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		Log.e("EditWorldRegionFrag", "In onOptionsItemSelected");
 		int id = item.getItemId();
 		switch (id) {
 			case R.id.action_show_grid:
@@ -229,36 +229,6 @@ public class EditWorldRegionFragment extends Fragment {
 	}
 
 	/**
-	 * Set a hint to the system about whether this fragment's UI is currently visible
-	 * to the user. This hint defaults to true and is persistent across fragment instance
-	 * state save and restore.
-	 * <p/>
-	 * <p>An app may set this to false to indicate that the fragment's UI is
-	 * scrolled out of visibility or is otherwise not directly visible to the user.
-	 * This may be used by the system to prioritize operations such as fragment lifecycle updates
-	 * or loader ordering behavior.</p>
-	 *
-	 * @param isVisibleToUser true if this fragment's UI is currently visible to the user
-	 *                        (default),
-	 *                        false if it is not.
-	 */
-	@Override
-	public void setUserVisibleHint(boolean isVisibleToUser) {
-		super.setUserVisibleHint(isVisibleToUser);
-		if (isVisibleToUser) {
-			if (!isVisible) {
-//                mapView.onResume();
-				isVisible = true;
-			}
-		}
-		else {
-			if (isVisible) {
-				isVisible = false;
-			}
-		}
-	}
-
-	/**
 	 * @see android.app.Fragment#onDetach()
 	 */
 	@Override
@@ -266,19 +236,6 @@ public class EditWorldRegionFragment extends Fragment {
 		super.onDetach();
 		this.region = null;
 	}
-
-	/**
-	 * Updates the {@code MapView} with the new {@code Map} instance.
-	 *
-	 */
-//    @SuppressWarnings("unused")
-//    public void onEventMainThread(Events.MapChangedEvent event) {
-//        this.region = event.region;
-//        eventBus.post(new Events.LoadMapCellsEvent(this.region));
-//        if(regionNameView != null) {
-//            regionNameView.setText(this.region.getName());
-//        }
-//    }
 
 	/**
 	 * Re-sizes the current {@code Map} and forces an update of the {@code MapView}.
@@ -395,9 +352,7 @@ public class EditWorldRegionFragment extends Fragment {
 			if (regionView != null) {
 				regionView.setRegion(this.region);
 			}
-			if (region.getName() != null) {
-				regionNameView.setText(this.region.getName());
-			}
+			regionNameView.setText(this.region.getName());
 		}
 	}
 
@@ -485,16 +440,6 @@ public class EditWorldRegionFragment extends Fragment {
 				String newName = ((TextView) v).getText().toString();
 				if (newName.length() == 0) {
 					regionNameView.setError(getString(R.string.validation_RegionNameRequired));
-				}
-				else if (region != null && !region.getName().equals(newName)) {
-					String oldName = region.getName();
-					if (region.getParent().getRegionNameMap().get(newName) != null) {
-						regionNameView.setError(getString(R.string.message_uniqueRegionName));
-					}
-					else {
-						region.setName(newName);
-						eventBus.post(new RegionEvent.Save(region));
-					}
 				}
 			}
 		});
