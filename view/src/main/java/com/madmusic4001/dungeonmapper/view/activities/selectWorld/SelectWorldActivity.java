@@ -35,6 +35,7 @@ import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler
 import com.madmusic4001.dungeonmapper.controller.events.DatabaseImportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ImportExportEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
+import com.madmusic4001.dungeonmapper.controller.handlers.WorldHandler;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
@@ -59,6 +60,9 @@ import java.util.Collection;
 
 import javax.inject.Inject;
 
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+
 import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WORLD_INTENT_WORLD_ID;
 
 /**
@@ -70,8 +74,10 @@ public class SelectWorldActivity extends Activity implements
 		FileSelectorDialogFragment.FileSelectorDialogListener {
 	@Inject
 	protected WorldListAdapter  adapter;
+//	@Inject
+//	protected EventBus          eventBus;
 	@Inject
-	protected EventBus          eventBus;
+	protected WorldHandler		worldHandler;
 	@Inject
 	protected WorldEventHandler worldEventHandler;
 	@Inject
@@ -85,21 +91,21 @@ public class SelectWorldActivity extends Activity implements
 	// Activity lifecycle event handlers
 	//**********************************************************************************************
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		if(eventBus != null && !eventBus.isRegistered(this)) {
-			eventBus.register(this);
-		}
-	}
+//	@Override
+//	protected void onResume() {
+//		super.onResume();
+//		if(eventBus != null && !eventBus.isRegistered(this)) {
+//			eventBus.register(this);
+//		}
+//	}
 
-	@Override
-	protected void onPause() {
-		if(eventBus != null) {
-			eventBus.unregister(this);
-		}
-		super.onPause();
-	}
+//	@Override
+//	protected void onPause() {
+//		if(eventBus != null) {
+//			eventBus.unregister(this);
+//		}
+//		super.onPause();
+//	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -107,13 +113,36 @@ public class SelectWorldActivity extends Activity implements
 
 		((DungeonMapperApp) getApplication()).getApplicationComponent()
 				.newActivityComponent(new ActivityModule(this)).injectInto(this);
-		if(!eventBus.isRegistered(this)) {
-			eventBus.register(this);
-		}
+//		if(!eventBus.isRegistered(this)) {
+//			eventBus.register(this);
+//		}
 		setContentView(R.layout.select_world_layout);
 		initListView();
 
-		eventBus.post(new WorldEvent.Load(null));
+		worldHandler.getWorlds(null)
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(new Subscriber<Collection<World>>() {
+					@Override
+					public void onCompleted() {
+
+					}
+
+					@Override
+					public void onError(Throwable e) {
+
+					}
+
+					@Override
+					public void onNext(Collection<World> worlds) {
+						String toastString;
+
+						toastString = String.format(getString(R.string.toast_worlds_loaded), worlds.size());
+						adapter.clear();
+						adapter.addAll(worlds);
+						adapter.notifyDataSetChanged();
+						Toast.makeText(SelectWorldActivity.this, toastString, Toast.LENGTH_SHORT).show();
+					}
+				});
 	}
 
 	@Override
@@ -136,7 +165,29 @@ public class SelectWorldActivity extends Activity implements
 				newWorld.setRegionHeight(16);
 				newWorld.setOriginLocation(DataConstants.SOUTHWEST);
 				newWorld.setOriginOffset(0);
-				eventBus.post(new WorldEvent.Save(newWorld));
+				worldHandler.saveWorld(newWorld)
+						.observeOn(AndroidSchedulers.mainThread())
+						.subscribe(new Subscriber<World>() {
+							@Override
+							public void onCompleted() {
+
+							}
+
+							@Override
+							public void onError(Throwable e) {
+								Toast.makeText(SelectWorldActivity.this, "An exception occurred saving world", Toast.LENGTH_SHORT).show();
+							}
+
+							@Override
+							public void onNext(World world) {
+								String toastString;
+
+								toastString = getString(R.string.toast_world_saved);
+								adapter.add(world);
+								adapter.notifyDataSetChanged();
+								Toast.makeText(SelectWorldActivity.this, toastString, Toast.LENGTH_SHORT).show();
+							}
+						});
 				return true;
 			case R.id.action_manage_terrains:
 				Intent intent = new Intent(this, EditTerrainActivity.class);
@@ -152,7 +203,7 @@ public class SelectWorldActivity extends Activity implements
 				dialog.show(getFragmentManager(), "");
 				return true;
 			case R.id.action_export:
-				eventBus.post(new ImportExportEvent.ExportDatabase("temp_export_file_name"));
+//				eventBus.post(new ImportExportEvent.ExportDatabase("temp_export_file_name"));
 				return true;
 			default:
 				return super.onOptionsItemSelected(item);
@@ -190,7 +241,33 @@ public class SelectWorldActivity extends Activity implements
 				filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 														  WorldDaoSqlImpl.WorldsContract._ID,
 														  String.valueOf(world.getId())));
-				eventBus.post(new WorldEvent.Delete(filters));
+				worldHandler.deleteWorlds(filters)
+						.observeOn(AndroidSchedulers.mainThread())
+						.subscribe(new Subscriber<Collection<World>>() {
+							@Override
+							public void onCompleted() {
+
+							}
+
+							@Override
+							public void onError(Throwable e) {
+
+							}
+
+							@Override
+							public void onNext(Collection<World> worlds) {
+								String toastString;
+
+								toastString = getString(R.string.toast_worlds_deleted);
+//								toastString = String.format(getString(R.string.toast_worlds_deleted), event.getNumDeleted());
+								for(World world : worlds) {
+									Log.e("SelectWorldActivity", "Deleted world id " + world.getId());
+									adapter.remove(world);
+								}
+								adapter.notifyDataSetChanged();
+								Toast.makeText(SelectWorldActivity.this, toastString, Toast.LENGTH_SHORT).show();
+							}
+						});
 				return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -284,12 +361,12 @@ public class SelectWorldActivity extends Activity implements
 
 	@Override
 	public void onDialogOverwriteClick(DialogFragment dialog) {
-		eventBus.post(new ImportExportEvent.ImportDatabase(fileName, true));
+//		eventBus.post(new ImportExportEvent.ImportDatabase(fileName, true));
 	}
 
 	@Override
 	public void onDialogKeepClick(DialogFragment dialog) {
-		eventBus.post(new ImportExportEvent.ImportDatabase(fileName, false));
+//		eventBus.post(new ImportExportEvent.ImportDatabase(fileName, false));
 	}
 	// </editor-fold>
 
