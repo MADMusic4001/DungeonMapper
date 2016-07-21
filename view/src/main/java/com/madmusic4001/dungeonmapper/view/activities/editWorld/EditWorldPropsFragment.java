@@ -113,7 +113,6 @@ public class EditWorldPropsFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, final ViewGroup container,
 							 Bundle savedInstanceState) {
 		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onCreateView");
-		Log.d(this.getClass().getName(), "Component = " + ((EditWorldActivity)getActivity()).getActivityComponent());
 		((EditWorldActivity)getActivity()).getActivityComponent().
 				newFragmentComponent(new FragmentModule(this)).injectInto(this);
 		if(eventBus != null && !eventBus.isRegistered(this)) {

@@ -18,10 +18,10 @@ package com.madmusic4001.dungeonmapper.view.activities.editWorld;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,9 +34,7 @@ import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandl
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
-import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 import com.madmusic4001.dungeonmapper.view.di.components.ActivityComponent;
@@ -45,9 +43,6 @@ import com.madmusic4001.dungeonmapper.view.di.modules.ActivityModule;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 import javax.inject.Inject;
 
@@ -80,6 +75,7 @@ public class EditWorldActivity extends Activity {
 	// <editor-fold desc="Activity lifecycle event handlers">
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onCreate");
 		super.onCreate(savedInstanceState);
 
 		activityComponent = ((DungeonMapperApp) getApplication()).getApplicationComponent()
@@ -145,6 +141,7 @@ public class EditWorldActivity extends Activity {
 
 	@Override
 	protected void onResume() {
+		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onResume");
 		super.onResume();
 		if(eventBus != null && !eventBus.isRegistered(this)) {
 			eventBus.register(this);
@@ -167,7 +164,21 @@ public class EditWorldActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onOptionsItemSelected");
 		int id = item.getItemId();
+		if(id == android.R.id.home) {
+			if (!getResources().getBoolean(R.bool.has_two_panes) && regionFragment != null) {
+				FragmentManager fragmentManager = getFragmentManager();
+				fragmentManager.popBackStack();
+				propsFragment = (EditWorldPropsFragment) fragmentManager.findFragmentByTag(PROPERTIES_FRAGMENT_TAG);
+				eventBus.post(new WorldEvent.LoadById(worldId));
+				regionFragment = null;
+				return true;
+			}
+			else {
+				NavUtils.navigateUpFromSameTask(this);
+			}
+		}
 		return id == R.id.actionSettings || super.onOptionsItemSelected(item);
 	}
 

@@ -18,6 +18,7 @@ package com.madmusic4001.dungeonmapper.view.activities.editWorld;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -418,15 +419,13 @@ public class EditWorldRegionFragment extends Fragment {
 		}
 	}
 
-	public void setRegion(Region region) {
+	public void setRegion(@NonNull Region region) {
 		this.region = region;
-		if(region != null) {
-			if (regionView != null) {
-				regionView.setRegion(region);
-			}
-			if (region.getName() != null) {
-				regionNameView.setText(region.getName());
-			}
+		if (regionView != null) {
+			regionView.setRegion(region);
+		}
+		if (region.getName() != null && regionNameView != null) {
+			regionNameView.setText(region.getName());
 		}
 	}
 	// </editor-fold>
