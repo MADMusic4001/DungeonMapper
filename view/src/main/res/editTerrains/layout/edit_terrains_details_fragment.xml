@@ -15,7 +15,7 @@
             android:layout_marginStart="4dp"
             android:paddingBottom="4dp"
             android:textIsSelectable="true"
-            android:inputType="textAutoCorrect"
+            android:inputType="textNoSuggestions"
             android:hint="@string/label_terrainName">
             <requestFocus />
         </EditText>
@@ -50,7 +50,7 @@
             android:layout_marginStart="4dp"
             android:layout_below="@id/localeSpinner"
             android:textIsSelectable="true"
-            android:inputType="textAutoCorrect"
+            android:inputType="textNoSuggestions"
             android:hint="@string/label_displayName"/>
         <TextView
             android:id="@+id/BitmapsLabel"

@@ -15,7 +15,7 @@
       android:layout_marginLeft="4dp"
       android:layout_marginStart="4dp"
       android:ems="15"
-      android:inputType="text"
+      android:inputType="textNoSuggestions"
       android:selectAllOnFocus="true"
       android:imeOptions="actionNext"
       android:hint="@string/label_newWorld">
