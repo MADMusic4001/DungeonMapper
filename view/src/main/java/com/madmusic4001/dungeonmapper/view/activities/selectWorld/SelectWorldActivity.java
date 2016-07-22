@@ -35,13 +35,13 @@ import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler
 import com.madmusic4001.dungeonmapper.controller.events.DatabaseImportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ImportExportEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
-import com.madmusic4001.dungeonmapper.controller.handlers.WorldHandler;
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.WorldRxHandler;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
 import com.madmusic4001.dungeonmapper.data.entity.World;
-import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
+import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 import com.madmusic4001.dungeonmapper.view.activities.FileSelectorDialogFragment;
 import com.madmusic4001.dungeonmapper.view.activities.editTerrain.EditTerrainActivity;
@@ -50,7 +50,6 @@ import com.madmusic4001.dungeonmapper.view.adapters.WorldListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.ActivityModule;
 import com.madmusic4001.dungeonmapper.view.utils.BundleConstants;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -74,10 +73,8 @@ public class SelectWorldActivity extends Activity implements
 		FileSelectorDialogFragment.FileSelectorDialogListener {
 	@Inject
 	protected WorldListAdapter  adapter;
-//	@Inject
-//	protected EventBus          eventBus;
 	@Inject
-	protected WorldHandler		worldHandler;
+	protected WorldRxHandler    worldRxHandler;
 	@Inject
 	protected WorldEventHandler worldEventHandler;
 	@Inject
@@ -88,7 +85,7 @@ public class SelectWorldActivity extends Activity implements
 	private   String            fileName;
 
 	//**********************************************************************************************
-	// Activity lifecycle event handlers
+	// Activity lifecycle event rxhandlers
 	//**********************************************************************************************
 
 //	@Override
@@ -119,7 +116,7 @@ public class SelectWorldActivity extends Activity implements
 		setContentView(R.layout.select_world_layout);
 		initListView();
 
-		worldHandler.getWorlds(null)
+		worldRxHandler.getWorlds(null)
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(new Subscriber<Collection<World>>() {
 					@Override
@@ -165,7 +162,7 @@ public class SelectWorldActivity extends Activity implements
 				newWorld.setRegionHeight(16);
 				newWorld.setOriginLocation(DataConstants.SOUTHWEST);
 				newWorld.setOriginOffset(0);
-				worldHandler.saveWorld(newWorld)
+				worldRxHandler.saveWorld(newWorld)
 						.observeOn(AndroidSchedulers.mainThread())
 						.subscribe(new Subscriber<World>() {
 							@Override
@@ -241,7 +238,7 @@ public class SelectWorldActivity extends Activity implements
 				filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 														  WorldDaoSqlImpl.WorldsContract._ID,
 														  String.valueOf(world.getId())));
-				worldHandler.deleteWorlds(filters)
+				worldRxHandler.deleteWorlds(filters)
 						.observeOn(AndroidSchedulers.mainThread())
 						.subscribe(new Subscriber<Collection<World>>() {
 							@Override
