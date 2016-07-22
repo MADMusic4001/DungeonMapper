@@ -29,22 +29,28 @@ import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellExitTypeEventHandler;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.RegionEventHandler;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandler;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.RegionRxHandler;
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.WorldRxHandler;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
+import com.madmusic4001.dungeonmapper.data.entity.Region;
+import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 import com.madmusic4001.dungeonmapper.view.DungeonMapperApp;
 import com.madmusic4001.dungeonmapper.view.di.components.ActivityComponent;
 import com.madmusic4001.dungeonmapper.view.di.modules.ActivityModule;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Collection;
+
 import javax.inject.Inject;
+
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 
 import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WORLD_INTENT_WORLD_ID;
 
@@ -55,22 +61,21 @@ public class EditWorldActivity extends Activity {
 	private static final String PROPERTIES_FRAGMENT_TAG = "properties_fragment";
 	private static final String REGION_FRAGMENT_TAG = "region_fragment";
 	@Inject
-	protected EventBus					eventBus;
+	protected FilterCreator            filterCreator;
 	@Inject
-	protected FilterCreator				filterCreator;
+	protected WorldRxHandler           worldRxHandler;
 	@Inject
-	protected WorldEventHandler			worldEventHandler;
+	protected RegionRxHandler          regionRxHandler;
 	@Inject
-	protected RegionEventHandler		regionEventHandler;
+	protected CellExitTypeEventHandler cellExitTypeEventHandler;
 	@Inject
-	protected CellExitTypeEventHandler	cellExitTypeEventHandler;
-	@Inject
-	protected TerrainEventHandler		terrainEventHandler;
-	private ActivityComponent			activityComponent;
-	private EditWorldPropsFragment		propsFragment;
-	private EditWorldRegionFragment		regionFragment;
+	protected TerrainEventHandler      terrainEventHandler;
+	private   ActivityComponent        activityComponent;
+	private   EditWorldPropsFragment   propsFragment;
+	private   EditWorldRegionFragment  regionFragment;
 	private int							worldId = DataConstants.UNINITIALIZED;
 	private int							selectedRegionId = DataConstants.UNINITIALIZED;
+	private Collection<Region>
 
 	// <editor-fold desc="Activity lifecycle event handlers">
 	@Override
@@ -81,9 +86,6 @@ public class EditWorldActivity extends Activity {
 		activityComponent = ((DungeonMapperApp) getApplication()).getApplicationComponent()
 				.newActivityComponent(new ActivityModule(this));
 		activityComponent.injectInto(this);
-		if(!eventBus.isRegistered(this)) {
-			eventBus.register(this);
-		}
 
 		setContentView(R.layout.edit_world);
 
@@ -120,7 +122,26 @@ public class EditWorldActivity extends Activity {
 		}
 
 		if(propsFragment != null && worldId != DataConstants.UNINITIALIZED) {
-			eventBus.post(new WorldEvent.LoadById(worldId));
+			worldRxHandler.getWorld(worldId)
+					.observeOn(AndroidSchedulers.mainThread())
+					.subscribe(new Subscriber<World>() {
+						@Override
+						public void onCompleted() {
+
+						}
+
+						@Override
+						public void onError(Throwable e) {
+
+						}
+
+						@Override
+						public void onNext(World world) {
+							if(propsFragment != null) {
+								propsFragment.setWorld(world);
+							}
+						}
+					});
 		}
 		if(regionFragment != null && selectedRegionId != DataConstants.UNINITIALIZED) {
 			regionFragment.loadRegion(selectedRegionId);
@@ -140,23 +161,6 @@ public class EditWorldActivity extends Activity {
 //	}
 
 	@Override
-	protected void onResume() {
-		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onResume");
-		super.onResume();
-		if(eventBus != null && !eventBus.isRegistered(this)) {
-			eventBus.register(this);
-		}
-	}
-
-	@Override
-	protected void onPause() {
-		if(eventBus != null && eventBus.isRegistered(this)) {
-			eventBus.unregister(this);
-		}
-		super.onPause();
-	}
-
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.edit_world_action_bar, menu);
 		return true;
@@ -171,7 +175,26 @@ public class EditWorldActivity extends Activity {
 				FragmentManager fragmentManager = getFragmentManager();
 				fragmentManager.popBackStack();
 				propsFragment = (EditWorldPropsFragment) fragmentManager.findFragmentByTag(PROPERTIES_FRAGMENT_TAG);
-				eventBus.post(new WorldEvent.LoadById(worldId));
+				worldRxHandler.getWorld(worldId)
+						.observeOn(AndroidSchedulers.mainThread())
+						.subscribe(new Subscriber<World>() {
+							@Override
+							public void onCompleted() {
+
+							}
+
+							@Override
+							public void onError(Throwable e) {
+
+							}
+
+							@Override
+							public void onNext(World world) {
+								if(propsFragment != null) {
+									propsFragment.setWorld(world);
+								}
+							}
+						});
 				regionFragment = null;
 				return true;
 			}

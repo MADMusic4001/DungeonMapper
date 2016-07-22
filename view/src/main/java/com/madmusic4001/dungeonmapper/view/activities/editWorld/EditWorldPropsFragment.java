@@ -42,6 +42,8 @@ import android.widget.Toast;
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.RegionRxHandler;
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.WorldRxHandler;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
@@ -51,7 +53,6 @@ import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
 import com.madmusic4001.dungeonmapper.view.adapters.RegionListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -61,6 +62,9 @@ import java.util.Collection;
 
 import javax.inject.Inject;
 
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.OriginLocation;
 
 /**
@@ -68,44 +72,28 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.OriginLocat
  */
 public class EditWorldPropsFragment extends Fragment {
 	@Inject
-	protected RegionListAdapter				regionListAdapter;
+	protected RegionListAdapter regionListAdapter;
 	@Inject
-	protected EventBus                      eventBus;
+	protected FilterCreator     filterCreator;
 	@Inject
-	protected FilterCreator                 filterCreator;
+	protected ComparatorUtils   comparatorUtils;
 	@Inject
-	protected ComparatorUtils               comparatorUtils;
-	private TextView						worldNameView;
-	private CheckBox						zeroBasedCoordinatesView;
-	private Spinner							originView;
-	private TextView						regionWidthView;
-	private TextView						regionHeightView;
-	private ListView						regionsListView;
-	private World							world;
+	protected WorldRxHandler    worldRxHandler;
+	@Inject
+	protected RegionRxHandler   regionRxHandler;
+	private   TextView          worldNameView;
+	private   CheckBox          zeroBasedCoordinatesView;
+	private   Spinner           originView;
+	private   TextView          regionWidthView;
+	private   TextView          regionHeightView;
+	private   ListView          regionsListView;
+	private   World             world;
 
 	// <editor-fold desc="Fragment lifecycle event handlers">
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		if(eventBus != null && !eventBus.isRegistered(this)) {
-			eventBus.register(this);
-		}
-	}
-
-	@Override
-	public void onPause() {
-		if(eventBus != null) {
-			eventBus.unregister(this);
-		}
-		super.onPause();
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onCreate");
 		super.onCreate(savedInstanceState);
-
 		setHasOptionsMenu(true);
 	}
 
@@ -115,9 +103,6 @@ public class EditWorldPropsFragment extends Fragment {
 		Log.d("Lifecycle", this.getClass().getSimpleName() +  ".onCreateView");
 		((EditWorldActivity)getActivity()).getActivityComponent().
 				newFragmentComponent(new FragmentModule(this)).injectInto(this);
-		if(eventBus != null && !eventBus.isRegistered(this)) {
-			eventBus.register(this);
-		}
 
 		View layout = inflater.inflate(R.layout.edit_world_fragment, container, false);
 
@@ -172,7 +157,27 @@ public class EditWorldPropsFragment extends Fragment {
 				region.setModifiedTs(currentTime);
 				region.setHeight(world.getRegionHeight());
 				region.setWidth(world.getRegionWidth());
-				eventBus.post(new RegionEvent.Save(region));
+				regionRxHandler.saveRegion(region)
+						.observeOn(AndroidSchedulers.mainThread())
+						.subscribe(new Subscriber<Region>() {
+							@Override
+							public void onCompleted() {
+
+							}
+
+							@Override
+							public void onError(Throwable e) {
+
+							}
+
+							@Override
+							public void onNext(Region region) {
+								if(regionListAdapter.getPosition(region) <= 0) {
+									regionListAdapter.add(region);
+								}
+								regionListAdapter.notifyDataSetChanged();
+							}
+						});
 				Log.e("EditWorldPropsFrag", "Posted RegionEvent.Save event");
 			}
 			result = true;
@@ -218,7 +223,37 @@ public class EditWorldPropsFragment extends Fragment {
 					filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 							RegionDaoSqlImpl.RegionsContract._ID,
 							String.valueOf(region.getId())));
-					eventBus.post(new RegionEvent.Delete(filters));
+					regionRxHandler.deleteRegions(filters)
+							.observeOn(AndroidSchedulers.mainThread())
+							.subscribe(new Subscriber<Collection<Region>>() {
+								@Override
+								public void onCompleted() {
+
+								}
+
+								@Override
+								public void onError(Throwable e) {
+									String toastString = getString(R.string.toast_worlds_deleted_error);
+									Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+								}
+
+								@Override
+								public void onNext(Collection<Region> regions) {
+									String toastString;
+
+									for (Region deletedRegion : regions) {
+										regionListAdapter.remove(deletedRegion);
+									}
+									if (regionListAdapter.getCount() > 0) {
+										regionListAdapter.notifyDataSetChanged();
+									}
+									else {
+										regionListAdapter.notifyDataSetInvalidated();
+									}
+									toastString = String.format(getString(R.string.toast_worlds_deleted), regions.size());
+									Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+								}
+							});
 					return true;
 				}
 				else {
@@ -258,13 +293,42 @@ public class EditWorldPropsFragment extends Fragment {
 			regionHeightView.setText(String.valueOf(world.getRegionHeight()));
 		}
 
-		if(eventBus != null) {
-			Collection<DaoFilter> filters = new ArrayList<>(1);
-			filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-													  RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
-													  String.valueOf(world.getId())));
-			eventBus.post(new RegionEvent.Load(filters));
-		}
+		Collection<DaoFilter> filters = new ArrayList<>(1);
+		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
+												  RegionDaoSqlImpl.RegionsContract.WORLD_ID_COLUMN_NAME,
+												  String.valueOf(world.getId())));
+		regionRxHandler.getRegions(filters)
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(new Subscriber<Collection<Region>>() {
+					@Override
+					public void onCompleted() {
+
+					}
+
+					@Override
+					public void onError(Throwable e) {
+						String toastString = getString(R.string.toast_regions_load_error);
+						if(regionListAdapter != null) {
+							regionListAdapter.clear();
+							regionListAdapter.notifyDataSetInvalidated();
+						}
+					}
+
+					@Override
+					public void onNext(Collection<Region> regions) {
+						String toastString;
+
+						toastString = String.format(getString(R.string.toast_regions_loaded), regions.size());
+						if(regionListAdapter != null) {
+							regionListAdapter.addAll(regions);
+							regionListAdapter.notifyDataSetChanged();
+						}
+						Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+						if(regions.size() > 0) {
+//							eventBus.post(new RegionEvent.Selected((Region) event.getItems().toArray()[0], false));
+						}
+					}
+				});
 	}
 	// </editor-fold>
 
@@ -302,7 +366,7 @@ public class EditWorldPropsFragment extends Fragment {
 		}
 		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
 		if(event.getItems().size() > 0) {
-			eventBus.post(new RegionEvent.Selected((Region) event.getItems().toArray()[0], false));
+//			eventBus.post(new RegionEvent.Selected((Region) event.getItems().toArray()[0], false));
 		}
 	}
 
@@ -370,7 +434,28 @@ public class EditWorldPropsFragment extends Fragment {
 					String newName = worldNameView.getText().toString();
 					if (world != null && !world.getName().equals(newName)) {
 						world.setName(newName);
-						eventBus.post(new WorldEvent.Save(world));
+						worldRxHandler.saveWorld(world)
+								.observeOn(AndroidSchedulers.mainThread())
+								.subscribe(new Subscriber<World>() {
+									@Override
+									public void onCompleted() {
+
+									}
+
+									@Override
+									public void onError(Throwable e) {
+										String toastString = getString(R.string.toast_world_save_error);
+										Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+									}
+
+									@Override
+									public void onNext(World world) {
+										String toastString;
+
+										toastString = getString(R.string.toast_world_saved);
+										Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+									}
+								});
 					}
 				}
 			}
@@ -389,7 +474,28 @@ public class EditWorldPropsFragment extends Fragment {
 						int newOffset = buttonView.isChecked() ? 0 : 1;
 						if (world != null && world.getOriginOffset() != newOffset) {
 							world.setOriginOffset(newOffset);
-							eventBus.post(new WorldEvent.Save(world));
+							worldRxHandler.saveWorld(world)
+									.observeOn(AndroidSchedulers.mainThread())
+									.subscribe(new Subscriber<World>() {
+										@Override
+										public void onCompleted() {
+
+										}
+
+										@Override
+										public void onError(Throwable e) {
+											String toastString = getString(R.string.toast_world_save_error);
+											Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+										}
+
+										@Override
+										public void onNext(World world) {
+											String toastString;
+
+											toastString = getString(R.string.toast_world_saved);
+											Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+										}
+									});
 							Log.d(((Object) this).getClass().getName(), "Executed "
 									+ "EditWorldPropsController#saveWorld(World world)");
 						}
@@ -415,7 +521,28 @@ public class EditWorldPropsFragment extends Fragment {
 				@OriginLocation int newPosition = (int) parent.getSelectedItemId();
 				if (world != null && world.getOriginLocation() != newPosition) {
 					world.setOriginLocation(newPosition);
-					eventBus.post(new WorldEvent.Save(world));
+					worldRxHandler.saveWorld(world)
+							.observeOn(AndroidSchedulers.mainThread())
+							.subscribe(new Subscriber<World>() {
+								@Override
+								public void onCompleted() {
+
+								}
+
+								@Override
+								public void onError(Throwable e) {
+									String toastString = getString(R.string.toast_world_save_error);
+									Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+								}
+
+								@Override
+								public void onNext(World world) {
+									String toastString;
+
+									toastString = getString(R.string.toast_world_saved);
+									Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+								}
+							});
 					Log.d(((Object) this).getClass().getName(), "Executed "
 							+ "EditWorldPropsController#saveWorld(World world)");
 				}
@@ -465,7 +592,28 @@ public class EditWorldPropsFragment extends Fragment {
 				int newWidth = Integer.valueOf(v.getText().toString());
 				if (world != null && world.getRegionWidth() != newWidth) {
 					world.setRegionWidth(newWidth);
-					eventBus.post(new WorldEvent.Save(world));
+					worldRxHandler.saveWorld(world)
+							.observeOn(AndroidSchedulers.mainThread())
+							.subscribe(new Subscriber<World>() {
+								@Override
+								public void onCompleted() {
+
+								}
+
+								@Override
+								public void onError(Throwable e) {
+									String toastString = getString(R.string.toast_world_save_error);
+									Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+								}
+
+								@Override
+								public void onNext(World world) {
+									String toastString;
+
+									toastString = getString(R.string.toast_world_saved);
+									Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+								}
+							});
 					Log.d(((Object) this).getClass().getName(), "Executed "
 							+ "EditWorldPropsController#saveWorld(World world)");
 					//TODO: Update region fragment with new width
@@ -480,11 +628,32 @@ public class EditWorldPropsFragment extends Fragment {
 					int newWidth = Integer.valueOf(regionWidthView.getText().toString());
 					if (world != null && world.getRegionWidth() != newWidth) {
 						world.setRegionWidth(newWidth);
-						eventBus.post(new WorldEvent.Save(world));
+						worldRxHandler.saveWorld(world)
+								.observeOn(AndroidSchedulers.mainThread())
+								.subscribe(new Subscriber<World>() {
+									@Override
+									public void onCompleted() {
+
+									}
+
+									@Override
+									public void onError(Throwable e) {
+										String toastString = getString(R.string.toast_world_save_error);
+										Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+									}
+
+									@Override
+									public void onNext(World world) {
+										String toastString;
+
+										toastString = getString(R.string.toast_world_saved);
+										Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+									}
+								});
 						for(Region aRegion : world.getRegionNameMap().values()) {
 							aRegion.setWidth(newWidth);
 						}
-						eventBus.post(new RegionEvent.SizeChanged(world.getRegionHeight(), newWidth));
+//						eventBus.post(new RegionEvent.SizeChanged(world.getRegionHeight(), newWidth));
 						Log.d(((Object) this).getClass().getName(), "Executed "
 								+ "EditWorldPropsController#saveWorld(World world)");
 					}
@@ -528,7 +697,28 @@ public class EditWorldPropsFragment extends Fragment {
 				int newHeight = Integer.valueOf(v.getText().toString());
 				if (world != null && world.getRegionHeight() != newHeight) {
 					world.setRegionHeight(newHeight);
-					eventBus.post(new WorldEvent.Save(world));
+					worldRxHandler.saveWorld(world)
+							.observeOn(AndroidSchedulers.mainThread())
+							.subscribe(new Subscriber<World>() {
+								@Override
+								public void onCompleted() {
+
+								}
+
+								@Override
+								public void onError(Throwable e) {
+									String toastString = getString(R.string.toast_world_save_error);
+									Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+								}
+
+								@Override
+								public void onNext(World world) {
+									String toastString;
+
+									toastString = getString(R.string.toast_world_saved);
+									Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+								}
+							});
 					Log.d(((Object) this).getClass().getName(), "Executed "
 							+ "EditWorldPropsController#saveWorld(World world)");
 					//TODO: Update region fragment with new height
@@ -543,11 +733,32 @@ public class EditWorldPropsFragment extends Fragment {
 					int newHeight = Integer.valueOf(regionHeightView.getText().toString());
 					if (world != null && world.getRegionHeight() != newHeight) {
 						world.setRegionHeight(newHeight);
-						eventBus.post(new WorldEvent.Save(world));
+						worldRxHandler.saveWorld(world)
+								.observeOn(AndroidSchedulers.mainThread())
+								.subscribe(new Subscriber<World>() {
+									@Override
+									public void onCompleted() {
+
+									}
+
+									@Override
+									public void onError(Throwable e) {
+										String toastString = getString(R.string.toast_world_save_error);
+										Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+									}
+
+									@Override
+									public void onNext(World world) {
+										String toastString;
+
+										toastString = getString(R.string.toast_world_saved);
+										Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
+									}
+								});
 						for(Region aRegion : world.getRegionNameMap().values()) {
 							aRegion.setHeight(newHeight);
 						}
-						eventBus.post(new RegionEvent.SizeChanged(newHeight, world.getRegionWidth()));
+//						eventBus.post(new RegionEvent.SizeChanged(newHeight, world.getRegionWidth()));
 						Log.d(((Object) this).getClass().getName(), "Executed "
 								+ "EditWorldPropsController#saveWorld(World world)");
 					}
@@ -595,7 +806,7 @@ public class EditWorldPropsFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Region region = (Region) regionsListView.getItemAtPosition(position);
-				eventBus.post(new RegionEvent.Selected(region, true));
+//				eventBus.post(new RegionEvent.Selected(region, true));
 			}
 		});
 		registerForContextMenu(regionsListView);

@@ -21,7 +21,7 @@ public class WorldRxHandler {
     /**
      * Creates a new WorldHandler instance
      *
-     * @param dao  a {@link WorldDao} instance to be used for data access
+     * @param dao  a {@link WorldDao} instance to use to access persistent storage
      */
     public WorldRxHandler(WorldDao dao) {
         this.dao = dao;

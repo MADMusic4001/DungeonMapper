@@ -15,7 +15,9 @@
  */
 package com.madmusic4001.dungeonmapper.view.di.modules;
 
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.RegionRxHandler;
 import com.madmusic4001.dungeonmapper.controller.rxhandlers.WorldRxHandler;
+import com.madmusic4001.dungeonmapper.data.dao.RegionDao;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
 
 import javax.inject.Singleton;
@@ -32,5 +34,11 @@ public class RxHandlerModule {
 	@Singleton
 	public WorldRxHandler provideWorldRxHandler(WorldDao dao) {
 		return new WorldRxHandler(dao);
+	}
+
+	@Provides
+	@Singleton
+	public RegionRxHandler provideRegionRxHandler(RegionDao dao) {
+		return new RegionRxHandler(dao);
 	}
 }

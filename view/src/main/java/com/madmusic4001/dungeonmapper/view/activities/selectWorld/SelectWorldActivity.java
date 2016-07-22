@@ -31,7 +31,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
 import com.madmusic4001.dungeonmapper.controller.events.DatabaseImportedEvent;
 import com.madmusic4001.dungeonmapper.controller.events.ImportExportEvent;
 import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
@@ -75,8 +74,6 @@ public class SelectWorldActivity extends Activity implements
 	protected WorldListAdapter  adapter;
 	@Inject
 	protected WorldRxHandler    worldRxHandler;
-	@Inject
-	protected WorldEventHandler worldEventHandler;
 	@Inject
 	protected FilterCreator     filterCreator;
 	@Inject
