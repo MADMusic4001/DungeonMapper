@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
 
 android {
 	compileSdkVersion 24
@@ -7,12 +8,9 @@ android {
 	defaultConfig {
 		applicationId "com.madmusic4001.dungeonmapper"
 		minSdkVersion 14
-		targetSdkVersion 24
+		targetSdkVersion 23
 		versionCode 1
 		versionName "1.0"
-		jackOptions {
-			enabled true
-		}
 	}
 	buildTypes {
 		release {
@@ -21,8 +19,8 @@ android {
 		}
 	}
 	compileOptions {
-		sourceCompatibility JavaVersion.VERSION_1_8
-		targetCompatibility JavaVersion.VERSION_1_8
+		sourceCompatibility JavaVersion.VERSION_1_7
+		targetCompatibility JavaVersion.VERSION_1_7
 	}
 	packagingOptions {
 		exclude 'META-INF/LICENSE.txt'
@@ -44,10 +42,11 @@ dependencies {
 	compile fileTree(include: ['*.jar'], dir: 'libs')
 	compile 'com.google.code.gson:gson:2.4'
 	compile 'com.google.dagger:dagger:2.4'
-	compile 'org.glassfish:javax.annotation:10.0-b28'
-	compile 'org.apache.commons:commons-lang3:3.4'
+	apt 'com.google.dagger:dagger-compiler:2.4'
 	compile 'com.android.support:support-annotations:24.1.0'
 	compile 'com.android.support:support-v13:24.1.0'
+	compile 'org.glassfish:javax.annotation:10.0-b28'
+	compile 'org.apache.commons:commons-lang3:3.4'
 	compile 'org.greenrobot:eventbus:3.0.0'
 	compile 'io.reactivex:rxandroid:1.2.1'
 }
