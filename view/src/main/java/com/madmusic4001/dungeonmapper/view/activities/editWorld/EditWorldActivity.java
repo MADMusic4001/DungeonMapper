@@ -75,7 +75,7 @@ public class EditWorldActivity extends Activity {
 	private   EditWorldRegionFragment  regionFragment;
 	private int							worldId = DataConstants.UNINITIALIZED;
 	private int							selectedRegionId = DataConstants.UNINITIALIZED;
-	private Collection<Region>
+//	private Collection<Region>
 
 	// <editor-fold desc="Activity lifecycle event handlers">
 	@Override

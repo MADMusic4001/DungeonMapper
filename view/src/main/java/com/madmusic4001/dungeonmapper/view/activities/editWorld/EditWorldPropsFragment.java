@@ -210,7 +210,7 @@ public class EditWorldPropsFragment extends Fragment {
 			case R.id.region_item_edit:
 				region = (Region)regionsListView.getItemAtPosition(info.position);
 				if(region != null) {
-					eventBus.post(new RegionEvent.Selected(region, true));
+//					eventBus.post(new RegionEvent.Selected(region, true));
 					return true;
 				}
 				else {
