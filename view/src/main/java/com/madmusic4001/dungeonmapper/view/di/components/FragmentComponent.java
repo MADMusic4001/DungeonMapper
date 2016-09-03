@@ -15,8 +15,8 @@
  */
 package com.madmusic4001.dungeonmapper.view.di.components;
 
+import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditRegionFragment;
 import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldPropsFragment;
-import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldRegionFragment;
 import com.madmusic4001.dungeonmapper.view.di.PerFragment;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 
@@ -33,5 +33,5 @@ import dagger.Subcomponent;
 public interface FragmentComponent {
 
 	void injectInto(EditWorldPropsFragment fragment);
-	void injectInto(EditWorldRegionFragment fragment);
+	void injectInto(EditRegionFragment fragment);
 }

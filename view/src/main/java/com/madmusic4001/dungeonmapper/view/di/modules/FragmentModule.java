@@ -15,8 +15,8 @@
  */
 package com.madmusic4001.dungeonmapper.view.di.modules;
 
+import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditRegionFragment;
 import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldPropsFragment;
-import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldRegionFragment;
 import com.madmusic4001.dungeonmapper.view.di.PerFragment;
 
 import dagger.Module;
@@ -29,14 +29,14 @@ import dagger.Provides;
 @Module
 public class FragmentModule {
 	private EditWorldPropsFragment  editWorldPropsFragment;
-	private EditWorldRegionFragment editWorldRegionFragment;
+	private EditRegionFragment editRegionFragment;
 
 	public FragmentModule(EditWorldPropsFragment editWorldPropsFragment) {
 		this.editWorldPropsFragment = editWorldPropsFragment;
 	}
 
-	public FragmentModule(EditWorldRegionFragment editWorldRegionFragment) {
-		this.editWorldRegionFragment = editWorldRegionFragment;
+	public FragmentModule(EditRegionFragment editRegionFragment) {
+		this.editRegionFragment = editRegionFragment;
 	}
 
 	@Provides @PerFragment
@@ -45,7 +45,7 @@ public class FragmentModule {
 	}
 
 	@Provides @PerFragment
-	public EditWorldRegionFragment provideEditWorldRegionFragment() {
-		return this.editWorldRegionFragment;
+	public EditRegionFragment provideEditWorldRegionFragment() {
+		return this.editRegionFragment;
 	}
 }

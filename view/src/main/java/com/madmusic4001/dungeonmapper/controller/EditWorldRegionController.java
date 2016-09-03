@@ -15,22 +15,8 @@
  */
 package com.madmusic4001.dungeonmapper.controller;
 
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.util.Log;
-
-import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
-import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
 //import com.madmusic4001.dungeonmapper.controller.managers.WorldManager;
-import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
-import com.madmusic4001.dungeonmapper.data.entity.Region;
-import com.madmusic4001.dungeonmapper.data.entity.Terrain;
-import com.madmusic4001.dungeonmapper.data.entity.World;
-import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldRegionFragment;
 
-import java.util.Collection;
-
-import javax.inject.Inject;
 
 /**
  * ${CLASS_DESCRIPTION}

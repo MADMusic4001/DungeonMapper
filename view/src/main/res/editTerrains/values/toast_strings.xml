@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2016 MadInnovations
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * -->
+<resources>
+    <!-- EditWorldPropsFragment toast strings -->
+    <string name="toast_worlds_loaded">%1$s worlds loaded successfully.</string>
+    <string name="toast_worlds_load_error">A fatal error occurred loading worlds.</string>
+    <string name="toast_world_load_error">A fatal error occurred loading world %1$s.</string>
+    <string name="toast_world_saved">World saved successfully.</string>
+    <string name="toast_world_save_error">A fatal error occurred saving world %1$s.</string>
+    <string name="toast_worlds_deleted">%1$s world deleted successfully.</string>
+    <string name="toast_worlds_deleted_error">A fatal error occurred deleting world.</string>
+    <string name="toast_loading_regions">Loading regions&#8230;</string>
+    <string name="toast_regions_loaded">%1$s regions loaded successfully.</string>
+    <string name="toast_regions_load_error">A fatal error occurred loading regions for world %1$s.</string>
+    <string name="toast_region_saved">Region saved successfully.</string>
+    <string name="toast_region_save_error">A fatal error occurred saving region %1$s.</string>
+    <string name="toast_cell_exit_types_loaded">%1$s cell exit types loaded successfully.</string>
+    <string name="toast_cell_exit_types_load_error">A fatal error occurred loading cell exit types.</string>
+    <string name="toast_terrains_loaded">%1$s terrains loaded successfully.</string>
+    <string name="toast_terrains_load_error">A fatal error occurred loading terrains.</string>
+
+    <!-- Terrain strings -->
+    <string name="toast_noTerrainSet">No terrain set</string>
+    <string name="toast_terrainSaved">Saved Terrain %1$s</string>
+    <string name="toast_terrainSaveFailed">Failed to save Terrain %1$s</string>
+
+    <!-- DbImportDialogFragment string -->
+    <string name="toast_db_imported">DB successfully imported!</string>
+
+    <!-- Region strings -->
+    <string name="toast_regionViewToolTip">Cell %1$d, %2$d\n%3$s</string>
+    <string name="toast_uniqueRegionName">Region names must be unique.</string>
+    <string name="toast_regionSaved">Saved Region: %1$s for World: %2$s</string>
+    <string name="toast_regionCellSaved">Saved RegionCell at: %1$d,%2$d for Region: %3$s</string>
+    <string name="toast_cellsLoaded">Cells loaded for Region: %1$s.</string>
+    <string name="toast_regionSaveFailed">Failed to save Region: %1$s for World: %2$s</string>
+    <string name="toast_regionCellSaveFailed">Failed to save RegionCell at: %1$d,%2$d for Region: %3$s</string>
+    <string name="toast_cellsLoadFailed">Failed to load cells for region: %1$s.</string>
+</resources>

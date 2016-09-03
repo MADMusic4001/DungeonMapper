@@ -85,22 +85,6 @@ public class SelectWorldActivity extends Activity implements
 	// Activity lifecycle event rxhandlers
 	//**********************************************************************************************
 
-//	@Override
-//	protected void onResume() {
-//		super.onResume();
-//		if(eventBus != null && !eventBus.isRegistered(this)) {
-//			eventBus.register(this);
-//		}
-//	}
-
-//	@Override
-//	protected void onPause() {
-//		if(eventBus != null) {
-//			eventBus.unregister(this);
-//		}
-//		super.onPause();
-//	}
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -117,15 +101,11 @@ public class SelectWorldActivity extends Activity implements
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(new Subscriber<Collection<World>>() {
 					@Override
-					public void onCompleted() {
-
-					}
-
+					public void onCompleted() {}
 					@Override
 					public void onError(Throwable e) {
-
+						Log.e("SelectWorldActivity", "Error occured loading all World instances.", e);
 					}
-
 					@Override
 					public void onNext(Collection<World> worlds) {
 						String toastString;

@@ -15,15 +15,7 @@
  */
 package com.madmusic4001.dungeonmapper.view.di.modules;
 
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellEventHandler;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellExitTypeEventHandler;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.RegionEventHandler;
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.TerrainEventHandler;
 import com.madmusic4001.dungeonmapper.controller.eventhandlers.WorldEventHandler;
-import com.madmusic4001.dungeonmapper.data.dao.CellDao;
-import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
-import com.madmusic4001.dungeonmapper.data.dao.RegionDao;
-import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
 
 import org.greenrobot.eventbus.EventBus;
@@ -38,34 +30,6 @@ import dagger.Provides;
  */
 @Module(includes = ApplicationModule.class)
 public class EventHandlerModule {
-	@Provides @Singleton
-	public CellEventHandler provideCellEventHandler(EventBus eventBus, CellDao cellDao) {
-		CellEventHandler handler = new CellEventHandler(eventBus, cellDao);
-		eventBus.register(handler);
-		return handler;
-	}
-
-	@Provides @Singleton
-	public CellExitTypeEventHandler provideCellExitTypeEventHandler(EventBus eventBus, CellExitTypeDao cellExitTypeDao) {
-		CellExitTypeEventHandler handler = new CellExitTypeEventHandler(eventBus, cellExitTypeDao);
-		eventBus.register(handler);
-		return handler;
-	}
-
-	@Provides @Singleton
-	public RegionEventHandler providesRegionEventHandler(EventBus eventBus, RegionDao regionDao) {
-		RegionEventHandler handler = new RegionEventHandler(eventBus, regionDao);
-		eventBus.register(handler);
-		return handler;
-	}
-
-	@Provides @Singleton
-	public TerrainEventHandler provideTerrainEventHandler(EventBus eventBus, TerrainDao terrainDao) {
-		TerrainEventHandler handler = new TerrainEventHandler(eventBus, terrainDao);
-		eventBus.register(handler);
-		return handler;
-	}
-
 	@Provides @Singleton
 	public WorldEventHandler provideWorldEventHandler(EventBus eventBus, WorldDao worldDao) {
 		WorldEventHandler handler = new WorldEventHandler(eventBus, worldDao);

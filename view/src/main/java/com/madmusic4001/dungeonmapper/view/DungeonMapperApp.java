@@ -17,21 +17,16 @@ package com.madmusic4001.dungeonmapper.view;
 
 import android.app.Application;
 
-import com.madmusic4001.dungeonmapper.controller.eventhandlers.CellEventHandler;
 import com.madmusic4001.dungeonmapper.view.di.components.ApplicationComponent;
 import com.madmusic4001.dungeonmapper.view.di.components.DaggerApplicationComponent;
 import com.madmusic4001.dungeonmapper.view.di.modules.ApplicationModule;
 import com.madmusic4001.dungeonmapper.view.di.modules.EventHandlerModule;
-
-import javax.inject.Inject;
 
 /**
  * Main class for maintaining application state.
  */
 public class DungeonMapperApp extends Application {
 	private ApplicationComponent applicationComponent;
-	@Inject
-	protected CellEventHandler cellEventHandler;
 
 	@Override
 	public void onCreate() {

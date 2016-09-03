@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2016 MadInnovations
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * -->
+<resources>
+    <!-- Terrain strings -->
+    <string name="validation_cannotModifyAppResources">App resources cannot be modified.</string>
+    <string name="validation_wrongSize">The image must be %1$d pixels wide and tall.</string>
+    <string name="validation_terrainNameRequired">Please enter a terrain name.</string>
+    <string name="validation_displayNameRequired">Please enter a display name.</string>
+    <string name="validation_uniqueTerrainName">That name is already in use. Please enter a unique name.</string>
+
+    <!-- World strings -->
+    <string name="validation_worldNameRequired">Please enter a world name.</string>
+
+    <!-- Region strings -->
+    <string name="validation_RegionNameRequired">Please enter a region name.</string>
+    <string name="validation_widthTooSmall">Please enter a width &gt; 0.</string>
+    <string name="validation_widthTooLarge">Please enter a width &lt; %1$s.</string>
+    <string name="validation_heightTooSmall">Please enter a width &gt; 0.</string>
+    <string name="validation_heightTooLarge">Please enter a width &lt; %1$s.</string>
+</resources>

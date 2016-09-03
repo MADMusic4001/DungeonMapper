@@ -19,6 +19,6 @@
         android:layout_width="0dp"
         android:layout_weight="65"
         android:layout_height="match_parent"
-        android:name="com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldRegionFragment"
+        android:name="com.madmusic4001.dungeonmapper.view.activities.editWorld.EditRegionFragment"
         tools:layout="@layout/edit_region_fragment"/>
 </LinearLayout>

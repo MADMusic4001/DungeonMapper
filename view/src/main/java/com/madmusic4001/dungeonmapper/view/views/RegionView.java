@@ -49,10 +49,9 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.events.cell.CellEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
 import com.madmusic4001.dungeonmapper.controller.managers.CellExitManager;
 import com.madmusic4001.dungeonmapper.controller.managers.TerrainManager;
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.CellRxHandler;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
@@ -64,10 +63,6 @@ import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldActivit
 import com.madmusic4001.dungeonmapper.view.di.components.ViewComponent;
 import com.madmusic4001.dungeonmapper.view.di.modules.ViewModule;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -77,6 +72,8 @@ import java.util.Arrays;
 import javax.inject.Inject;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import rx.Subscriber;
 
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.DOWN;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.Direction;
@@ -95,6 +92,7 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WEST;
  * Draws a map of a region.
  */
 public class RegionView extends GLSurfaceView {
+	private static final String LOG_TAG = "RegionView";
 	private static final int   FLOAT_SIZE           = 4;
 	private static final int   SHORT_SIZE           = 2;
 	private static final float FLOAT_ZERO           = 0.0f;
@@ -113,7 +111,7 @@ public class RegionView extends GLSurfaceView {
 	@Inject
 	protected TerrainManager  terrainManager;
 	@Inject
-	protected EventBus eventBus;
+	protected CellRxHandler   cellRxHandler;
 
 	// Domain objects
 	private Region      region;
@@ -192,7 +190,6 @@ public class RegionView extends GLSurfaceView {
 		ViewComponent viewComponent = ((EditWorldActivity) context).getActivityComponent()
 				.newViewComponent(new ViewModule(this));
 		viewComponent.injectInto(this);
-		eventBus.register(this);
 
 		initView();
 	}
@@ -233,7 +230,7 @@ public class RegionView extends GLSurfaceView {
 	public void setRegion(Region newRegion) {
 		if (newRegion != this.region) {
 			Region oldRegion = this.region;
-			region = newRegion;
+			this.region = newRegion;
 			boolean createGrid = false;
 			if (oldRegion == null || oldRegion.getWidth() != newRegion.getWidth() ||
 					oldRegion.getHeight() != newRegion.getHeight()) {
@@ -266,10 +263,25 @@ public class RegionView extends GLSurfaceView {
 	 * @param cell the MapCell to insert or update.
 	 */
 	public void updateCell(final Cell cell) {
+		cellRxHandler.save(cell)
+				.subscribe(new Subscriber<Cell>() {
+					@Override
+					public void onCompleted() {}
+					@Override
+					public void onError(Throwable e) {
+						Log.e(LOG_TAG, "Exception caught saving Cell.", e);
+						Toast.makeText(getContext(), String.format(getContext().getString(R.string.toast_regionCellSaveFailed),
+								cell.getX(), cell.getY(), region.getName()), Toast.LENGTH_SHORT).show();
+					}
+					@Override
+					public void onNext(Cell cell) {
+						Toast.makeText(getContext(), String.format(getContext().getString(R.string.toast_regionCellSaved),
+								cell.getX(), cell.getY(), region.getName()), Toast.LENGTH_SHORT).show();
+					}
+				});
 		queueEvent(new Runnable() {
 			@Override
 			public void run() {
-				eventBus.post(new CellEvent.Save(cell));
 				mapRenderer.createSpritesForCell(cell, true);
 				requestRender();
 			}
@@ -328,6 +340,9 @@ public class RegionView extends GLSurfaceView {
 		}
 	}
 
+	/**
+	 * Fills all empty cells in the region with the current terrain.
+	 */
 	public void fillRegion() {
 		boolean cellChanged;
 		boolean isNew;
@@ -362,10 +377,20 @@ public class RegionView extends GLSurfaceView {
 
 				if(cellChanged) {
 					final Cell finalCell = cell;
+					cellRxHandler.save(finalCell)
+							.subscribe(new Subscriber<Cell>() {
+								@Override
+								public void onCompleted() {}
+								@Override
+								public void onError(Throwable e) {
+									Log.e(LOG_TAG, "Exception caught saving Cell.", e);
+								}
+								@Override
+								public void onNext(Cell cell) {}
+							});
 					queueEvent(new Runnable() {
 						@Override
 						public void run() {
-							eventBus.post(new CellEvent.Save(finalCell));
 							mapRenderer.createSpritesForCell(finalCell, true);
 						}
 					});
@@ -462,6 +487,7 @@ public class RegionView extends GLSurfaceView {
 	private class MapViewGestureListener extends GestureDetector.SimpleOnGestureListener {
 		private static final int ESTIMATED_TOAST_HEIGHT_DIPS = 48;
 
+		@Override
 		public boolean onSingleTapConfirmed(MotionEvent event) {
 			boolean cellChanged = false;
 			boolean isNew = false;
@@ -524,12 +550,11 @@ public class RegionView extends GLSurfaceView {
 				terrainName = terrain.getDisplayName();
 			}
 			else {
-				terrainName = getResources().getString(R.string.message_noTerrainSet);
+				terrainName = getResources().getString(R.string.toast_noTerrainSet);
 			}
 
 			// Initial cell array offset assumes origin is top left.Flip the offset based on the
-			// map sizes and the user orientation
-			// preference for this world
+			// map sizes and the user orientation preference for this world
 			World world = region.getParent();
 			@OriginLocation int regionOrientation = world.getOriginLocation();
 			if (NORTHEAST == regionOrientation || SOUTHEAST == regionOrientation) {
@@ -541,7 +566,7 @@ public class RegionView extends GLSurfaceView {
 			cellCoordinates.x += world.getOriginOffset();
 			cellCoordinates.y += world.getOriginOffset();
 			String toolTipText = String.format(
-					getResources().getString(R.string.message_regionViewToolTip),
+					getResources().getString(R.string.toast_regionViewToolTip),
 					cellCoordinates.x, cellCoordinates.y, terrainName);
 			showToolTip(toolTipText, event.getX(), event.getY());
 		}
@@ -1211,10 +1236,4 @@ public class RegionView extends GLSurfaceView {
 		return cellCoordinates;
 	}
 	// </editor-fold>
-
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionSelected(RegionEvent.Selected event) {
-		setRegion(event.getRegion());
-		Log.e("RegionView", "Selected region: " + region);
-	}
 }

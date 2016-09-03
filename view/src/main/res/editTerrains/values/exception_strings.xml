@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2016 MadInnovations
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * -->
+<resources>
+    <!-- Exception strings -->
+    <string name="exception_dbAccessError">Unable to access database.</string>
+    <string name="exception_versionMismatch">Your data cannot be loaded by this version of the app.</string>
+    <string name="exception_errorOpeningForWrite">Unable to save file.</string>
+    <string name="exception_dirNotCreated">Could not create directory %1$s</string>
+    <string name="exception_externalStorageNotAvailable">Cannot load %1$s. External Storage is unavailable.</string>
+    <string name="exception_terrainLoadError">Error loading Terrains.</string>
+    <string name="exception_terrainNotSaved">Terrain not saved.</string>
+    <string name="exception_terrainNotRemoved">Terrain not removed.</string>
+    <string name="exception_worldLoadError">Unable to load World with id = %1$d.</string>
+    <string name="exception_worldNotSaved">World not saved.</string>
+    <string name="exception_worldNotRemoved">World not removed.</string>
+    <string name="exception_regionLoadError">Unable to load Region %1$s for World %2$s.</string>
+    <string name="exception_regionNotSaved">Region %1$s for World %2$s not saved.</string>
+    <string name="exception_regionNotRemoved">Map not removed.</string>
+    <string name="exception_cellExitNotSaved">Cell exit not saved.</string>
+    <string name="exception_cellExitNotRemoved">Cell exit not removed.</string>
+    <string name="exception_cellLoadError">Unable to load Cell at %1$d, %2$d in Region %3$s for World %4$s.</string>
+    <string name="exception_cellNotSaved">Cell at %1$d, %2$d in Region %3$s for World %4$s not saved.</string>
+    <string name="exception_cellNotRemoved">Cell not removed.</string>
+</resources>

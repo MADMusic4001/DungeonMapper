@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 /**
@@ -60,8 +61,8 @@ public class RegionRxHandler {
 						}
 					}
 				}
-		)
-		.subscribeOn(Schedulers.io());
+		).subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread());
 	}
 
 	/**
@@ -86,8 +87,8 @@ public class RegionRxHandler {
 						}
 					}
 				}
-		)
-				.subscribeOn(Schedulers.io());
+		).subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread());
 	}
 
 	/**
@@ -111,8 +112,8 @@ public class RegionRxHandler {
 						}
 					}
 				}
-		)
-				.subscribeOn(Schedulers.io());
+		).subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread());
 	}
 
 	/**
@@ -137,7 +138,7 @@ public class RegionRxHandler {
 						}
 					}
 				}
-		)
-				.subscribeOn(Schedulers.io());
+		).subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread());
 	}
 }

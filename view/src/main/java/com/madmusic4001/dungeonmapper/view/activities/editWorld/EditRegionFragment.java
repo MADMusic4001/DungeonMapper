@@ -35,9 +35,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.events.cellExitType.CellExitTypeEvent;
-import com.madmusic4001.dungeonmapper.controller.events.region.RegionEvent;
-import com.madmusic4001.dungeonmapper.controller.events.terrain.TerrainEvent;
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.CellExitTypeRxHandler;
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.RegionRxHandler;
+import com.madmusic4001.dungeonmapper.controller.rxhandlers.TerrainRxHandler;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
@@ -48,11 +48,11 @@ import com.madmusic4001.dungeonmapper.view.adapters.TerrainSpinnerAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 import com.madmusic4001.dungeonmapper.view.views.RegionView;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import java.util.Collection;
 
 import javax.inject.Inject;
+
+import rx.Subscriber;
 
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.CURRENT_REGION_ID;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.DOWN;
@@ -65,11 +65,16 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WEST;
 /**
  *
  */
-public class EditWorldRegionFragment extends Fragment {
-	@Inject
-	protected EventBus                      eventBus;
+public class EditRegionFragment extends Fragment {
+	private static final String LOG_TAG = "EditRegionFragmet";
 	@Inject
 	protected FilterCreator                 filterCreator;
+	@Inject
+	protected RegionRxHandler               regionRxHandler;
+	@Inject
+	protected CellExitTypeRxHandler         cellExitTypeRxHandler;
+	@Inject
+	protected TerrainRxHandler              terrainRxHandler;
 	private   EditText                      regionNameView;
 	private   GridLayout					selectorsGrid;
 	private   RegionView                    regionView;
@@ -90,6 +95,34 @@ public class EditWorldRegionFragment extends Fragment {
 	private Region  region    = null;
 	private boolean showingPalette = true;
 
+	// <editor-fold desc="Public API methods">
+	public void loadRegion(int regionId) {
+		regionRxHandler.getRegion(regionId)
+				.subscribe(new Subscriber<Region>() {
+					@Override
+					public void onCompleted() {}
+					@Override
+					public void onError(Throwable e) {
+						Log.e(LOG_TAG, "Exception caught loading Region instance.", e);
+					}
+					@Override
+					public void onNext(Region region) {
+						setRegion(region);
+					}
+				});
+	}
+
+	public void setRegion(@NonNull Region region) {
+		this.region = region;
+		if (regionView != null) {
+			regionView.setRegion(region);
+		}
+		if (region.getName() != null && regionNameView != null) {
+			regionNameView.setText(region.getName());
+		}
+	}
+	// </editor-fold>
+
 	// <editor-fold desc="Fragment lifecycle event handlers">
 
 	@Override
@@ -105,14 +138,11 @@ public class EditWorldRegionFragment extends Fragment {
 		View layout = inflater.inflate(R.layout.edit_region_fragment, container, false);
 		((EditWorldActivity) getActivity()).getActivityComponent().
 				newFragmentComponent(new FragmentModule(this)).injectInto(this);
-		if(!eventBus.isRegistered(this)) {
-			eventBus.register(this);
-		}
 
 		if(savedInstanceState != null) {
 			int regionId = savedInstanceState.getInt(CURRENT_REGION_ID, DataConstants.UNINITIALIZED);
 			if(regionId != DataConstants.UNINITIALIZED) {
-				eventBus.post(new RegionEvent.LoadById(regionId));
+				loadRegion(regionId);
 			}
 		}
 		initRegionNameView(layout);
@@ -143,8 +173,65 @@ public class EditWorldRegionFragment extends Fragment {
 		regionView = (RegionView) layout.findViewById(R.id.regionView);
 		initRegionView(regionView);
 
-		eventBus.post(new CellExitTypeEvent.Load(null));
-		eventBus.post(new TerrainEvent.Load(null));
+		cellExitTypeRxHandler.get(null)
+				.subscribe(new Subscriber<Collection<CellExitType>>() {
+					@Override
+					public void onCompleted() {}
+					@Override
+					public void onError(Throwable e) {
+						Log.e(LOG_TAG, "Exception caught loading CellExitType instances.", e);
+						Toast.makeText(getActivity(), getString(R.string.toast_cell_exit_types_load_error), Toast.LENGTH_SHORT).show();
+					}
+					@Override
+					public void onNext(Collection<CellExitType> cellExitTypes) {
+						upExitAdapter.clear();
+						upExitAdapter.addAll(cellExitTypes);
+						upExitAdapter.notifyDataSetChanged();
+						regionView.setCurrentCellExit(UP, (CellExitType) upExitSpinner.getSelectedItem());
+
+						northExitAdapter.clear();
+						northExitAdapter.addAll(cellExitTypes);
+						northExitAdapter.notifyDataSetChanged();
+						regionView.setCurrentCellExit(NORTH, (CellExitType) northExitSpinner.getSelectedItem());
+
+						westExitAdapter.clear();
+						westExitAdapter.addAll(cellExitTypes);
+						westExitAdapter.notifyDataSetChanged();
+						regionView.setCurrentCellExit(WEST, (CellExitType) westExitSpinner.getSelectedItem());
+
+						eastExitAdapter.clear();
+						eastExitAdapter.addAll(cellExitTypes);
+						eastExitAdapter.notifyDataSetChanged();
+						regionView.setCurrentCellExit(EAST, (CellExitType) eastExitSpinner.getSelectedItem());
+
+						southExitAdapter.clear();
+						southExitAdapter.addAll(cellExitTypes);
+						southExitAdapter.notifyDataSetChanged();
+						regionView.setCurrentCellExit(SOUTH, (CellExitType) southExitSpinner.getSelectedItem());
+
+						downExitAdapter.clear();
+						downExitAdapter.addAll(cellExitTypes);
+						downExitAdapter.notifyDataSetChanged();
+						regionView.setCurrentCellExit(DOWN, (CellExitType) downExitSpinner.getSelectedItem());
+					}
+				});
+
+		terrainRxHandler.load(null)
+				.subscribe(new Subscriber<Collection<Terrain>>() {
+					@Override
+					public void onCompleted() {}
+					@Override
+					public void onError(Throwable e) {
+						Log.e(LOG_TAG, "Exception caught loading Terrain instances.", e);
+						Toast.makeText(getActivity(), getString(R.string.toast_terrains_load_error), Toast.LENGTH_SHORT).show();
+					}
+					@Override
+					public void onNext(Collection<Terrain> terrains) {
+						terrainAdapter.clear();
+						terrainAdapter.addAll(terrains);
+						terrainAdapter.notifyDataSetChanged();
+					}
+				});
 
 		return layout;
 	}
@@ -163,7 +250,6 @@ public class EditWorldRegionFragment extends Fragment {
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Log.e("EditWorldRegionFrag", "In onOptionsItemSelected");
 		int id = item.getItemId();
 		switch (id) {
 			case R.id.action_show_grid:
@@ -211,24 +297,6 @@ public class EditWorldRegionFragment extends Fragment {
 		}
 	}
 
-	@Override
-	public void onPause() {
-		regionView.onPause();
-		if(eventBus != null && eventBus.isRegistered(this)) {
-			eventBus.unregister(this);
-		}
-		super.onPause();
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		if(eventBus != null && !eventBus.isRegistered(this)) {
-			eventBus.register(this);
-		}
-		regionView.onResume();
-	}
-
 	/**
 	 * @see android.app.Fragment#onDetach()
 	 */
@@ -238,195 +306,48 @@ public class EditWorldRegionFragment extends Fragment {
 		this.region = null;
 	}
 
-	/**
-	 * Re-sizes the current {@code Map} and forces an update of the {@code MapView}.
-	 *
-	 */
-//    @SuppressWarnings("unused")
-//    public void onEventMainThread(Events.MapWidthChangedEvent event) {
-//        region.resizeRegion();
-//    }
-
-	/**
-	 * Re-sizes the current {@code Map} and forces an update of the {@code MapView}.
-	 *
-	 * @param event a {@code MapHeightChangedEvent}.
-	 */
-//    @SuppressWarnings("unused")
-//    public void onEventMainThread(Events.MapHeightChangedEvent event) {
-//        region.resizeRegion();
-//    }
-
-	/**
-	 * Displays a toast to inform the user the {@code MapCell} was saved or failed.
-	 *
-	 */
-//    @SuppressWarnings("unused")
-//    public void onEventMainThread(final Events.SaveMapCellCompletedEvent event) {
-//        String message;
-//        int x = event.xCoordinate;
-//        int y = event.yCoordinate;
-//        @OriginLocation int origin = region.getParent().getMapOriginPosition();
-//        if(origin == SOUTHEAST || origin == NORTHEAST) {
-//            x = (region.getWidth() - 1) - x;
-//        }
-//        if(origin == SOUTHEAST || origin == SOUTHWEST) {
-//            y = (region.getHeight() - 1) - y;
-//        }
-//        if(event.successful) {
-//            mapView.updateCell(event.region.getCell(event.xCoordinate, event.yCoordinate));
-//            message = String.format(getString(R.string.message_mapCellSaved),
-//                    x,
-//                    y,
-//                    event.region.getName());
-//        }
-//        else {
-//            message = String.format(getString(R.string.message_mapCellSaveFailed),
-//                    x,
-//                    y,
-//                    event.region.getName());
-//            Log.e(((Object)this).getClass().getName(), message +
-//                System.getProperty("line.separator"), event.exception);
-//        }
-//        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-//    }
-
-	/**
-	 * Displays a toast to inform the user the {@code Map} was saved or failed.
-	 *
-	 */
-//    @SuppressWarnings("unused")
-//    public void onEventMainThread(Events.SaveMapCompletedEvent event) {
-//        String message;
-//        if(event.successful) {
-//            eventBus.post(new Events.LoadMapsEvent(world));
-//            message = String.format(getString(R.string.message_mapSaved),
-//                    event.region.getName(),
-//                    event.world.getName());
-//        }
-//        else {
-//            message = String.format(getString(R.string.message_mapSaveFailed),
-//                    event.region.getName(),
-//                    event.world.getName());
-//            Log.e(((Object)this).getClass().getName(), message +
-//                    System.getProperty("line.separator"), event.exception);
-//        }
-//        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-//    }
-
-	/**
-	 * Displays a toast to inform the user the {@code MapCell} instances were loaded or failed.
-	 *
-	 */
-//    @SuppressWarnings("unused")
-//    public void onEventMainThread(Events.LoadMapCellsCompletedEvent event) {
-//        String message;
-//        if(event.successful) {
-//            mapView.onRegionLoaded(event.region);
-//            message = String.format(getString(R.string.message_cellsLoaded),
-//                    event.region.getName());
-//        }
-//        else {
-//            message = String.format(getString(R.string.message_cellsLoadFailed),
-//                    event.region.getName());
-//            Log.e(((Object)this).getClass().getName(), message +
-//                    System.getProperty("line.separator"), event.exception);
-//        }
-//        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-//    }
 	// </editor-fold>
 
 	// <editor-fold desc="Eventbus subscription handler methods">
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionLoaded(RegionEvent.SingleLoaded event) {
-		if(event.isSuccessful()) {
-			this.region = event.getRegion();
-			regionNameView.setText(this.region.getName());
-		}
-	}
+//	@Subscribe(threadMode = ThreadMode.MAIN)
+//	public void onRegionLoaded(RegionEvent.SingleLoaded event) {
+//		if(event.isSuccessful()) {
+//			this.region = event.getRegion();
+//			regionNameView.setText(this.region.getName());
+//		}
+//	}
 
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionSelected(RegionEvent.Selected event) {
-		this.region = event.getRegion();
-		if(this.region != null) {
-			if (regionView != null) {
-				regionView.setRegion(this.region);
-			}
-			regionNameView.setText(this.region.getName());
-		}
-	}
-
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onRegionSaved(RegionEvent.Saved event) {
-		String toastString;
-		Region region = event.getItem();
-
-		if(event.isSuccessful()) {
-			toastString = getString(R.string.toast_region_saved);
-		}
-		else {
-			toastString = String.format(getString(R.string.toast_region_save_error), region != null ? region.getName() : "unknown");
-		}
-		Toast.makeText(getActivity(), toastString, Toast.LENGTH_SHORT).show();
-	}
-
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onLoadCellExitTypesComplete(CellExitTypeEvent.Loaded event) {
-		if(event.isSuccessful()) {
-			for (CellExitType exit : event.getItems()) {
-				upExitAdapter.add(exit);
-				northExitAdapter.add(exit);
-				westExitAdapter.add(exit);
-				eastExitAdapter.add(exit);
-				southExitAdapter.add(exit);
-				downExitAdapter.add(exit);
-			}
-			upExitAdapter.notifyDataSetChanged();
-			regionView.setCurrentCellExit(UP, (CellExitType) upExitSpinner.getSelectedItem());
-			northExitAdapter.notifyDataSetChanged();
-			regionView.setCurrentCellExit(NORTH, (CellExitType) northExitSpinner.getSelectedItem());
-			westExitAdapter.notifyDataSetChanged();
-			regionView.setCurrentCellExit(WEST, (CellExitType) westExitSpinner.getSelectedItem());
-			eastExitAdapter.notifyDataSetChanged();
-			regionView.setCurrentCellExit(EAST, (CellExitType) eastExitSpinner.getSelectedItem());
-			southExitAdapter.notifyDataSetChanged();
-			regionView.setCurrentCellExit(SOUTH, (CellExitType) southExitSpinner.getSelectedItem());
-			downExitAdapter.notifyDataSetChanged();
-			regionView.setCurrentCellExit(DOWN, (CellExitType) downExitSpinner.getSelectedItem());
-		}
-		else {
-			Toast.makeText(getActivity(), getString(R.string.toast_cell_exit_types_load_error), Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onTerrainsLoadedEvent(TerrainEvent.Loaded event) {
-		if(event.isSuccessful()) {
-			terrainAdapter.addAll(event.getItems());
-			terrainAdapter.notifyDataSetChanged();
-		}
-		else {
-			Toast.makeText(getActivity(), getString(R.string.toast_terrains_load_error), Toast.LENGTH_SHORT).show();
-		}
-	}
+//	@Subscribe(threadMode = ThreadMode.MAIN)
+//	public void onRegionSelected(RegionEvent.Selected event) {
+//		this.region = event.getRegion();
+//		if(this.region != null) {
+//			if (regionView != null) {
+//				regionView.setRegion(this.region);
+//			}
+//			regionNameView.setText(this.region.getName());
+//		}
+//	}
 
 	// </editor-fold>
 
-	// <editor-fold desc="Public action methods">
-	public void loadRegion(int regionId) {
-		if(eventBus != null) {
-			eventBus.post(new RegionEvent.LoadById(regionId));
-		}
-	}
-
-	public void setRegion(@NonNull Region region) {
-		this.region = region;
-		if (regionView != null) {
-			regionView.setRegion(region);
-		}
-		if (region.getName() != null && regionNameView != null) {
-			regionNameView.setText(region.getName());
-		}
+	// <editor-fold desc="private action methods">
+	private void saveRegion(final Region region) {
+		regionRxHandler.saveRegion(region)
+				.subscribe(new Subscriber<Region>() {
+					@Override
+					public void onCompleted() {}
+					@Override
+					public void onError(Throwable e) {
+						Log.e(LOG_TAG, "Exception caught saving Region instance.", e);
+						Toast.makeText(getActivity(), String.format(getString(R.string.toast_region_save_error),
+								region != null ? region.getName() : "unknown"), Toast.LENGTH_SHORT).show();
+					}
+					@Override
+					public void onNext(Region region) {
+						Toast.makeText(getActivity(), getString(R.string.toast_region_saved), Toast.LENGTH_SHORT).show();
+						((EditWorldActivity)getActivity()).addRegionToList(region);
+					}
+				});
 	}
 	// </editor-fold>
 
@@ -443,7 +364,7 @@ public class EditWorldRegionFragment extends Fragment {
 				}
 				else if(!newName.equals(region.getName())) {
 					region.setName(newName);
-					eventBus.post(new RegionEvent.Save(region));
+					saveRegion(region);
 				}
 			}
 		});
@@ -480,8 +401,7 @@ public class EditWorldRegionFragment extends Fragment {
 										   (CellExitType) parent.getItemAtPosition(position));
 			}
 			@Override
-			public void onNothingSelected(AdapterView<
-					?> parent) {
+			public void onNothingSelected(AdapterView<?> parent) {
 			}
 		});
 
@@ -554,7 +474,7 @@ public class EditWorldRegionFragment extends Fragment {
 		regionView.setCellChangedListener(new RegionView.OnCellChangedListener() {
 			@Override
 			public void onCellChanged(Region region, int xCoordinate, int yCoordinate) {
-            String message = String.format(getString(R.string.message_regionCellSaved),
+            String message = String.format(getString(R.string.toast_regionCellSaved),
                     xCoordinate, yCoordinate, region.getName());
 				Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
 			}
@@ -567,9 +487,6 @@ public class EditWorldRegionFragment extends Fragment {
 
 		if(region != null) {
 			regionView.setRegion(region);
-		}
-		else {
-			Log.e("RegionView", "region is null");
 		}
 	}
 	// </editor-fold>
