@@ -26,12 +26,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.CellExitTypeBitmapSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.CellExitTypeSchema;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 
 import java.io.ByteArrayOutputStream;
@@ -57,58 +58,7 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WEST;
  * Implementation of the {@link CellExitTypeDao} for managing {@link CellExitType} instances in a SQLite database.
  */
 @Singleton
-public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTypeDao {
-	// Cell exits table constants
-	public static abstract class CellExitsTypesContract implements BaseColumns {
-		public static final String TABLE_NAME   = "cell_exit_types";
-		public static final String NAME         = "name";
-		public static final String IS_SOLID     = "is_solid";
-		public static final String USER_CREATED = "user_created";
-	}
-	private static       String[] cellExitTypesColumnNames     = {
-			CellExitsTypesContract._ID,
-			CellExitsTypesContract.NAME,
-			CellExitsTypesContract.USER_CREATED,
-			CellExitsTypesContract.IS_SOLID};
-	public static final String    CREATE_TABLE_CELL_EXIT_TYPES =
-		CREATE_TABLE + CellExitsTypesContract.TABLE_NAME + " (" +
-			CellExitsTypesContract._ID + INTEGER + NOT_NULL + PRIMARY_KEY + COMMA +
-			CellExitsTypesContract.NAME + TEXT + NOT_NULL + COMMA +
-			CellExitsTypesContract.USER_CREATED + BOOLEAN + NOT_NULL +
-				CHECK + "(" + CellExitsTypesContract.USER_CREATED + IN + "(0,1))" + COMMA +
-			CellExitsTypesContract.IS_SOLID + BOOLEAN + NOT_NULL +
-				CHECK + "(" + CellExitsTypesContract.IS_SOLID + IN + "(0,1)));";
-
-	// Cell exit bitmaps table constants
-	public static abstract class CellExitTypeBitmapsContract implements BaseColumns {
-		public static final String TABLE_NAME          = "cell_exit_type_bitmaps";
-		public static final String CELL_EXIT_ID        = "cell_exit_id";
-		public static final String CELL_EXIT_DIRECTION = "cell_exit_direction";
-		public static final String BITMAP_DATA         = "bitmap_data";
-	}
-	public static final String    CREATE_TABLE_CELL_EXIT_TYPE_BITMAPS =
-		CREATE_TABLE + CellExitTypeBitmapsContract.TABLE_NAME + "(" +
-			CellExitTypeBitmapsContract._ID + INTEGER + NOT_NULL + PRIMARY_KEY + COMMA +
-			CellExitTypeBitmapsContract.CELL_EXIT_ID + INTEGER + NOT_NULL + COMMA +
-			CellExitTypeBitmapsContract.CELL_EXIT_DIRECTION + INTEGER + NOT_NULL + COMMA +
-			CellExitTypeBitmapsContract.BITMAP_DATA + BLOB + NOT_NULL + COMMA +
-			CONSTRAINT + "fk_bitmap_to_cell_exit" +
-				FOREIGN_KEY+ "(" + CellExitTypeBitmapsContract.CELL_EXIT_ID + ")" +
-				REFERENCES + CellExitsTypesContract.TABLE_NAME + "(" + CellExitsTypesContract._ID + ")" +
-					ON + DELETE + CASCADE + COMMA +
-			CONSTRAINT + "unique_cell_exit_side_density" +
-				UNIQUE + "(" + CellExitTypeBitmapsContract.CELL_EXIT_ID + COMMA +
-					CellExitTypeBitmapsContract.CELL_EXIT_DIRECTION + "));";
-	private static final int      ID_INDEX                            = 0;
-	private static final int      NAME_INDEX                          = 1;
-	private static final int      USER_CREATED_INDEX                  = 2;
-	private static final int      SOLID_INDEX                         = 3;
-	private static       String[] cellExitTypeBitmapsColumnNames      = {
-			CellExitTypeBitmapsContract.CELL_EXIT_DIRECTION,
-			CellExitTypeBitmapsContract.BITMAP_DATA};
-	private static final int      DIRECTION_INDEX                     = 0;
-	private static final int      BITMAP_DATA_INDEX                   = 1;
-
+public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTypeDao, CellExitTypeSchema {
 	// Member variables
 	private SparseArray<CellExitType> cellExitTypeCache = new SparseArray<>();
 	private Context          context;
@@ -139,7 +89,7 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 			db.beginTransaction();
 		}
 		try {
-			Cursor cursor = db.query(CellExitsTypesContract.TABLE_NAME,
+			Cursor cursor = db.query(TABLE_NAME,
 									 new String[]{"COUNT(*)"},
 									 whereClause,
 									 whereArgsList.toArray(whereArgs),
@@ -172,9 +122,9 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 				db.beginTransaction();
 			}
 			try {
-				Cursor cursor = db.query(CellExitsTypesContract.TABLE_NAME,
+				Cursor cursor = db.query(TABLE_NAME,
 										 cellExitTypesColumnNames,
-										 CellExitsTypesContract._ID + "=?",
+										 _ID + "=?",
 										 new String[]{String.valueOf(id)},
 										 null,
 										 null,
@@ -214,7 +164,7 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 				db.beginTransaction();
 			}
 			try {
-				Cursor cursor = db.query(CellExitsTypesContract.TABLE_NAME,
+				Cursor cursor = db.query(TABLE_NAME,
 										 cellExitTypesColumnNames,
 										 null,
 										 null,
@@ -262,9 +212,9 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 		boolean result = false;
 		ContentValues values = new ContentValues();
 
-		values.put(CellExitsTypesContract.NAME, cellExitType.getName());
-		values.put(CellExitsTypesContract.USER_CREATED, cellExitType.isUserCreated());
-		values.put(CellExitsTypesContract.IS_SOLID, cellExitType.isSolid());
+		values.put(NAME, cellExitType.getName());
+		values.put(USER_CREATED, cellExitType.isUserCreated());
+		values.put(IS_SOLID, cellExitType.isSolid());
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
 		boolean newTransaction = !db.inTransaction();
@@ -273,23 +223,23 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 		}
 		try {
 			if (cellExitType.getId() == -1) {
-				cellExitType.setId((int) db.insert(CellExitsTypesContract.TABLE_NAME, null, values));
+				cellExitType.setId((int) db.insert(TABLE_NAME, null, values));
 				result = (cellExitType.getId() == -1);
 			}
 			else {
-				result = (db.update(CellExitsTypesContract.TABLE_NAME, values, CellExitsTypesContract._ID + " = ?",
+				result = (db.update(TABLE_NAME, values, _ID + " = ?",
 									new String[]{Long.toString(cellExitType.getId())}) != 1);
 			}
 			values.clear();
-			values.put(CellExitTypeBitmapsContract.CELL_EXIT_ID, cellExitType.getId());
+			values.put(CellExitTypeBitmapSchema.CELL_EXIT_ID, cellExitType.getId());
 			SparseArray<Bitmap> directionsBitmapsMap = cellExitType.getDirectionsBitmapsMap();
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			for (int i = 0; i < directionsBitmapsMap.size(); i++) {
-				values.put(CellExitTypeBitmapsContract.CELL_EXIT_DIRECTION,
+				values.put(CellExitTypeBitmapSchema.CELL_EXIT_DIRECTION,
 						   directionsBitmapsMap.keyAt(i));
 				directionsBitmapsMap.valueAt(i).compress(Bitmap.CompressFormat.PNG, 100, stream);
-				values.put(CellExitTypeBitmapsContract.BITMAP_DATA, stream.toByteArray());
-				result = (db.insertWithOnConflict(CellExitTypeBitmapsContract.TABLE_NAME, null,
+				values.put(CellExitTypeBitmapSchema.BITMAP_DATA, stream.toByteArray());
+				result = (db.insertWithOnConflict(CellExitTypeBitmapSchema.TABLE_NAME, null,
 												  values, SQLiteDatabase.CONFLICT_REPLACE) == -1);
 				try {
 					stream.close();
@@ -323,7 +273,7 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 			db.beginTransaction();
 		}
 		try {
-			result = db.delete(CellExitsTypesContract.TABLE_NAME,
+			result = db.delete(TABLE_NAME,
 								whereClause,
 								whereArgsList.toArray(whereArgs));
 			if(result >= 0 && newTransaction) {
@@ -354,9 +304,9 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 		Bitmap bitmap;
 		BitmapFactory.Options options = new BitmapFactory.Options();
 
-		Cursor cursor = db.query(CellExitTypeBitmapsContract.TABLE_NAME,
-								 cellExitTypeBitmapsColumnNames,
-								 CellExitTypeBitmapsContract.CELL_EXIT_ID + "= ?",
+		Cursor cursor = db.query(CellExitTypeBitmapSchema.TABLE_NAME,
+								 CellExitTypeBitmapSchema.cellExitTypeBitmapsColumnNames,
+								 CellExitTypeBitmapSchema.CELL_EXIT_ID + "= ?",
 								 selectionArgs,
 								 null,
 								 null,
@@ -364,8 +314,8 @@ public class CellExitTypeTypeDaoSqlImpl extends BaseDaoSql implements CellExitTy
 
 			cursor.moveToFirst();
 			while(!cursor.isAfterLast()) {
-                @Direction int direction = cursor.getInt(DIRECTION_INDEX);
-				byte[] bitmapData = cursor.getBlob(BITMAP_DATA_INDEX);
+                @Direction int direction = cursor.getInt(CellExitTypeBitmapSchema.DIRECTION_INDEX);
+				byte[] bitmapData = cursor.getBlob(CellExitTypeBitmapSchema.BITMAP_DATA_INDEX);
 				options.inDensity = currentDensity;
 				options.inTargetDensity = currentDensity;
 				options.inScaled = false;

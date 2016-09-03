@@ -29,7 +29,7 @@ public class CellExitType {
 	private String name;
 	private boolean solid;
 	private boolean	userCreated;
-	private SparseArray<Bitmap> directionsBitmapsMap = new SparseArray<Bitmap>();
+	private SparseArray<Bitmap> directionsBitmapsMap = new SparseArray<>();
 
     /**
      * Creates a new instance.
@@ -56,6 +56,37 @@ public class CellExitType {
 		directionsBitmapsMap.put(direction, bitmap);
 	}
 
+	@Override
+	public String toString() {
+		return "CellExitType{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", solid=" + solid +
+				", userCreated=" + userCreated +
+				", directionsBitmapsMap=" + directionsBitmapsMap +
+				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		CellExitType that = (CellExitType) o;
+
+		return getId() == that.getId();
+	}
+
+	@Override
+	public int hashCode() {
+		return getId();
+	}
+
+	// Getters and setters
     public SparseArray<Bitmap> getDirectionsBitmapsMap() {
         return directionsBitmapsMap;
     }

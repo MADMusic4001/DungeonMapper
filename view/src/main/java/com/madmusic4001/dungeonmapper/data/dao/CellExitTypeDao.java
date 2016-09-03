@@ -19,7 +19,7 @@ package com.madmusic4001.dungeonmapper.data.dao;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 
 /**
- *
+ * Interface for methods to manipulate CellExitType instances in persistent storage.
  */
 public interface CellExitTypeDao extends BaseDao<CellExitType>{
 }

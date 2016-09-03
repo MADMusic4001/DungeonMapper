@@ -24,16 +24,49 @@ import com.madmusic4001.dungeonmapper.data.util.DataConstants;
  * Manages information about a map cell
  */
 public class Cell {
-    private int                  	id = -1;
-    private Region                  parent = null;
-	private int						x;
-	private int						y;
+    private int                  	  id = -1;
+    private Region                    parent = null;
+	private int						  x;
+	private int						  y;
     private boolean                   solid               = false;
 	private Terrain                   terrain             = null;
     private SparseArray<Cell>         directionLinksArray = new SparseArray<>(6);
     private SparseArray<CellExitType> directionExitsArray = new SparseArray<>(6);
 
-    /**
+	@Override
+	public String toString() {
+		return "Cell{" +
+				"id=" + id +
+				", parent=" + parent +
+				", x=" + x +
+				", y=" + y +
+				", solid=" + solid +
+				", terrain=" + terrain +
+				", directionLinksArray=" + directionLinksArray +
+				", directionExitsArray=" + directionExitsArray +
+				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		Cell cell = (Cell) o;
+
+		return getId() == cell.getId();
+	}
+
+	@Override
+	public int hashCode() {
+		return getId();
+	}
+
+	/**
      * Gets the {@code Cell} for the given direction.
      *
      * @param direction  a {@link DataConstants.Direction}.

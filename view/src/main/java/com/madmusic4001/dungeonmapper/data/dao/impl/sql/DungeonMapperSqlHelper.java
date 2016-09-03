@@ -26,6 +26,15 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.madmusic4001.dungeonmapper.R;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.CellExitTypeBitmapSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.CellExitTypeSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.CellSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.ConnectedRegionsSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.RegionCellExitSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.RegionSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.TerrainDisplayNameSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.TerrainSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.WorldSchema;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 
 import javax.inject.Inject;
@@ -36,6 +45,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
+	private static final String LOG_TAG = "DungeonMapperSqlHelper";
 	private final Context context;
 
 	/**
@@ -54,21 +64,21 @@ public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
 	@SuppressWarnings("ResourceType")
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		Log.d(this.getClass().getName(), "Creating db...");
+		Log.d(LOG_TAG, "Creating db...");
 		try {
 			db.beginTransaction();
-			db.execSQL(TerrainDaoSqlImpl.CREATE_TABLE_TERRAINS);
-			db.execSQL(TerrainDaoSqlImpl.CREATE_TABLE_TERRAIN_DISPLAY_NAMES);
-			db.execSQL(WorldDaoSqlImpl.CREATE_TABLE_WORLDS);
-			db.execSQL(RegionDaoSqlImpl.CREATE_TABLE_REGIONS);
-			db.execSQL(RegionDaoSqlImpl.CREATE_TABLE_CONNECTED_REGIONS);
-			db.execSQL(CellDaoSqlImpl.CREATE_TABLE_CELLS);
-			db.execSQL(CellDaoSqlImpl.CREATE_TABLE_MAP_CELL_EXITS);
-			db.execSQL(CellExitTypeTypeDaoSqlImpl.CREATE_TABLE_CELL_EXIT_TYPES);
-			db.execSQL(CellExitTypeTypeDaoSqlImpl.CREATE_TABLE_CELL_EXIT_TYPE_BITMAPS);
+			db.execSQL(TerrainSchema.CREATE_TABLE);
+			db.execSQL(TerrainDisplayNameSchema.CREATE_TABLE);
+			db.execSQL(WorldSchema.CREATE_TABLE);
+			db.execSQL(RegionSchema.CREATE_TABLE);
+			db.execSQL(ConnectedRegionsSchema.CREATE_TABLE);
+			db.execSQL(CellSchema.CREATE_TABLE);
+			db.execSQL(RegionCellExitSchema.CREATE_TABLE);
+			db.execSQL(CellExitTypeSchema.CREATE_TABLE);
+			db.execSQL(CellExitTypeBitmapSchema.CREATE_TABLE);
 
 			ContentValues values = new ContentValues();
-			values.put(TerrainDaoSqlImpl.TerrainsContract.COLUMN_NAME_USER_CREATED, false);
+			values.put(TerrainSchema.COLUMN_NAME_USER_CREATED, false);
 			Resources resources = context.getResources();
 			// Get resource array listing app defined terrains
 			TypedArray appTerrainsInfo = resources.obtainTypedArray(R.array.AppTerrainsInfo);
@@ -81,17 +91,17 @@ public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
 									DataConstants.ID_WHEN_RESOURCE_NOT_FOUND);
 					// Save the name of the terrain resource array as the name of the terrain
                     // in the database
-                    values.put(TerrainDaoSqlImpl.TerrainsContract.COLUMN_NAME_NAME,
+                    values.put(TerrainSchema.COLUMN_NAME_NAME,
                            resources.getResourceName(resourceId));
                     TypedArray terrainInfo = resources.obtainTypedArray(resourceId);
                     try {
                         // Get the solid flag from the resource array and save to tb
-                        values.put(TerrainDaoSqlImpl.TerrainsContract.COLUMN_NAME_SOLID,
+                        values.put(TerrainSchema.COLUMN_NAME_SOLID,
                                 terrainInfo.getBoolean(2, false));
                         // Get the connectible flag from the resource array and save to fb
-                        values.put(TerrainDaoSqlImpl.TerrainsContract.COLUMN_NAME_CONNECT,
+                        values.put(TerrainSchema.COLUMN_NAME_CONNECT,
                                 terrainInfo.getBoolean(3, false));
-                        db.insert(TerrainDaoSqlImpl.TerrainsContract.TABLE_NAME, null, values);
+                        db.insert(TerrainSchema.TABLE_NAME, null, values);
                     }
                     finally {
                         terrainInfo.recycle();
@@ -103,7 +113,7 @@ public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
 			}
 
 			values.clear();
-			values.put(CellExitTypeTypeDaoSqlImpl.CellExitsTypesContract.USER_CREATED, false);
+			values.put(CellExitTypeSchema.USER_CREATED, false);
             // Get resource array listing app defined cell exits
 			TypedArray appCellExitTypesInfo = resources.obtainTypedArray(R.array.appCellExitTypesInfo);
 			try {
@@ -114,15 +124,15 @@ public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
 					int resourceId = appCellExitTypesInfo.getResourceId(i,
 										DataConstants.ID_WHEN_RESOURCE_NOT_FOUND);
                     // Save the name of typed array resource in the NAME field of the table
-                    values.put(CellExitTypeTypeDaoSqlImpl.CellExitsTypesContract.NAME,
+                    values.put(CellExitTypeSchema.NAME,
 							   resources.getResourceName(resourceId));
                     // Get the typed array for the cell exit
                     TypedArray cellExitInfo = resources.obtainTypedArray(resourceId);
                     try {
                         // Save the solid indicator
-                        values.put(CellExitTypeTypeDaoSqlImpl.CellExitsTypesContract.IS_SOLID,
+                        values.put(CellExitTypeSchema.IS_SOLID,
 								   cellExitInfo.getBoolean(5, false));
-                        db.insert(CellExitTypeTypeDaoSqlImpl.CellExitsTypesContract.TABLE_NAME, null, values);
+                        db.insert(CellExitTypeSchema.TABLE_NAME, null, values);
                     }
                     finally {
                         cellExitInfo.recycle();
@@ -136,10 +146,10 @@ public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
 			db.endTransaction();
 		}
 		catch(SQLException ex) {
-			Log.e(this.getClass().getName(), "Error creating db.", ex);
+			Log.e(LOG_TAG, "Error creating db.", ex);
 			db.endTransaction();
 		}
-		Log.d(this.getClass().getName(), "Db creation complete. Db located at " + db.getPath());
+		Log.d(LOG_TAG, "Db creation complete. Db located at " + db.getPath());
 	}
 
 	/**
@@ -155,23 +165,5 @@ public class DungeonMapperSqlHelper extends SQLiteOpenHelper {
 	 */
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		Log.e("DungeonMapperSqlHelper", "Upgrading DB from " + oldVersion + " to " + newVersion);
-		if (oldVersion == DataConstants.DB_VERSION_1 && newVersion == DataConstants.DB_VERSION) {
-			try {
-				db.beginTransaction();
-				db.execSQL(WorldDaoSqlImpl.CREATE_TABLE_WORLDS_V2);
-				db.execSQL(WorldDaoSqlImpl.COPY_WORLDS_TO_V2);
-				db.execSQL(WorldDaoSqlImpl.DROP_TABLE_WORLD);
-				db.execSQL(WorldDaoSqlImpl.RENAME_WORLD_V2_TO_WORLD);
-				db.setTransactionSuccessful();
-				Log.w("DungeonMapperSqlHelper", "Worlds table upgraded from V1 to V2");
-			}
-			catch (SQLException ex) {
-				Log.e("DungeonMapperSqlHelper", "SqlException in onUpgrade - ", ex);
-			}
-			finally {
-				db.endTransaction();
-			}
-		}
 	}
 }

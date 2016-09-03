@@ -30,7 +30,7 @@ public interface BaseDao<T> {
 	 * @return the number of instance of T in the storage medium meeting the filter criteria.
 	 * Implementors must throw a DaoException if an error occurs.
 	 */
-	public int count(Collection<DaoFilter> filters);
+	int count(Collection<DaoFilter> filters);
 
 	/**
 	 * Load an instance of T from storage.
@@ -39,7 +39,7 @@ public interface BaseDao<T> {
 	 * @return an instance of type T if the item is found or null if not found. Implementing
 	 * classes should throw a DaoException if any error occurs.
 	 */
-	public T load(int id);
+	T load(int id);
 
 	/**
 	 * Load all instances of T from storage which match the filter. Implementors must return an
@@ -52,7 +52,7 @@ public interface BaseDao<T> {
 	 * empty Collection if there are no instances of T in the storage medium and throw a
 	 * DaoException if any errors occur.
 	 */
-	public Collection<T> load(Collection<DaoFilter> filters);
+	Collection<T> load(Collection<DaoFilter> filters);
 
 	/**
 	 * Save an existing or new instance of T to persistent storage. Implementing classes should
@@ -61,7 +61,7 @@ public interface BaseDao<T> {
 	 * @param entity the instance of T to be saved.
 	 * @return true if the entity was saved successfully, otherwise false
 	 */
-	public boolean save(T entity);
+	boolean save(T entity);
 
 	/**
 	 * Deletes an existing instance of T from persistent storage. If the _ID field value is < 0 then
@@ -71,5 +71,5 @@ public interface BaseDao<T> {
 	 *                 If the collection is null or empty then all instances will be deleted
 	 * @return the number of affected entity instances.
 	 */
-	public int delete(Collection<DaoFilter> filters);
+	int delete(Collection<DaoFilter> filters);
 }

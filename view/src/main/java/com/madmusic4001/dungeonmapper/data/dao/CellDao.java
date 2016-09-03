@@ -15,15 +15,10 @@
  */
 package com.madmusic4001.dungeonmapper.data.dao;
 
-import android.provider.BaseColumns;
-
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- * Created 7/2/2015.
+ * Interface for methods to manipulate Cell instances in persistent storage.
  */
 public interface CellDao extends BaseDao<Cell> {
 }

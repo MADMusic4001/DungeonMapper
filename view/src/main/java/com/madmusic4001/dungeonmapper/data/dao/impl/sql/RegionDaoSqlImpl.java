@@ -20,7 +20,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.BaseColumns;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -28,6 +27,7 @@ import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.RegionDao;
 import com.madmusic4001.dungeonmapper.data.dao.WorldDao;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.RegionSchema;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
@@ -45,64 +45,7 @@ import javax.inject.Singleton;
  * Implementation of the {@link RegionDao} for managing {@link Region} instances in a SQLite database.
  */
 @Singleton
-public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
-	// Regions table constants
-	public static abstract class RegionsContract implements BaseColumns {
-		public static final String TABLE_NAME = 	"regions";
-		public static final String WORLD_ID_COLUMN_NAME    = "world_id";
-		public static final String NAME_COLUMN_NAME        = "name";
-		public static final String CREATE_TS_COLUMN_NAME   = "create_ts";
-		public static final String MODIFIED_TS_COLUMN_NAME = "modified_ts";
-	}
-	public static final String CREATE_TABLE_REGIONS =
-		CREATE_TABLE + RegionsContract.TABLE_NAME + "(" +
-			RegionsContract._ID + INTEGER + NOT_NULL + PRIMARY_KEY + COMMA +
-			RegionsContract.WORLD_ID_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			RegionsContract.NAME_COLUMN_NAME + TEXT + NOT_NULL + COMMA +
-			RegionsContract.CREATE_TS_COLUMN_NAME + LONG + NOT_NULL + COMMA +
-			RegionsContract.MODIFIED_TS_COLUMN_NAME + LONG + NOT_NULL + COMMA +
-			CONSTRAINT + "fk_map_to_world" +
-				FOREIGN_KEY + "(" + RegionsContract.WORLD_ID_COLUMN_NAME +")" +
-				REFERENCES + WorldDaoSqlImpl.WorldsContract.TABLE_NAME + "(" + WorldDaoSqlImpl.WorldsContract._ID + ")" +
-					ON + DELETE + CASCADE + COMMA +
-			CONSTRAINT + "unique_world_map_name" +
-				UNIQUE + "(" + RegionsContract.WORLD_ID_COLUMN_NAME + COMMA + RegionsContract._ID + "));";
-
-	// Connected regions table constants
-	public static abstract class ConnectedRegionsContract implements BaseColumns {
-		public static final String TABLE_NAME       			= "connected_regions";
-		public static final String REGION_ID_COLUMN_NAME        = "region_id";
-		public static final String DIRECTION_COLUMN_NAME        = "direction";
-		public static final String CONNECTED_MAP_ID_COLUMN_NAME = "connected_region_id";
-	}
-	public static final String CREATE_TABLE_CONNECTED_REGIONS        =
-		CREATE_TABLE + ConnectedRegionsContract.TABLE_NAME + " (" +
-			ConnectedRegionsContract._ID + INTEGER + NOT_NULL + PRIMARY_KEY + COMMA +
-			ConnectedRegionsContract.REGION_ID_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			ConnectedRegionsContract.CONNECTED_MAP_ID_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			ConnectedRegionsContract.DIRECTION_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			CONSTRAINT + "fk_map_to_map" +
-				FOREIGN_KEY + "(" + ConnectedRegionsContract.REGION_ID_COLUMN_NAME + ")" +
-				REFERENCES + RegionsContract.TABLE_NAME + "(" + RegionsContract._ID + ")" + ON + DELETE + CASCADE + COMMA +
-			CONSTRAINT + "fk_map_to_connected_map" +
-				FOREIGN_KEY + "(" + ConnectedRegionsContract.CONNECTED_MAP_ID_COLUMN_NAME + ")" +
-				REFERENCES + RegionsContract.TABLE_NAME + "(" + RegionsContract._ID + ")" + ON + DELETE + CASCADE + COMMA +
-			CONSTRAINT + "unique_connection_direction" +
-				UNIQUE + "(" + ConnectedRegionsContract.REGION_ID_COLUMN_NAME + COMMA +
-					ConnectedRegionsContract.DIRECTION_COLUMN_NAME + "));";
-	private              String[] regionColumns     = {
-			RegionsContract._ID,
-			RegionsContract.WORLD_ID_COLUMN_NAME,
-			RegionsContract.NAME_COLUMN_NAME,
-			RegionsContract.CREATE_TS_COLUMN_NAME,
-			RegionsContract.MODIFIED_TS_COLUMN_NAME
-	};
-	private static final int      REGION_ID_INDEX   = 0;
-	private static final int      WORLD_ID_INDEX    = 1;
-	private static final int      NAME_INDEX        = 2;
-	private static final int      CREATE_TS_INDEX   = 3;
-	private static final int      MODIFIED_TS_INDEX = 4;
-
+public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao, RegionSchema {
 	// Member variables
 	private SparseArray<Region> regionCache = new SparseArray<>(10);
 	private SQLiteOpenHelper sqlHelper;
@@ -135,9 +78,9 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 			db.beginTransaction();
 		}
 		try {
-			Cursor cursor = db.query(RegionsContract.TABLE_NAME,
+			Cursor cursor = db.query(TABLE_NAME,
 									 regionColumns,
-									 RegionsContract._ID + "=?",
+									 _ID + "=?",
 									 new String[]{String.valueOf(id)},
 									 null,
 									 null,
@@ -174,7 +117,7 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 				db.beginTransaction();
 			}
 			try {
-				cursor = db.query(RegionsContract.TABLE_NAME,
+				cursor = db.query(TABLE_NAME,
 								  regionColumns,
 								  whereClause,
 								  whereArgsList.toArray(whereArgs),
@@ -211,10 +154,10 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 		boolean result = false;
 		ContentValues values = new ContentValues();
 
-		values.put(RegionsContract.WORLD_ID_COLUMN_NAME, aRegion.getParent().getId());
-		values.put(RegionsContract.NAME_COLUMN_NAME, aRegion.getName());
-		values.put(RegionsContract.CREATE_TS_COLUMN_NAME, aRegion.getCreateTs().getTimeInMillis());
-		values.put(RegionsContract.MODIFIED_TS_COLUMN_NAME, Calendar.getInstance().getTimeInMillis());
+		values.put(WORLD_ID_COLUMN_NAME, aRegion.getParent().getId());
+		values.put(NAME_COLUMN_NAME, aRegion.getName());
+		values.put(CREATE_TS_COLUMN_NAME, aRegion.getCreateTs().getTimeInMillis());
+		values.put(MODIFIED_TS_COLUMN_NAME, Calendar.getInstance().getTimeInMillis());
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
 		boolean newTransaction = !db.inTransaction();
@@ -223,7 +166,7 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 		}
 		try {
 			if (aRegion.getId() == -1L) {
-				aRegion.setId((int) db.insert(RegionsContract.TABLE_NAME, null, values));
+				aRegion.setId((int) db.insert(TABLE_NAME, null, values));
 				result = (aRegion.getId() != DataConstants.UNINITIALIZED);
 				Log.e("RegionDaoSqlImpl", "db.insert() returned " + aRegion.getId());
 				if (aRegion.getId() == DataConstants.UNINITIALIZED) {
@@ -231,9 +174,9 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 				}
 			}
 			else {
-				int updateCount = db.updateWithOnConflict(RegionsContract.TABLE_NAME,
+				int updateCount = db.updateWithOnConflict(TABLE_NAME,
 										   values,
-										   RegionsContract._ID + "=?",
+										   _ID + "=?",
 										   new String[] {Long.toString(aRegion.getId())},
 										   SQLiteDatabase.CONFLICT_IGNORE);
 				Log.e("RegionDaoSqlImpl", "db.update() returned " + updateCount);
@@ -264,7 +207,7 @@ public class RegionDaoSqlImpl extends BaseDaoSql implements RegionDao {
 			db.beginTransaction();
 		}
 		try {
-			result = db.delete(RegionsContract.TABLE_NAME,
+			result = db.delete(TABLE_NAME,
 								whereClause,
 								whereArgsList.toArray(whereArgs));
 			if(result >= 0 && newTransaction) {

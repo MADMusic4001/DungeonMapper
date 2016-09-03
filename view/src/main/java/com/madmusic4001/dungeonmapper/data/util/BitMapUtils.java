@@ -38,7 +38,6 @@ public final class BitMapUtils {
 
 	public static Bitmap getBitmapFromString(String encoded) {
 		byte[] decodedString = Base64.decode(encoded, Base64.DEFAULT);
-		Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-		return decodedByte;
+		return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 	}
 }

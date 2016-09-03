@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Created by madanle on 5/19/16.
+ * Utility class that defines Comparator methods
  */
 @Singleton
 public class ComparatorUtils {

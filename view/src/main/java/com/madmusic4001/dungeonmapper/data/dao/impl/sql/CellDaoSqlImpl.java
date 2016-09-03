@@ -20,7 +20,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.BaseColumns;
 
 import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.data.dao.CellDao;
@@ -28,6 +27,8 @@ import com.madmusic4001.dungeonmapper.data.dao.CellExitTypeDao;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.CellSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.RegionCellExitSchema;
 import com.madmusic4001.dungeonmapper.data.entity.Cell;
 import com.madmusic4001.dungeonmapper.data.entity.CellExitType;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
@@ -50,75 +51,7 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.SOUTH;
  * Implementation of the {@link CellDao} for managing {@link Cell} instances in a SQLite database.
  */
 @Singleton
-public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
-	// Cell table constants
-	public static abstract class CellsContract implements BaseColumns {
-		public static final String TABLE_NAME   = "cells";
-		public static final String QUALIFIED_ID = TABLE_NAME + "." + _ID;
-		public static final String REGION_ID_COLUMN_NAME    = "region_id";
-		public static final String TERRAIN_ID_COLUMN_NAME   = "terrain_id";
-		public static final String IS_SOLID_COLUMN_NAME     = "is_solid";
-		public static final String X_COORDINATE_COLUMN_NAME = "x_coordinate";
-		public static final String Y_COORDINATE_COLUMN_NAME = "y_coordinate";
-	}
-	public static final String CREATE_TABLE_CELLS                 =
-		CREATE_TABLE + CellsContract.TABLE_NAME + "(" +
-			CellsContract._ID + INTEGER + NOT_NULL + PRIMARY_KEY + COMMA +
-			CellsContract.REGION_ID_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			CellsContract.TERRAIN_ID_COLUMN_NAME + INTEGER + COMMA +
-			CellsContract.IS_SOLID_COLUMN_NAME + BOOLEAN + NOT_NULL +
-				CHECK + "(" + CellsContract.IS_SOLID_COLUMN_NAME + IN + "(0,1))" + COMMA +
-			CellsContract.X_COORDINATE_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			CellsContract.Y_COORDINATE_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			CONSTRAINT + "fk_cell_to_map" +
-				FOREIGN_KEY + "(" + CellsContract.REGION_ID_COLUMN_NAME + ")" +
-				REFERENCES + RegionDaoSqlImpl.RegionsContract.TABLE_NAME + "(" + RegionDaoSqlImpl.RegionsContract._ID + ")" +
-					ON + DELETE + CASCADE + COMMA +
-			CONSTRAINT + "fk_cell_to_terrain" +
-				FOREIGN_KEY + "(" + CellsContract.TERRAIN_ID_COLUMN_NAME + ")" +
-				REFERENCES + TerrainDaoSqlImpl.TerrainsContract.TABLE_NAME + "(" + TerrainDaoSqlImpl.TerrainsContract._ID + ")" +
-				ON + DELETE + CASCADE + COMMA +
-			CONSTRAINT + "unique_map_coordinates" +
-				UNIQUE + "(" + CellsContract.REGION_ID_COLUMN_NAME + COMMA + CellsContract.X_COORDINATE_COLUMN_NAME + COMMA +
-					CellsContract.Y_COORDINATE_COLUMN_NAME + "));";
-	public static abstract class RegionCellExitsContract implements BaseColumns {
-		public static final String TABLE_NAME   = "region_cell_exits";
-		public static final String CELL_ID_COLUMN_NAME      = "cell_id";
-		public static final String DIRECTION_COLUMN_NAME    = "direction";
-		public static final String CELL_EXIT_ID_COLUMN_NAME = "cell_exit_id";
-	}
-	public static final String CREATE_TABLE_MAP_CELL_EXITS        =
-		CREATE_TABLE + RegionCellExitsContract.TABLE_NAME + " (" +
-			RegionCellExitsContract._ID + INTEGER + NOT_NULL + PRIMARY_KEY + COMMA +
-			RegionCellExitsContract.CELL_ID_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			RegionCellExitsContract.DIRECTION_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			RegionCellExitsContract.CELL_EXIT_ID_COLUMN_NAME + INTEGER + NOT_NULL + COMMA +
-			CONSTRAINT + "fk_exit_to_cell" +
-				FOREIGN_KEY + "(" + RegionCellExitsContract.CELL_ID_COLUMN_NAME + ")" +
-				REFERENCES + CellsContract.TABLE_NAME + "(" + CellsContract._ID + ")" + ON + DELETE + CASCADE + COMMA +
-			CONSTRAINT + "fk_cell_exit_to_cell" +
-				FOREIGN_KEY + "(" + RegionCellExitsContract.CELL_EXIT_ID_COLUMN_NAME + ")" +
-				REFERENCES + CellExitTypeTypeDaoSqlImpl.CellExitsTypesContract.TABLE_NAME + "(" +
-					CellExitTypeTypeDaoSqlImpl.CellExitsTypesContract._ID + ")" + ON + DELETE + CASCADE + COMMA +
-			CONSTRAINT + "unique_exit_direction" +
-				UNIQUE + "(" + RegionCellExitsContract.CELL_ID_COLUMN_NAME + COMMA +
-					RegionCellExitsContract.DIRECTION_COLUMN_NAME + "));";
-	private static final int      CELL_ID_INDEX      = 0;
-	private static final int      TERRAIN_ID_INDEX   = 1;
-	private static final int      IS_SOLID_INDEX     = 2;
-	private static final int      X_COORDINATE_INDEX = 3;
-	private static final int      Y_COORDINATE_INDEX = 4;
-	private static final int      DIRECTION_INDEX    = 5;
-	private static final int      EXIT_ID_INDEX      = 6;
-	private static       String[] projection         = {
-			CellsContract.QUALIFIED_ID,
-			CellsContract.TERRAIN_ID_COLUMN_NAME,
-			CellsContract.IS_SOLID_COLUMN_NAME,
-			CellsContract.X_COORDINATE_COLUMN_NAME,
-			CellsContract.Y_COORDINATE_COLUMN_NAME,
-			RegionCellExitsContract.DIRECTION_COLUMN_NAME,
-			RegionCellExitsContract.CELL_EXIT_ID_COLUMN_NAME
-	};
+public class CellDaoSqlImpl extends BaseDaoSql implements CellDao, CellSchema {
 	private SQLiteOpenHelper sqlHelper;
 	private CellExitTypeDao  cellExitTypeDao;
 	private TerrainDao       terrainDao;
@@ -163,8 +96,8 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 			db.beginTransaction();
 		}
 		try {
-			Cursor cursor = db.query(CellsContract.TABLE_NAME,
-									 projection,
+			Cursor cursor = db.query(TABLE_NAME,
+									 RegionCellExitSchema.PROJECTION,
 									 whereClause,
 									 whereArgsList.toArray(whereArgs),
 									 null,
@@ -199,28 +132,28 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 		List<String> whereArgsList = new ArrayList<>();
 		Collection<DaoFilter> filters = new ArrayList<>();
 		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-								 CellsContract.REGION_ID_COLUMN_NAME,
+								 REGION_ID_COLUMN_NAME,
 								 Integer.valueOf(cell.getParent().getId()).toString()));
 		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-								 CellsContract.X_COORDINATE_COLUMN_NAME,
+								 X_COORDINATE_COLUMN_NAME,
 								 Integer.valueOf(cell.getX()).toString()));
 		filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-								 CellsContract.Y_COORDINATE_COLUMN_NAME,
+								 Y_COORDINATE_COLUMN_NAME,
 								 Integer.valueOf(cell.getY()).toString()));
 		String whereClause = buildWhereArgs(filters, whereArgsList);
 		String[] whereArgs = new String[whereArgsList.size()];
 
 		ContentValues values = new ContentValues();
-		values.put(CellsContract.REGION_ID_COLUMN_NAME, cell.getParent().getId());
+		values.put(REGION_ID_COLUMN_NAME, cell.getParent().getId());
 		if (cell.getTerrain() != null) {
-			values.put(CellsContract.TERRAIN_ID_COLUMN_NAME, cell.getTerrain().getId());
+			values.put(TERRAIN_ID_COLUMN_NAME, cell.getTerrain().getId());
 		}
 		else {
-			values.putNull(CellsContract.TERRAIN_ID_COLUMN_NAME);
+			values.putNull(TERRAIN_ID_COLUMN_NAME);
 		}
-		values.put(CellsContract.X_COORDINATE_COLUMN_NAME, cell.getX());
-		values.put(CellsContract.Y_COORDINATE_COLUMN_NAME, cell.getY());
-		values.put(CellsContract.IS_SOLID_COLUMN_NAME, cell.isSolid());
+		values.put(X_COORDINATE_COLUMN_NAME, cell.getX());
+		values.put(Y_COORDINATE_COLUMN_NAME, cell.getY());
+		values.put(IS_SOLID_COLUMN_NAME, cell.isSolid());
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
 		boolean newTransaction = !db.inTransaction();
@@ -229,11 +162,11 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 		}
 		try {
 			if(cell.getId() == -1) {
-				cell.setId((int) db.insertOrThrow(CellsContract.TABLE_NAME, null, values));
+				cell.setId((int) db.insertOrThrow(TABLE_NAME, null, values));
 				result = (cell.getId() > DataConstants.UNINITIALIZED);
 			}
 			else {
-				result = (db.update(CellsContract.TABLE_NAME,
+				result = (db.update(TABLE_NAME,
 									values,
 						  			whereClause,
 									whereArgsList.toArray(whereArgs)) != 1);
@@ -267,7 +200,7 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 			db.beginTransaction();
 		}
 		try {
-			result = db.delete(CellsContract.TABLE_NAME,
+			result = db.delete(TABLE_NAME,
 									  whereClause,
 									  whereArgsList.toArray(whereArgs));
 			if(result > 0 && newTransaction) {
@@ -287,17 +220,17 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 
 		Cell cell = new Cell();
 		cell.setParent(region);
-		cellId = cursor.getInt(CELL_ID_INDEX);
+		cellId = cursor.getInt(RegionCellExitSchema.CELL_ID_INDEX);
 		cell.setId(cellId);
-		cell.setTerrain(terrainDao.load(cursor.getInt(TERRAIN_ID_INDEX)));
-		cell.setSolid(cursor.getInt(IS_SOLID_INDEX) != 0);
-		cell.setX(cursor.getInt(X_COORDINATE_INDEX));
-		cell.setY(cursor.getInt(Y_COORDINATE_INDEX));
+		cell.setTerrain(terrainDao.load(cursor.getInt(RegionCellExitSchema.TERRAIN_ID_INDEX)));
+		cell.setSolid(cursor.getInt(RegionCellExitSchema.IS_SOLID_INDEX) != 0);
+		cell.setX(cursor.getInt(RegionCellExitSchema.X_COORDINATE_INDEX));
+		cell.setY(cursor.getInt(RegionCellExitSchema.Y_COORDINATE_INDEX));
 
-		while(!cursor.isAfterLast() && cursor.getLong(CELL_ID_INDEX) == cellId &&
-				!cursor.isNull(DIRECTION_INDEX)) {
-			@Direction int tempDir = cursor.getInt(DIRECTION_INDEX);
-			cell.setExitForDirection(tempDir, cellExitTypeDao.load(cursor.getInt(EXIT_ID_INDEX)));
+		while(!cursor.isAfterLast() && cursor.getLong(RegionCellExitSchema.CELL_ID_INDEX) == cellId &&
+				!cursor.isNull(RegionCellExitSchema.DIRECTION_INDEX)) {
+			@Direction int tempDir = cursor.getInt(RegionCellExitSchema.DIRECTION_INDEX);
+			cell.setExitForDirection(tempDir, cellExitTypeDao.load(cursor.getInt(RegionCellExitSchema.EXIT_ID_INDEX)));
 			cursor.moveToNext();
 		}
 		return cell;
@@ -307,17 +240,17 @@ public class CellDaoSqlImpl extends BaseDaoSql implements CellDao {
 		boolean result = true;
 		ContentValues values = new ContentValues();
 
-		db.delete(RegionCellExitsContract.TABLE_NAME,
-				  RegionCellExitsContract.CELL_ID_COLUMN_NAME + " = ?",
+		db.delete(RegionCellExitSchema.TABLE_NAME,
+				  RegionCellExitSchema.CELL_ID_COLUMN_NAME + " = ?",
 				  new String[]{Long.toString(cell.getId())});
 		for(@Direction int direction = NORTH; direction <= SOUTH && result;
 			direction++) {
 			CellExitType exit = cell.getExitForDirection(direction);
 			if(exit != null) {
-				values.put(RegionCellExitsContract.CELL_ID_COLUMN_NAME, cell.getId());
-				values.put(RegionCellExitsContract.DIRECTION_COLUMN_NAME, direction);
-				values.put(RegionCellExitsContract.CELL_EXIT_ID_COLUMN_NAME, exit.getId());
-				result = (db.insert(RegionCellExitsContract.TABLE_NAME, null, values) >= DataConstants.UNINITIALIZED);
+				values.put(RegionCellExitSchema.CELL_ID_COLUMN_NAME, cell.getId());
+				values.put(RegionCellExitSchema.DIRECTION_COLUMN_NAME, direction);
+				values.put(RegionCellExitSchema.CELL_EXIT_ID_COLUMN_NAME, exit.getId());
+				result = (db.insert(RegionCellExitSchema.TABLE_NAME, null, values) >= DataConstants.UNINITIALIZED);
 			}
 		}
 		return result;

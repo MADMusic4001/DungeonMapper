@@ -52,25 +52,22 @@ public class World {
 		this.name = name;
 	}
 
+	// Getters and setters
 	public int getId() {
 		return id;
 	}
-
 	public void setId(int id) {
 		this.id = id;
 	}
-
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		if (name == null) {
 			throw new IllegalArgumentException("World.name cannot be null");
 		}
 		this.name = name;
 	}
-
 	public int getOriginOffset() {
 		return originOffset;
 	}
@@ -134,31 +131,10 @@ public class World {
 
 		World world = (World) o;
 
-		if (id != world.id) {
-			return false;
-		}
-		if (originOffset != world.originOffset) {
-			return false;
-		}
-		if (originLocation != world.originLocation) {
-			return false;
-		}
-		if (regionWidth != world.regionWidth) {
-			return false;
-		}
-		if (regionHeight != world.regionHeight) {
-			return false;
-		}
-		if (!name.equals(world.name)) {
-			return false;
-		}
-		if (!createTs.equals(world.createTs)) {
-			return false;
-		}
-		if (!modifiedTs.equals(world.modifiedTs)) {
-			return false;
-		}
-		return regionNameMap.equals(world.regionNameMap);
+		return id == world.id && originOffset == world.originOffset && originLocation == world.originLocation
+				&& regionWidth == world.regionWidth && regionHeight == world.regionHeight && name.equals(world.name)
+				&& createTs.equals(world.createTs) && modifiedTs.equals(world.modifiedTs) && regionNameMap.equals(
+				world.regionNameMap);
 
 	}
 

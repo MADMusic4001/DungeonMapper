@@ -19,7 +19,7 @@ package com.madmusic4001.dungeonmapper.data.dao;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
 
 /**
- *
+ * Interface declaring methods for managing Terrain instances in persistent storage.
  */
 public interface TerrainDao extends BaseDao<Terrain> {
 }

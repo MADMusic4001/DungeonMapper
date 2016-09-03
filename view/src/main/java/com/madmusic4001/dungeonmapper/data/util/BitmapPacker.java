@@ -25,10 +25,7 @@ import java.util.Comparator;
 import java.util.TreeSet;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- *         Created 9/9/2014.
+ * Utility class to pack a group of bitmaps into a single bitmap which can be used to enhance performance of the OpenGL engine.
  */
 public class BitmapPacker {
     private boolean packed = false;
@@ -37,15 +34,15 @@ public class BitmapPacker {
     private int height;
     private int padding;
     private boolean duplicateBorder;
-    private ArrayList<Level> levels = new ArrayList<Level>(10);
-    private ArrayList<Region> allRegions = new ArrayList<Region>(100);
+    private ArrayList<Level> levels = new ArrayList<>(10);
+    private ArrayList<Region> allRegions = new ArrayList<>(100);
     private TreeSet<ImageRegion> regionsSet;
 
     static final class Level {
         Level previousLevel = null;
         int remainingWidth;
         int ceiling;
-        private ArrayList<ImageRegion> imageRegions = new ArrayList<ImageRegion>(20);
+        private ArrayList<ImageRegion> imageRegions = new ArrayList<>(20);
     }
 
     static final class Region {
@@ -64,11 +61,11 @@ public class BitmapPacker {
         this.padding = padding;
         this.duplicateBorder = duplicateBorder;
 
-        regionsSet = new TreeSet<ImageRegion>(new Comparator<ImageRegion>() {
+        regionsSet = new TreeSet<>(new Comparator<ImageRegion>() {
             @Override
             public int compare(ImageRegion lhs, ImageRegion rhs) {
                 int result = rhs.region.rect.height() - lhs.region.rect.height();
-                if(result == 0) {
+                if (result == 0) {
                     result = 1;
                 }
                 return result;
@@ -188,6 +185,7 @@ public class BitmapPacker {
         return bitmap;
     }
 
+    // Getters
     public Rect getRect(String name) {
         for(Region region : allRegions) {
             if(region.name.equals(name)) {
@@ -196,15 +194,12 @@ public class BitmapPacker {
         }
         return null;
     }
-
     public Bitmap getBitmap() {
         return bitmap;
     }
-
     public int getWidth() {
         return width;
     }
-
     public int getHeight() {
         return height;
     }

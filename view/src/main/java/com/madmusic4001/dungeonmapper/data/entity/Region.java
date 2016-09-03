@@ -129,7 +129,6 @@ public class Region {
 		Region region = (Region) o;
 
 		return getId() == region.getId();
-
 	}
 
 	@Override

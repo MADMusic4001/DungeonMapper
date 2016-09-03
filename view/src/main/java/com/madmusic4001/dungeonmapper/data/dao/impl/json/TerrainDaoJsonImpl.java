@@ -27,6 +27,7 @@ import com.madmusic4001.dungeonmapper.R;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
 import com.madmusic4001.dungeonmapper.data.dao.impl.sql.TerrainDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.TerrainSchema;
 import com.madmusic4001.dungeonmapper.data.entity.AppSettings;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
 import com.madmusic4001.dungeonmapper.data.exceptions.DaoException;
@@ -53,11 +54,12 @@ import javax.inject.Singleton;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.APP_VERSION_ID;
 
 /**
- *
+ * TerrainDao implementation for JSON persistent storage.
  */
 @SuppressWarnings("unused")
 @Singleton
 public class TerrainDaoJsonImpl implements TerrainDao {
+	private static final String LOG_TAG = "TerrainDaoJsonImpl";
 	public static final String TERRAIN_DIR = File.separator + "terrains";
 	public static final String TERRAIN_FILE_EXTENSION = ".trn";
 	public static final String TERRAIN_FILES_REGEX = ".*" + File.pathSeparator + TERRAIN_FILE_EXTENSION;
@@ -111,7 +113,7 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 									 aTerrain.getName() + TERRAIN_FILE_EXTENSION);
 			if (AppSettings.useExternalStorageForWorlds() &&
 					!fileUtils.isExternalStorageReadable()) {
-				Log.e(this.getClass().getName(), "External storage unavailable");
+				Log.e(LOG_TAG, "External storage unavailable");
 				throw new DaoException(R.string.exception_terrainLoadError);
 			}
 			stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
@@ -129,12 +131,12 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 			stream.flush();
 		}
 		catch (FileNotFoundException ex) {
-			Log.e(this.getClass().getName(), file.getAbsolutePath() +
+			Log.e(LOG_TAG, file.getAbsolutePath() +
 					" could not be opened for writing", ex);
 			throw new DaoException(R.string.exception_terrainNotSaved, file.getAbsolutePath(), ex);
 		}
 		catch(IOException ex) {
-			Log.e(this.getClass().getName(), "Error occurred while writing " +
+			Log.e(LOG_TAG, "Error occurred while writing " +
 					file.getAbsolutePath(), ex);
 			throw new DaoException(R.string.exception_terrainNotSaved, file.getAbsolutePath(), ex);
 		}
@@ -144,7 +146,7 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 					stream.close();
 				}
 				catch(IOException ex){
-					Log.w(this.getClass().getName(), "Error occurred while closing stream for " +
+					Log.w(LOG_TAG, "Error occurred while closing stream for " +
 							file.getAbsolutePath());
 				}
 			}
@@ -163,7 +165,7 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 				throw new UnsupportedOperationException("TerrainDaoJsonImpl.delete() can only accept 0 or 1 filter");
 			}
 			DaoFilter filter = filters.iterator().next();
-			if(!filter.getFieldName().equals(TerrainDaoSqlImpl.TerrainsContract.COLUMN_NAME_NAME)) {
+			if(!filter.getFieldName().equals(TerrainSchema.COLUMN_NAME_NAME)) {
 				throw new UnsupportedOperationException("TerrainDaoJsonImpl.delete() filter must be on NAME field");
 			}
 			File file;
@@ -200,7 +202,7 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 		try {
 			if(AppSettings.useExternalStorageForWorlds() &&
                     !fileUtils.isExternalStorageReadable()) {
-				Log.e(this.getClass().getName(), "External storage unavailable");
+				Log.e(LOG_TAG, "External storage unavailable");
 				throw new DaoException(R.string.exception_terrainLoadError);
 			}
 			stream = new InputStreamReader(new DataInputStream(new BufferedInputStream(new FileInputStream(file))));
@@ -212,11 +214,11 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 			versionedTerrain.terrain.setImage(BitMapUtils.getBitmapFromString(versionedTerrain.imageString));
 		}
 		catch (JsonSyntaxException | JsonIOException ex) {
-			Log.e(this.getClass().getName(), "Error reading " + file.getAbsolutePath(), ex);
+			Log.e(LOG_TAG, "Error reading " + file.getAbsolutePath(), ex);
 			throw new DaoException(R.string.exception_terrainLoadError, file.getAbsolutePath(), ex);
 		}
 		catch(FileNotFoundException ex) {
-			Log.e(this.getClass().getName(), file.getAbsolutePath() + " not found.", ex);
+			Log.e(LOG_TAG, file.getAbsolutePath() + " not found.", ex);
 			throw new DaoException(R.string.exception_terrainLoadError, file.getAbsolutePath(), ex);
 		}
 		finally {
@@ -225,7 +227,7 @@ public class TerrainDaoJsonImpl implements TerrainDao {
 					stream.close();
 				}
 				catch (IOException ex) {
-					Log.e(this.getClass().getName(), "Error closing stream.", ex);
+					Log.e(LOG_TAG, "Error closing stream.", ex);
 				}
 			}
 		}

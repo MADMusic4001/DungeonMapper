@@ -16,12 +16,10 @@
 
 package com.madmusic4001.dungeonmapper.data.dao;
 
-import android.provider.BaseColumns;
-
 import com.madmusic4001.dungeonmapper.data.entity.World;
 
 /**
- * Interface declaring methods for managing persistent Map instances.
+ * Interface declaring methods for managing World instances in persistent storage.
  */
 public interface WorldDao extends BaseDao<World>{
 }

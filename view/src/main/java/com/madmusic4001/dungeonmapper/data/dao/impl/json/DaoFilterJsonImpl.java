@@ -18,10 +18,7 @@ package com.madmusic4001.dungeonmapper.data.dao.impl.json;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- * Created 5/18/2016.
+ * DaoFilter implementation for use with JSON storage
  */
 public class DaoFilterJsonImpl extends DaoFilter {
 	/**

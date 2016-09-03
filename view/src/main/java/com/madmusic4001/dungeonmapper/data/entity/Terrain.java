@@ -100,6 +100,40 @@ public class Terrain {
 		localeDisplayNames.put(localeName, displayName);
 	}
 
+	@Override
+	public String toString() {
+		return "Terrain{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", userCreated=" + userCreated +
+				", appResourceId=" + appResourceId +
+				", localeDisplayNames=" + localeDisplayNames +
+				", image=" + image +
+				", solid=" + solid +
+				", connect=" + connect +
+				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		Terrain terrain = (Terrain) o;
+
+		return getId() == terrain.getId();
+	}
+
+	@Override
+	public int hashCode() {
+		return getId();
+	}
+
+	// Getters and setters
     public Map<String, String> getLocaleDisplayNames() {
         return localeDisplayNames;
     }
@@ -109,7 +143,6 @@ public class Terrain {
 	public void setId(int id) {
 		this.id = id;
 	}
-
 	public String getName() {
 		return name;
 	}

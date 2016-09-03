@@ -49,11 +49,12 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WORLDS_DIR;
 import static com.madmusic4001.dungeonmapper.data.util.DataConstants.WORLD_FILE_EXTENSION;
 
 /**
- *
+ * WorldDao implementation for JSON persistent storage.
  */
 @SuppressWarnings("unused")
 @Singleton
 public class WorldDaoJsonImpl implements WorldDao {
+	private static final String LOG_TAG = "WorldDaoJsonImpl";
 	@SuppressLint("SimpleDateFormat")
 	private static final SimpleDateFormat dateFormat =
 			new SimpleDateFormat("yyyy-MM-dd HH-mm-ss-SSS");
@@ -86,7 +87,7 @@ public class WorldDaoJsonImpl implements WorldDao {
 									 String.valueOf(id) + WORLD_FILE_EXTENSION);
 			if (AppSettings.useExternalStorageForWorlds() &&
 					!fileUtils.isExternalStorageReadable()) {
-				Log.e(this.getClass().getName(), "External storage unavailable");
+				Log.e(LOG_TAG, "External storage unavailable");
 				throw new DaoException(R.string.exception_worldLoadError);
 			}
 			stream = new InputStreamReader(new DataInputStream(new BufferedInputStream(
@@ -107,7 +108,7 @@ public class WorldDaoJsonImpl implements WorldDao {
 					stream.close();
 				}
 				catch (IOException ex) {
-					Log.w(this.getClass().getName(), "Error occurred while closing stream for " +
+					Log.w(LOG_TAG, "Error occurred while closing stream for " +
 							file.getAbsolutePath());
 				}
 			}
@@ -137,7 +138,7 @@ public class WorldDaoJsonImpl implements WorldDao {
 					WORLDS_DIR, saveFileName);
 			if(AppSettings.useExternalStorageForWorlds() &&
 					!fileUtils.isExternalStorageReadable()) {
-				Log.e(this.getClass().getName(), "External storage unavailable");
+				Log.e(LOG_TAG, "External storage unavailable");
 				throw new DaoException(R.string.exception_worldLoadError);
 			}
 			stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
@@ -148,12 +149,12 @@ public class WorldDaoJsonImpl implements WorldDao {
 //			file.getAbsolutePath();
 			return true;
 		} catch (FileNotFoundException ex) {
-			Log.e(this.getClass().getName(), file.getAbsolutePath() +
+			Log.e(LOG_TAG, file.getAbsolutePath() +
 					" could not be opened for writing", ex);
 			throw new DaoException(R.string.exception_worldNotSaved, file.getAbsolutePath(), ex);
 		}
 		catch (IOException ex) {
-			Log.e(this.getClass().getName(), "Error occurred while writing " +
+			Log.e(LOG_TAG, "Error occurred while writing " +
 					file.getAbsolutePath(), ex);
 			throw new DaoException(R.string.exception_worldNotSaved, aWorld.getName(), ex);
 		}
@@ -163,7 +164,7 @@ public class WorldDaoJsonImpl implements WorldDao {
 					stream.close();
 				}
 				catch(IOException ex){
-					Log.w(this.getClass().getName(), "Error occurred while closing stream for " +
+					Log.w(LOG_TAG, "Error occurred while closing stream for " +
 							file.getAbsolutePath());
 				}
 			}

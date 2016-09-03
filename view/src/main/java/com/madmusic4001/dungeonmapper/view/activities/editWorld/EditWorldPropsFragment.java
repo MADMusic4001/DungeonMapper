@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -46,10 +45,11 @@ import com.madmusic4001.dungeonmapper.controller.rxhandlers.RegionRxHandler;
 import com.madmusic4001.dungeonmapper.controller.rxhandlers.WorldRxHandler;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.RegionDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.RegionSchema;
 import com.madmusic4001.dungeonmapper.data.entity.Region;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
+import com.madmusic4001.dungeonmapper.data.util.DateUtils;
 import com.madmusic4001.dungeonmapper.view.adapters.RegionListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.FragmentModule;
 
@@ -106,7 +106,7 @@ public class EditWorldPropsFragment extends Fragment {
 				TextView textView = (TextView) v.findViewById(R.id.nameHeader);
 				textView.setText(region.getName());
 				textView = (TextView) v.findViewById(R.id.modifiedHeader);
-				textView.setText(getFormattedDateOrTime(region.getModifiedTs().getTimeInMillis()));
+				textView.setText(DateUtils.getFormattedDateOrTime(getActivity(), region.getModifiedTs().getTimeInMillis()));
 			}
 		}
 		regionListAdapter.notifyDataSetChanged();
@@ -255,8 +255,8 @@ public class EditWorldPropsFragment extends Fragment {
 				if(region != null) {
 					Collection<DaoFilter> filters = new ArrayList<>(1);
 					filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-							RegionDaoSqlImpl.RegionsContract._ID,
-							String.valueOf(region.getId())));
+															  RegionSchema._ID,
+															  String.valueOf(region.getId())));
 					regionRxHandler.deleteRegions(filters)
 							.observeOn(AndroidSchedulers.mainThread())
 							.subscribe(new Subscriber<Collection<Region>>() {
@@ -529,25 +529,6 @@ public class EditWorldPropsFragment extends Fragment {
 						Toast.makeText(getActivity(), getString(R.string.toast_world_saved), Toast.LENGTH_SHORT).show();
 					}
 				});
-	}
-
-	private String getFormattedDateOrTime(long timeInMillis) {
-		String result;
-
-		Calendar modDateTime = Calendar.getInstance();
-		modDateTime.setTimeInMillis(timeInMillis);
-		Calendar today = Calendar.getInstance();
-		today.set(Calendar.HOUR, 0);
-		today.set(Calendar.MINUTE, 0);
-		today.set(Calendar.SECOND, 0);
-		today.set(Calendar.MILLISECOND, 0);
-		if (modDateTime.after(today)) {
-			result = DateFormat.getTimeFormat(getActivity()).format(modDateTime.getTime());
-		}
-		else {
-			result = DateFormat.getDateFormat(getActivity()).format(modDateTime.getTime());
-		}
-		return result;
 	}
 	// </editor-fold>
 }

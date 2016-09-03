@@ -23,10 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- *         Created 9/8/2014.
+ * A class for manipulating a packed bitmap
  */
 @SuppressWarnings("UnusedDeclaration")
 public class PackedBitmap {
@@ -51,12 +48,10 @@ public class PackedBitmap {
 
     public class Page {
         Node root;
-//        OrderedMap<String, Rect> rects;
         HashMap<String, Rect> rects;
         Bitmap image;
         Canvas canvas;
-        final ArrayList<String> addedRects = new ArrayList<String>();
-//        final Array<String> addedRects = new Array<String>();
+        final ArrayList<String> addedRects = new ArrayList<>();
 
         public Bitmap getBitmap() {
             return image;
@@ -65,17 +60,13 @@ public class PackedBitmap {
         public HashMap<String, Rect> getRects () {
             return rects;
         }
-//        public OrderedMap<String, Rect> getRects () {
-//            return rects;
-//        }
     }
 
     final int pageWidth;
     final int pageHeight;
     final int padding;
     final boolean duplicateBorder;
-    final ArrayList<Page> pages = new ArrayList<Page>();
-//    final Array<Page> pages = new Array<Page>();
+    final ArrayList<Page> pages = new ArrayList<>();
     Page currPage;
     boolean disposed;
 
@@ -178,7 +169,7 @@ public class PackedBitmap {
         page.image = Bitmap.createBitmap(pageWidth, pageHeight, Bitmap.Config.ARGB_8888);
         page.canvas = new Canvas(page.image);
         page.root = new Node(0, 0, pageWidth, pageHeight, null, null, null);
-        page.rects = new HashMap<String, Rect>();
+        page.rects = new HashMap<>();
         pages.add(page);
         currPage = page;
     }
@@ -281,18 +272,16 @@ public class PackedBitmap {
         disposed = true;
     }
 
+    // Getters and setters
     public int getPageWidth () {
         return pageWidth;
     }
-
     public int getPageHeight () {
         return pageHeight;
     }
-
     public int getPadding () {
         return padding;
     }
-
     public boolean duplicateBorder () {
         return duplicateBorder;
     }

@@ -26,11 +26,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.provider.BaseColumns;
 import android.util.SparseArray;
 
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.TerrainDao;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.TerrainDisplayNameSchema;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.TerrainSchema;
 import com.madmusic4001.dungeonmapper.data.entity.Terrain;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
 
@@ -49,66 +50,7 @@ import static com.madmusic4001.dungeonmapper.data.util.DataConstants.TERRAIN_NAM
  * Implementation of the {@link TerrainDao} for managing {@link Terrain} instances in a SQLite database.
  */
 @Singleton
-public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
-	// Terrain table constants
-	public static abstract class TerrainsContract implements BaseColumns {
-		public static final String TABLE_NAME = "terrains";
-		public static final String COLUMN_NAME_NAME = "name";
-		public static final String COLUMN_NAME_USER_CREATED = "user_created";
-		public static final String COLUMN_NAME_SOLID = "is_solid";
-		public static final String COLUMN_NAME_CONNECT = "can_connect";
-		public static final String COLUMN_NAME_BITMAP_DATA = "bitmap_data";
-	}
-	public static final String CREATE_TABLE_TERRAINS              =
-		CREATE_TABLE + TerrainsContract.TABLE_NAME + "(" +
-			TerrainsContract._ID + INTEGER + NOT_NULL + PRIMARY_KEY + COMMA +
-			TerrainsContract.COLUMN_NAME_NAME + TEXT + NOT_NULL + COMMA +
-			TerrainsContract.COLUMN_NAME_USER_CREATED + BOOLEAN + NOT_NULL +
-				CHECK + "(" + TerrainsContract.COLUMN_NAME_USER_CREATED + IN + "(0,1))" + COMMA +
-			TerrainsContract.COLUMN_NAME_SOLID + BOOLEAN + NOT_NULL +
-				CHECK + "(" + TerrainsContract.COLUMN_NAME_SOLID + IN + "(0,1))" + COMMA +
-			TerrainsContract.COLUMN_NAME_CONNECT + BOOLEAN + NOT_NULL +
-				CHECK + "(" + TerrainsContract.COLUMN_NAME_CONNECT + IN + "(0,1))" + COMMA +
-			TerrainsContract.COLUMN_NAME_BITMAP_DATA + BLOB + ");";
-	private static       String[]                  terrainColumnNames             = {
-			TerrainsContract._ID,
-			TerrainsContract.COLUMN_NAME_NAME,
-			TerrainsContract.COLUMN_NAME_USER_CREATED,
-			TerrainsContract.COLUMN_NAME_SOLID,
-			TerrainsContract.COLUMN_NAME_CONNECT,
-			TerrainsContract.COLUMN_NAME_BITMAP_DATA};
-	private static final int                       ID_INDEX                       = 0;
-	private static final int                       NAME_INDEX                     = 1;
-	private static final int                       USER_CREATED_INDEX             = 2;
-	private static final int                       SOLID_INDEX                    = 3;
-	private static final int                       CONNECT_INDEX                  = 4;
-	private static final int                       BITMAP_DATA_INDEX              = 5;
-
-	// Terrain display name table constants
-	public static abstract class TerrainDisplayNamesContract implements BaseColumns {
-		public static final String TABLE_NAME = "terrain_display_names";
-		public static final String COLUMN_NAME_TERRAIN_ID = "terrain_id";
-		public static final String COLUMN_NAME_LANGUAGE_CODE = "language_code";
-		public static final String COLUMN_NAME_DISPLAY_NAME = "display_name";
-	}
-	public static final String CREATE_TABLE_TERRAIN_DISPLAY_NAMES =
-		CREATE_TABLE + TerrainDisplayNamesContract.TABLE_NAME + "(" +
-			TerrainDisplayNamesContract._ID + INTEGER + NOT_NULL + PRIMARY_KEY + COMMA +
-			TerrainDisplayNamesContract.COLUMN_NAME_TERRAIN_ID + INTEGER + NOT_NULL + COMMA +
-			TerrainDisplayNamesContract.COLUMN_NAME_LANGUAGE_CODE  + TEXT + NOT_NULL + COMMA +
-			TerrainDisplayNamesContract.COLUMN_NAME_DISPLAY_NAME + TEXT + NOT_NULL + COMMA +
-			CONSTRAINT + "fk_display_name_to_terrain" +
-				FOREIGN_KEY + "(" + CellDaoSqlImpl.CellsContract.TERRAIN_ID_COLUMN_NAME + ")" +
-				REFERENCES + TerrainsContract.TABLE_NAME + "(" + TerrainsContract._ID +")" + ON + DELETE + CASCADE + COMMA +
-			CONSTRAINT + "unique_terrain_language_code" +
-				UNIQUE + "(" + TerrainDisplayNamesContract.COLUMN_NAME_TERRAIN_ID + COMMA +
-					TerrainDisplayNamesContract.COLUMN_NAME_LANGUAGE_CODE + "));";
-	private static       String[]                  terrainDisplayNamesColumnNames = {
-			TerrainDisplayNamesContract.COLUMN_NAME_LANGUAGE_CODE,
-			TerrainDisplayNamesContract.COLUMN_NAME_DISPLAY_NAME};
-	private static final int                       LANGUAGE_CODE_INDEX            = 0;
-	private static final int                       DISPLAY_NAME_INDEX             = 1;
-
+public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao, TerrainSchema {
 	// member variables
 	private SparseArray<Terrain> terrainCache = new SparseArray<>(12);
 	private Context context;
@@ -141,9 +83,9 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 				db.beginTransaction();
 			}
 			try {
-				Cursor cursor = db.query(TerrainsContract.TABLE_NAME,
+				Cursor cursor = db.query(TABLE_NAME,
 										 terrainColumnNames,
-										 TerrainsContract._ID + "=?",
+										 _ID + "=?",
 										 new String[]{String.valueOf(id)},
 										 null,
 										 null,
@@ -178,7 +120,7 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 			db.beginTransaction();
 		}
 		try {
-			Cursor cursor = db.query(TerrainsContract.TABLE_NAME,
+			Cursor cursor = db.query(TABLE_NAME,
 									 terrainColumnNames,
 									 whereClause,
 									 whereArgsList.toArray(whereArgs),
@@ -224,17 +166,17 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 		boolean result = false;
 		ContentValues values = new ContentValues();
 
-		values.put(TerrainsContract.COLUMN_NAME_NAME, terrain.getName());
-		values.put(TerrainsContract.COLUMN_NAME_USER_CREATED, terrain.isUserCreated());
-		values.put(TerrainsContract.COLUMN_NAME_SOLID, terrain.isSolid());
-		values.put(TerrainsContract.COLUMN_NAME_CONNECT, terrain.canConnect());
+		values.put(COLUMN_NAME_NAME, terrain.getName());
+		values.put(COLUMN_NAME_USER_CREATED, terrain.isUserCreated());
+		values.put(COLUMN_NAME_SOLID, terrain.isSolid());
+		values.put(COLUMN_NAME_CONNECT, terrain.canConnect());
 		if(terrain.isUserCreated()) {
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			terrain.getImage().compress(Bitmap.CompressFormat.PNG, 100, stream);
-			values.put(TerrainsContract.COLUMN_NAME_BITMAP_DATA, stream.toByteArray());
+			values.put(COLUMN_NAME_BITMAP_DATA, stream.toByteArray());
 		}
 		else {
-			values.putNull(TerrainsContract.COLUMN_NAME_BITMAP_DATA);
+			values.putNull(COLUMN_NAME_BITMAP_DATA);
 		}
 
 		SQLiteDatabase db = sqlHelper.getWritableDatabase();
@@ -245,24 +187,24 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 		try {
 			db.beginTransaction();
 			if (terrain.getId() == -1) {
-				terrain.setId((int) db.insert(TerrainsContract.TABLE_NAME, null, values));
+				terrain.setId((int) db.insert(TABLE_NAME, null, values));
 				result = (terrain.getId() != DataConstants.UNINITIALIZED);
 			}
 			else {
-				result = (db.update(TerrainsContract.TABLE_NAME, values,
-							  TerrainsContract._ID + " = ?",
+				result = (db.update(TABLE_NAME, values,
+							  _ID + " = ?",
 							  new String[]{Long.toString(terrain.getId())}) == 1);
 			}
 
 			if(result) {
 				values.clear();
-				values.put(TerrainDisplayNamesContract.COLUMN_NAME_TERRAIN_ID, terrain.getId());
+				values.put(TerrainDisplayNameSchema.COLUMN_NAME_TERRAIN_ID, terrain.getId());
 				for (Map.Entry<String, String> entry : terrain.getLocaleDisplayNames().entrySet()) {
-					values.put(TerrainDisplayNamesContract.COLUMN_NAME_LANGUAGE_CODE,
+					values.put(TerrainDisplayNameSchema.COLUMN_NAME_LANGUAGE_CODE,
 							   entry.getKey());
-					values.put(TerrainDisplayNamesContract.COLUMN_NAME_DISPLAY_NAME,
+					values.put(TerrainDisplayNameSchema.COLUMN_NAME_DISPLAY_NAME,
 							   entry.getValue());
-					result &= (db.insertWithOnConflict(TerrainDisplayNamesContract.TABLE_NAME, null,
+					result &= (db.insertWithOnConflict(TerrainDisplayNameSchema.TABLE_NAME, null,
 												values, SQLiteDatabase.CONFLICT_REPLACE) != -1);
 				}
 			}
@@ -291,7 +233,7 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 			db.beginTransaction();
 		}
 		try {
-			result = db.delete(TerrainsContract.TABLE_NAME,
+			result = db.delete(TABLE_NAME,
 								whereClause,
 								whereArgsList.toArray(whereArgs));
 			if(result >= 0 && newTransaction) {
@@ -326,19 +268,19 @@ public class TerrainDaoSqlImpl extends BaseDaoSql implements TerrainDao {
 	}
 
 	private void loadDisplayNames(SQLiteDatabase db, Terrain aTerrain) {
-		Cursor cursor = db.query(TerrainDisplayNamesContract.TABLE_NAME,
-                terrainDisplayNamesColumnNames,
-                TerrainDisplayNamesContract.COLUMN_NAME_TERRAIN_ID + "= ?",
-                new String[]{Long.toString(aTerrain.getId())},
-                null,
-                null,
-                null);
+		Cursor cursor = db.query(TerrainDisplayNameSchema.TABLE_NAME,
+								 TerrainDisplayNameSchema.terrainDisplayNamesColumnNames,
+								 TerrainDisplayNameSchema.COLUMN_NAME_TERRAIN_ID + "= ?",
+                				 new String[]{Long.toString(aTerrain.getId())},
+                				 null,
+                				 null,
+                				 null);
 
 			cursor.moveToFirst();
 			while(!cursor.isAfterLast()) {
 				aTerrain.addDisplayName(
-                        cursor.getString(LANGUAGE_CODE_INDEX),
-                        cursor.getString(DISPLAY_NAME_INDEX));
+                        cursor.getString(TerrainDisplayNameSchema.LANGUAGE_CODE_INDEX),
+                        cursor.getString(TerrainDisplayNameSchema.DISPLAY_NAME_INDEX));
 				cursor.moveToNext();
 			}
 			cursor.close();

@@ -16,10 +16,7 @@
 package com.madmusic4001.dungeonmapper.data.dao;
 
 /**
- * ${CLASS_DESCRIPTION}
- *
- * @author Mark
- * Created 5/18/2016.
+ * Utility class for creating DaoFilter instances
  */
 public interface FilterCreator {
 	/**
@@ -30,5 +27,5 @@ public interface FilterCreator {
 	 * @param value  the value to use in the filter comparison.
 	 * @return  a DaoFilter instance.
 	 */
-	public DaoFilter createDaoFilter(DaoFilter.Operator operator, String fieldName, String value);
+	DaoFilter createDaoFilter(DaoFilter.Operator operator, String fieldName, String value);
 }

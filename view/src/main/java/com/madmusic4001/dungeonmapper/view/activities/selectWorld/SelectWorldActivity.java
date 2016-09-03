@@ -37,7 +37,7 @@ import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
 import com.madmusic4001.dungeonmapper.controller.rxhandlers.WorldRxHandler;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
-import com.madmusic4001.dungeonmapper.data.dao.impl.sql.WorldDaoSqlImpl;
+import com.madmusic4001.dungeonmapper.data.dao.schemas.WorldSchema;
 import com.madmusic4001.dungeonmapper.data.entity.World;
 import com.madmusic4001.dungeonmapper.data.util.ComparatorUtils;
 import com.madmusic4001.dungeonmapper.data.util.DataConstants;
@@ -213,7 +213,7 @@ public class SelectWorldActivity extends Activity implements
 				Log.e("SelectWorldActivity", "Deleting world id " + world.getId());
 				Collection<DaoFilter> filters = new ArrayList<>();
 				filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
-														  WorldDaoSqlImpl.WorldsContract._ID,
+														  WorldSchema._ID,
 														  String.valueOf(world.getId())));
 				worldRxHandler.deleteWorlds(filters)
 						.observeOn(AndroidSchedulers.mainThread())
