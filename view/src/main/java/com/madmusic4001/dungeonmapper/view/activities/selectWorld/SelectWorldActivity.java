@@ -31,9 +31,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.madmusic4001.dungeonmapper.R;
-import com.madmusic4001.dungeonmapper.controller.events.DatabaseImportedEvent;
-import com.madmusic4001.dungeonmapper.controller.events.ImportExportEvent;
-import com.madmusic4001.dungeonmapper.controller.events.world.WorldEvent;
 import com.madmusic4001.dungeonmapper.controller.rxhandlers.WorldRxHandler;
 import com.madmusic4001.dungeonmapper.data.dao.DaoFilter;
 import com.madmusic4001.dungeonmapper.data.dao.FilterCreator;
@@ -48,9 +45,6 @@ import com.madmusic4001.dungeonmapper.view.activities.editWorld.EditWorldActivit
 import com.madmusic4001.dungeonmapper.view.adapters.WorldListAdapter;
 import com.madmusic4001.dungeonmapper.view.di.modules.ActivityModule;
 import com.madmusic4001.dungeonmapper.view.utils.BundleConstants;
-
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -70,6 +64,7 @@ import static com.madmusic4001.dungeonmapper.view.utils.IntentConstants.EDIT_WOR
 public class SelectWorldActivity extends Activity implements
 		DbImportDialogFragment.ImportDialogListener,
 		FileSelectorDialogFragment.FileSelectorDialogListener {
+	private static final String LOG_TAG = "SelectWorldActivity";
 	@Inject
 	protected WorldListAdapter  adapter;
 	@Inject
@@ -104,7 +99,7 @@ public class SelectWorldActivity extends Activity implements
 					public void onCompleted() {}
 					@Override
 					public void onError(Throwable e) {
-						Log.e("SelectWorldActivity", "Error occured loading all World instances.", e);
+						Log.e(LOG_TAG, "Error occured loading all World instances.", e);
 					}
 					@Override
 					public void onNext(Collection<World> worlds) {
@@ -149,6 +144,7 @@ public class SelectWorldActivity extends Activity implements
 
 							@Override
 							public void onError(Throwable e) {
+								Log.e(LOG_TAG, "Exception occuring saving new world.", e);
 								Toast.makeText(SelectWorldActivity.this, "An exception occurred saving world", Toast.LENGTH_SHORT).show();
 							}
 
@@ -210,7 +206,7 @@ public class SelectWorldActivity extends Activity implements
 				}
 			case R.id.select_world_item_delete:
 				world = (World)listView.getItemAtPosition(info.position);
-				Log.e("SelectWorldActivity", "Deleting world id " + world.getId());
+				Log.e(LOG_TAG, "Deleting world id " + world.getId());
 				Collection<DaoFilter> filters = new ArrayList<>();
 				filters.add(filterCreator.createDaoFilter(DaoFilter.Operator.EQUALS,
 														  WorldSchema._ID,
@@ -235,7 +231,7 @@ public class SelectWorldActivity extends Activity implements
 								toastString = getString(R.string.toast_worlds_deleted);
 //								toastString = String.format(getString(R.string.toast_worlds_deleted), event.getNumDeleted());
 								for(World world : worlds) {
-									Log.e("SelectWorldActivity", "Deleted world id " + world.getId());
+									Log.e(LOG_TAG, "Deleted world id " + world.getId());
 									adapter.remove(world);
 								}
 								adapter.notifyDataSetChanged();
@@ -256,76 +252,74 @@ public class SelectWorldActivity extends Activity implements
 	 *
 	 * @param event  a WorldSavedEvent instance
 	 */
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldSavedEvent(WorldEvent.Saved event) {
-		String toastString;
-
-		if(event.isSuccessful()) {
-			toastString = getString(R.string.toast_world_saved);
-			adapter.add(event.getItem());
-			adapter.notifyDataSetChanged();
-		}
-		else {
-			toastString = String.format(getString(R.string.toast_world_save_error), event.getItem().getName());
-		}
-		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
-	}
+//	@Subscribe(threadMode = ThreadMode.MAIN)
+//	public void onWorldSavedEvent(WorldEvent.Saved event) {
+//		String toastString;
+//
+//		if(event.isSuccessful()) {
+//			toastString = getString(R.string.toast_world_saved);
+//			adapter.add(event.getItem());
+//			adapter.notifyDataSetChanged();
+//		}
+//		else {
+//			toastString = String.format(getString(R.string.toast_world_save_error), event.getItem().getName());
+//		}
+//		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
+//	}
 
 	/**
 	 * Responds to a LoadedEvent<World> by updating the adapter with the new collection of World instances and displaying a
 	 * toast if successful, otherwise displaying a toast and clearing the adapter.
-	 *
-	 * @param event  a LoadedEvent<World> instance
 	 */
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldsLoadedEvent(WorldEvent.Loaded event) {
-		String toastString;
+//	@Subscribe(threadMode = ThreadMode.MAIN)
+//	public void onWorldsLoadedEvent(WorldEvent.Loaded event) {
+//		String toastString;
+//
+//		if(event.isSuccessful()) {
+//			toastString = String.format(getString(R.string.toast_worlds_loaded), event.getItems().size());
+//			adapter.clear();
+//			adapter.addAll(event.getItems());
+//			adapter.notifyDataSetChanged();
+//		}
+//		else {
+//			toastString = getString(R.string.toast_worlds_load_error);
+//		}
+//		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
+//	}
 
-		if(event.isSuccessful()) {
-			toastString = String.format(getString(R.string.toast_worlds_loaded), event.getItems().size());
-			adapter.clear();
-			adapter.addAll(event.getItems());
-			adapter.notifyDataSetChanged();
-		}
-		else {
-			toastString = getString(R.string.toast_worlds_load_error);
-		}
-		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
-	}
+//	@Subscribe(threadMode = ThreadMode.MAIN)
+//	public void onWorldDeletedEvent(WorldEvent.Deleted event) {
+//		String toastString;
+//
+//		if(event.isSuccessful()) {
+//			toastString = String.format(getString(R.string.toast_worlds_deleted), event.getNumDeleted());
+//			for(World world : event.getDeleted()) {
+//				Log.e(LOG_TAG, "Deleted world id " + world.getId());
+//				adapter.remove(world);
+//			}
+//			adapter.notifyDataSetChanged();
+//		}
+//		else {
+//			toastString = getString(R.string.toast_worlds_deleted_error);
+//		}
+//		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
+//	}
 
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onWorldDeletedEvent(WorldEvent.Deleted event) {
-		String toastString;
+//	@Subscribe(threadMode = ThreadMode.MAIN)
+//	public void onDatabaseExported(ImportExportEvent.DatabaseExported event) {
+//		DialogFragment dialog = new DbExportedDialogFragment();
+//		Bundle bundle = new Bundle();
+//		bundle.putString(BundleConstants.EXPORT_DIALOG_FILEPATH,
+//						 event.getFileName());
+//		dialog.setArguments(bundle);
+//		dialog.show(getFragmentManager(), "DbExportedDialogFragment");
+//	}
 
-		if(event.isSuccessful()) {
-			toastString = String.format(getString(R.string.toast_worlds_deleted), event.getNumDeleted());
-			for(World world : event.getDeleted()) {
-				Log.e("SelectWorldActivity", "Deleted world id " + world.getId());
-				adapter.remove(world);
-			}
-			adapter.notifyDataSetChanged();
-		}
-		else {
-			toastString = getString(R.string.toast_worlds_deleted_error);
-		}
-		Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show();
-	}
-
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onDatabaseExported(ImportExportEvent.DatabaseExported event) {
-		DialogFragment dialog = new DbExportedDialogFragment();
-		Bundle bundle = new Bundle();
-		bundle.putString(BundleConstants.EXPORT_DIALOG_FILEPATH,
-						 event.getFileName());
-		dialog.setArguments(bundle);
-		dialog.show(getFragmentManager(), "DbExportedDialogFragment");
-	}
-
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onDatabaseImported(DatabaseImportedEvent event) {
-		Toast.makeText(this, R.string.toast_db_imported, Toast.LENGTH_LONG)
-				.show();
-	}
+//	@Subscribe(threadMode = ThreadMode.MAIN)
+//	public void onDatabaseImported(DatabaseImportedEvent event) {
+//		Toast.makeText(this, R.string.toast_db_imported, Toast.LENGTH_LONG)
+//				.show();
+//	}
 	// </editor-fold>
 
 	// <editor-fold desc="DbImportDialogFragment.ImportDialogListener interface implementation">
@@ -348,7 +342,7 @@ public class SelectWorldActivity extends Activity implements
 
 	@Override
 	public void onFileSelected(String fileName) {
-		Log.d(this.getClass().getName(), "In onFileSelected for " + fileName);
+		Log.d(LOG_TAG, "In onFileSelected for " + fileName);
 		this.fileName = fileName;
 		DialogFragment dialog = new DbImportDialogFragment();
 		dialog.show(getFragmentManager(), "DbImportDialogFragment");

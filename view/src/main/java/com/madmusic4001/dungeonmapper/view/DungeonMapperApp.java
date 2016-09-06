@@ -20,7 +20,6 @@ import android.app.Application;
 import com.madmusic4001.dungeonmapper.view.di.components.ApplicationComponent;
 import com.madmusic4001.dungeonmapper.view.di.components.DaggerApplicationComponent;
 import com.madmusic4001.dungeonmapper.view.di.modules.ApplicationModule;
-import com.madmusic4001.dungeonmapper.view.di.modules.EventHandlerModule;
 
 /**
  * Main class for maintaining application state.
@@ -36,7 +35,6 @@ public class DungeonMapperApp extends Application {
 
 	private void initializeInjector() {
 		this.applicationComponent = DaggerApplicationComponent.builder()
-				.eventHandlerModule(new EventHandlerModule())
 				.applicationModule(new ApplicationModule(this))
 				.build();
 	}

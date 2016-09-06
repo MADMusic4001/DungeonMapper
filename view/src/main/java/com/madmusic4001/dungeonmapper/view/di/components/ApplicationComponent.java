@@ -18,7 +18,6 @@ package com.madmusic4001.dungeonmapper.view.di.components;
 
 import com.madmusic4001.dungeonmapper.view.di.modules.ActivityModule;
 import com.madmusic4001.dungeonmapper.view.di.modules.ApplicationModule;
-import com.madmusic4001.dungeonmapper.view.di.modules.EventHandlerModule;
 import com.madmusic4001.dungeonmapper.view.di.modules.RxHandlerModule;
 import com.madmusic4001.dungeonmapper.view.di.modules.SqlDaoModule;
 
@@ -30,7 +29,7 @@ import dagger.Component;
  *
  */
 @Singleton
-@Component(modules = {ApplicationModule.class, EventHandlerModule.class, SqlDaoModule.class, RxHandlerModule.class})
+@Component(modules = {ApplicationModule.class, SqlDaoModule.class, RxHandlerModule.class})
 public interface ApplicationComponent {
 	ActivityComponent newActivityComponent(ActivityModule activityModule);
 }
